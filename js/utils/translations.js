@@ -487,3 +487,6 @@ window.translationSystem = {
   getCurrentLanguage: () => currentLanguage,
   priorityIconClasses,
 };
+
+// Also make t() available globally for Alpine templates
+window.t = t;

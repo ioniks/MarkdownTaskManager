@@ -1,307 +1,326 @@
 // Task Store - Main data store for tasks and configuration
-document.addEventListener('alpine:init', () => {
-    Alpine.store('tasks', {
-        // State
-        tasks: [],
-        config: {
-            lastTaskId: 0,
-            columns: [],
-            categories: [],
-            users: [],
-            priorities: [],
-            tags: []
-        },
-        directoryHandle: null,
-        kanbanFileHandle: null,
-        archivedTasks: [],
-        archiveFileHandle: null,
+document.addEventListener("alpine:init", () => {
+  Alpine.store("tasks", {
+    // State
+    tasks: [],
+    config: {
+      lastTaskId: 0,
+      columns: [],
+      categories: [],
+      users: [],
+      priorities: [],
+      tags: [],
+    },
+    directoryHandle: null,
+    kanbanFileHandle: null,
+    archivedTasks: [],
+    archiveFileHandle: null,
 
-        // Initialize store
-        init() {
-            // Set default config if needed
-            if (this.config.columns.length === 0) {
-                this.config.columns = [
-                    { name: '📝 To Do', id: 'todo' },
-                    { name: '🚀 In Progress', id: 'in-progress' },
-                    { name: '👀 In Review', id: 'in-review' },
-                    { name: '✅ Done', id: 'done' }
-                ];
-            }
-        },
+    // Initialize store
+    init() {
+      // Set default config if needed
+      if (this.config.columns.length === 0) {
+        this.config.columns = [
+          { name: "📝 To Do", id: "todo" },
+          { name: "🚀 In Progress", id: "in-progress" },
+          { name: "👀 In Review", id: "in-review" },
+          { name: "✅ Done", id: "done" },
+        ];
+      }
+    },
 
-        // Load kanban file
-        async loadFile(dirHandle) {
-            try {
-                this.directoryHandle = dirHandle;
+    // Load kanban file
+    async loadFile(dirHandle) {
+      try {
+        this.directoryHandle = dirHandle;
 
-                // Load kanban.md
-                const kanbanResult = await window.fileSystem.loadKanbanFile(dirHandle);
-                this.kanbanFileHandle = kanbanResult.fileHandle;
+        // Load kanban.md
+        const kanbanResult = await window.fileSystem.loadKanbanFile(dirHandle);
+        this.kanbanFileHandle = kanbanResult.fileHandle;
 
-                // Parse content
-                const parsed = window.markdownParser.parseMarkdown(kanbanResult.content);
-                this.tasks = parsed.tasks;
-                this.config = parsed.config;
+        // Parse content
+        const parsed = window.markdownParser.parseMarkdown(
+          kanbanResult.content,
+        );
+        this.tasks = parsed.tasks;
+        this.config = parsed.config;
 
-                // Set current content for file watcher
-                window.fileWatcher.setCurrentContent(kanbanResult.content);
+        // Set current content for file watcher
+        window.fileWatcher.setCurrentContent(kanbanResult.content);
 
-                // Load archive.md
-                const archiveResult = await window.fileSystem.loadArchiveFile(dirHandle);
-                this.archiveFileHandle = archiveResult.fileHandle;
-                this.archivedTasks = window.markdownParser.parseArchive(archiveResult.content);
+        // Load archive.md
+        const archiveResult =
+          await window.fileSystem.loadArchiveFile(dirHandle);
+        this.archiveFileHandle = archiveResult.fileHandle;
+        this.archivedTasks = window.markdownParser.parseArchive(
+          archiveResult.content,
+        );
 
-                // Start file watcher
-                this.startWatching();
+        // Start file watcher
+        this.startWatching();
 
-                return true;
-            } catch (error) {
-                console.error('Error loading files:', error);
-                return false;
-            }
-        },
+        return true;
+      } catch (error) {
+        console.error("Error loading files:", error);
+        return false;
+      }
+    },
 
-        // Save kanban file
-        async saveFile() {
-            if (!this.kanbanFileHandle) return false;
+    // Save kanban file
+    async saveFile() {
+      if (!this.kanbanFileHandle) return false;
 
-            const content = window.markdownParser.generateMarkdown(this.tasks, this.config);
-            await window.fileWatcher.autoSave(this.kanbanFileHandle, () => content);
-            return true;
-        },
+      // Use autoSave with callback that generates content
+      window.fileWatcher.autoSave(this.kanbanFileHandle, () => {
+        return window.markdownParser.generateMarkdown(this.tasks, this.config);
+      });
+      return true;
+    },
 
-        // Save archive file
-        async saveArchive() {
-            if (!this.archiveFileHandle) return false;
+    // Save archive file
+    async saveArchive() {
+      if (!this.archiveFileHandle) return false;
 
-            const content = window.markdownParser.generateArchiveMarkdown(this.archivedTasks);
-            return await window.fileSystem.saveArchiveFile(content);
-        },
+      const content = window.markdownParser.generateArchiveMarkdown(
+        this.archivedTasks,
+      );
 
-        // Add new task
-        addTask(taskData) {
-            // Generate new task ID
-            this.config.lastTaskId++;
-            const taskId = 'TASK-' + String(this.config.lastTaskId).padStart(3, '0');
+      // Save using fileWatcher's performSave for consistency
+      await window.fileWatcher.performSave(this.archiveFileHandle, content);
+      return true;
+    },
 
-            // Create task object
-            const newTask = {
-                id: taskId,
-                title: taskData.title || '',
-                status: taskData.status || 'todo',
-                priority: taskData.priority || '',
-                category: taskData.category || '',
-                assignees: taskData.assignees || [],
-                tags: taskData.tags || [],
-                created: taskData.created || new Date().toISOString().split('T')[0],
-                started: taskData.started || '',
-                due: taskData.due || '',
-                completed: taskData.completed || '',
-                description: taskData.description || '',
-                subtasks: taskData.subtasks || [],
-                notes: taskData.notes || ''
-            };
+    // Add new task
+    addTask(taskData) {
+      // Generate new task ID
+      this.config.lastTaskId++;
+      const taskId = "TASK-" + String(this.config.lastTaskId).padStart(3, "0");
 
-            // Add to tasks array
-            this.tasks.push(newTask);
+      // Create task object
+      const newTask = {
+        id: taskId,
+        title: taskData.title || "",
+        status: taskData.status || "todo",
+        priority: taskData.priority || "",
+        category: taskData.category || "",
+        assignees: taskData.assignees || [],
+        tags: taskData.tags || [],
+        created: taskData.created || new Date().toISOString().split("T")[0],
+        started: taskData.started || "",
+        due: taskData.due || "",
+        completed: taskData.completed || "",
+        description: taskData.description || "",
+        subtasks: taskData.subtasks || [],
+        notes: taskData.notes || "",
+      };
 
-            // Save to file
-            this.saveFile();
+      // Add to tasks array
+      this.tasks.push(newTask);
 
-            return newTask;
-        },
+      // Save to file
+      this.saveFile();
 
-        // Update existing task
-        updateTask(taskId, updates) {
-            const taskIndex = this.tasks.findIndex(t => t.id === taskId);
-            if (taskIndex === -1) return false;
+      return newTask;
+    },
 
-            // Check if status changed
-            const oldStatus = this.tasks[taskIndex].status;
+    // Update existing task
+    updateTask(taskId, updates) {
+      const taskIndex = this.tasks.findIndex((t) => t.id === taskId);
+      if (taskIndex === -1) return false;
 
-            // Update task
-            this.tasks[taskIndex] = { ...this.tasks[taskIndex], ...updates };
+      // Check if status changed
+      const oldStatus = this.tasks[taskIndex].status;
 
-            // If status changed, trigger reorganization
-            if (oldStatus !== updates.status && updates.status) {
-                window.markdownParser.scheduleStatusReorganization(
-                    this.tasks,
-                    this.config,
-                    (content) => this.saveFile()
-                );
-            } else {
-                // Normal save
-                this.saveFile();
-            }
+      // Update task
+      this.tasks[taskIndex] = { ...this.tasks[taskIndex], ...updates };
 
-            return true;
-        },
+      // If status changed, trigger reorganization
+      if (oldStatus !== updates.status && updates.status) {
+        window.markdownParser.scheduleStatusReorganization(
+          this.tasks,
+          this.config,
+          (content) => this.saveFile(),
+        );
+      } else {
+        // Normal save
+        this.saveFile();
+      }
 
-        // Delete task
-        deleteTask(taskId) {
-            const taskIndex = this.tasks.findIndex(t => t.id === taskId);
-            if (taskIndex === -1) return false;
+      return true;
+    },
 
-            this.tasks.splice(taskIndex, 1);
-            this.saveFile();
-            return true;
-        },
+    // Delete task
+    deleteTask(taskId) {
+      const taskIndex = this.tasks.findIndex((t) => t.id === taskId);
+      if (taskIndex === -1) return false;
 
-        // Move task to different column
-        moveTask(taskId, newStatus) {
-            return this.updateTask(taskId, { status: newStatus });
-        },
+      this.tasks.splice(taskIndex, 1);
+      this.saveFile();
+      return true;
+    },
 
-        // Archive task
-        archiveTask(taskId) {
-            const taskIndex = this.tasks.findIndex(t => t.id === taskId);
-            if (taskIndex === -1) return false;
+    // Move task to different column
+    moveTask(taskId, newStatus) {
+      return this.updateTask(taskId, { status: newStatus });
+    },
 
-            const task = this.tasks[taskIndex];
+    // Archive task
+    archiveTask(taskId) {
+      const taskIndex = this.tasks.findIndex((t) => t.id === taskId);
+      if (taskIndex === -1) return false;
 
-            // Add to archived tasks
-            this.archivedTasks.push({ ...task, status: 'archived' });
+      const task = this.tasks[taskIndex];
 
-            // Remove from active tasks
-            this.tasks.splice(taskIndex, 1);
+      // Add to archived tasks
+      this.archivedTasks.push({ ...task, status: "archived" });
 
-            // Save both files
-            this.saveFile();
-            this.saveArchive();
+      // Remove from active tasks
+      this.tasks.splice(taskIndex, 1);
 
-            return true;
-        },
+      // Save both files
+      this.saveFile();
+      this.saveArchive();
 
-        // Restore task from archive
-        restoreTask(taskId, targetStatus) {
-            const taskIndex = this.archivedTasks.findIndex(t => t.id === taskId);
-            if (taskIndex === -1) return false;
+      return true;
+    },
 
-            const task = this.archivedTasks[taskIndex];
+    // Restore task from archive
+    restoreTask(taskId, targetStatus) {
+      const taskIndex = this.archivedTasks.findIndex((t) => t.id === taskId);
+      if (taskIndex === -1) return false;
 
-            // Restore to tasks with target status
-            this.tasks.push({ ...task, status: targetStatus || 'todo' });
+      const task = this.archivedTasks[taskIndex];
 
-            // Remove from archive
-            this.archivedTasks.splice(taskIndex, 1);
+      // Restore to tasks with target status
+      this.tasks.push({ ...task, status: targetStatus || "todo" });
 
-            // Save both files
-            this.saveFile();
-            this.saveArchive();
+      // Remove from archive
+      this.archivedTasks.splice(taskIndex, 1);
 
-            return true;
-        },
+      // Save both files
+      this.saveFile();
+      this.saveArchive();
 
-        // Permanently delete from archive
-        deleteArchivedTask(taskId) {
-            const taskIndex = this.archivedTasks.findIndex(t => t.id === taskId);
-            if (taskIndex === -1) return false;
+      return true;
+    },
 
-            this.archivedTasks.splice(taskIndex, 1);
-            this.saveArchive();
+    // Permanently delete from archive
+    deleteArchivedTask(taskId) {
+      const taskIndex = this.archivedTasks.findIndex((t) => t.id === taskId);
+      if (taskIndex === -1) return false;
 
-            return true;
-        },
+      this.archivedTasks.splice(taskIndex, 1);
+      this.saveArchive();
 
-        // Get tasks by column
-        getColumnTasks(columnId) {
-            return this.tasks.filter(t => t.status === columnId);
-        },
+      return true;
+    },
 
-        // Get task by ID
-        getTaskById(taskId) {
-            return this.tasks.find(t => t.id === taskId) ||
-                   this.archivedTasks.find(t => t.id === taskId);
-        },
+    // Get tasks by column
+    getColumnTasks(columnId) {
+      return this.tasks.filter((t) => t.status === columnId);
+    },
 
-        // Update column configuration
-        updateColumns(columns) {
-            this.config.columns = columns;
-            this.saveFile();
-        },
+    // Get task by ID
+    getTaskById(taskId) {
+      return (
+        this.tasks.find((t) => t.id === taskId) ||
+        this.archivedTasks.find((t) => t.id === taskId)
+      );
+    },
 
-        // Add column
-        addColumn(name, id) {
-            this.config.columns.push({ name, id });
-            this.saveFile();
-        },
+    // Update column configuration
+    updateColumns(columns) {
+      this.config.columns = columns;
+      this.saveFile();
+    },
 
-        // Remove column
-        removeColumn(columnId) {
-            // Move all tasks from this column to first column
-            const firstColumnId = this.config.columns[0]?.id || 'todo';
-            this.tasks.forEach(task => {
-                if (task.status === columnId) {
-                    task.status = firstColumnId;
-                }
-            });
+    // Add column
+    addColumn(name, id) {
+      this.config.columns.push({ name, id });
+      this.saveFile();
+    },
 
-            // Remove column from config
-            this.config.columns = this.config.columns.filter(c => c.id !== columnId);
-            this.saveFile();
-        },
-
-        // Update subtask
-        updateSubtask(taskId, subtaskIndex, completed) {
-            const task = this.getTaskById(taskId);
-            if (!task || !task.subtasks[subtaskIndex]) return false;
-
-            task.subtasks[subtaskIndex].completed = completed;
-
-            if (this.archivedTasks.includes(task)) {
-                this.saveArchive();
-            } else {
-                this.saveFile();
-            }
-
-            return true;
-        },
-
-        // Start file watching
-        startWatching() {
-            window.fileWatcher.startFileWatcher(this.kanbanFileHandle, {
-                onExternalChange: (newContent) => {
-                    // Save old tasks for comparison
-                    const oldTasks = [...this.tasks];
-
-                    // Parse new content
-                    const parsed = window.markdownParser.parseMarkdown(newContent);
-                    this.tasks = parsed.tasks;
-                    this.config = parsed.config;
-
-                    // Apply changes with callbacks
-                    window.fileWatcher.applyExternalChanges(oldTasks, this.tasks, {
-                        onTaskRemoved: (task) => {
-                            // Task was removed externally
-                            console.log('Task removed:', task.id);
-                        },
-                        onTaskAdded: (task) => {
-                            // Task was added externally
-                            console.log('Task added:', task.id);
-                        },
-                        onTaskMoved: (task, oldStatus) => {
-                            // Task was moved externally
-                            console.log('Task moved:', task.id);
-                        },
-                        onTaskUpdated: (task) => {
-                            // Task was updated externally
-                            console.log('Task updated:', task.id);
-                        },
-                        onReorganizeNeeded: () => {
-                            // Reorganize file after status changes
-                            this.saveFile();
-                        }
-                    });
-
-                    // Show notification
-                    Alpine.store('ui').showNotification('File updated from external source', 'info');
-                }
-            });
-        },
-
-        // Stop file watching
-        stopWatching() {
-            window.fileWatcher.stopFileWatcher();
+    // Remove column
+    removeColumn(columnId) {
+      // Move all tasks from this column to first column
+      const firstColumnId = this.config.columns[0]?.id || "todo";
+      this.tasks.forEach((task) => {
+        if (task.status === columnId) {
+          task.status = firstColumnId;
         }
-    });
+      });
+
+      // Remove column from config
+      this.config.columns = this.config.columns.filter(
+        (c) => c.id !== columnId,
+      );
+      this.saveFile();
+    },
+
+    // Update subtask
+    updateSubtask(taskId, subtaskIndex, completed) {
+      const task = this.getTaskById(taskId);
+      if (!task || !task.subtasks[subtaskIndex]) return false;
+
+      task.subtasks[subtaskIndex].completed = completed;
+
+      if (this.archivedTasks.includes(task)) {
+        this.saveArchive();
+      } else {
+        this.saveFile();
+      }
+
+      return true;
+    },
+
+    // Start file watching
+    startWatching() {
+      window.fileWatcher.startFileWatcher(this.kanbanFileHandle, {
+        onExternalChange: (newContent) => {
+          // Save old tasks for comparison
+          const oldTasks = [...this.tasks];
+
+          // Parse new content
+          const parsed = window.markdownParser.parseMarkdown(newContent);
+          this.tasks = parsed.tasks;
+          this.config = parsed.config;
+
+          // Apply changes with callbacks
+          window.fileWatcher.applyExternalChanges(oldTasks, this.tasks, {
+            onTaskRemoved: (task) => {
+              // Task was removed externally
+              console.log("Task removed:", task.id);
+            },
+            onTaskAdded: (task) => {
+              // Task was added externally
+              console.log("Task added:", task.id);
+            },
+            onTaskMoved: (task, oldStatus) => {
+              // Task was moved externally
+              console.log("Task moved:", task.id);
+            },
+            onTaskUpdated: (task) => {
+              // Task was updated externally
+              console.log("Task updated:", task.id);
+            },
+            onReorganizeNeeded: () => {
+              // Reorganize file after status changes
+              this.saveFile();
+            },
+          });
+
+          // Show notification
+          Alpine.store("ui").showNotification(
+            "File updated from external source",
+            "info",
+          );
+        },
+      });
+    },
+
+    // Stop file watching
+    stopWatching() {
+      window.fileWatcher.stopFileWatcher();
+    },
+  });
 });
