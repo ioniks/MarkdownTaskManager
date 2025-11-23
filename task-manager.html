@@ -470,6 +470,20 @@
                                             class="task-id"
                                             x-text="task.id"
                                         ></span>
+                                        <button
+                                            class="task-edit-btn"
+                                            @click.stop="$store.ui.openTaskForm(task)"
+                                            style="
+                                                background: none;
+                                                border: none;
+                                                cursor: pointer;
+                                                font-size: 1.1rem;
+                                                padding: 0.25rem;
+                                            "
+                                            title="Edit task"
+                                        >
+                                            ✏️
+                                        </button>
                                     </div>
                                     <div
                                         class="task-title"
