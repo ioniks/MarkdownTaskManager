@@ -50,6 +50,7 @@ document.addEventListener("alpine:init", () => {
     taskFormAssigneesInput: "",
     taskFormTagsInput: "",
     newSubtaskText: "",
+    newSubtaskInput: "", // For adding subtasks in detail view
 
     // Initialize UI
     init() {

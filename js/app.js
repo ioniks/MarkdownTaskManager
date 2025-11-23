@@ -325,6 +325,75 @@ document.addEventListener("alpine:init", () => {
 
       const newState = !task.subtasks[subtaskIndex].completed;
       this.$store.tasks.updateSubtask(taskId, subtaskIndex, newState);
+
+      // Refresh the detail view if it's open
+      if (
+        this.$store.ui.currentDetailTask &&
+        this.$store.ui.currentDetailTask.id === taskId
+      ) {
+        this.$store.ui.currentDetailTask =
+          this.$store.tasks.getTaskById(taskId);
+      }
+    },
+
+    // Add subtask from detail view
+    addSubtask(taskId) {
+      if (
+        !this.$store.ui.newSubtaskInput ||
+        !this.$store.ui.newSubtaskInput.trim()
+      )
+        return;
+
+      const task = this.$store.tasks.getTaskById(taskId);
+      if (!task) return;
+
+      const newSubtask = {
+        completed: false,
+        text: this.$store.ui.newSubtaskInput.trim(),
+      };
+
+      task.subtasks = task.subtasks || [];
+      task.subtasks.push(newSubtask);
+
+      this.$store.tasks.updateTask(taskId, { subtasks: task.subtasks });
+      this.$store.ui.newSubtaskInput = "";
+
+      // Refresh the detail view
+      if (
+        this.$store.ui.currentDetailTask &&
+        this.$store.ui.currentDetailTask.id === taskId
+      ) {
+        this.$store.ui.currentDetailTask =
+          this.$store.tasks.getTaskById(taskId);
+      }
+    },
+
+    // Delete subtask from detail view
+    deleteSubtask(taskId, subtaskIndex) {
+      const task = this.$store.tasks.getTaskById(taskId);
+      if (!task || !task.subtasks[subtaskIndex]) return;
+
+      if (
+        !confirm(
+          this.t("confirm.deleteSubtask", {
+            text: task.subtasks[subtaskIndex].text,
+          }),
+        )
+      ) {
+        return;
+      }
+
+      task.subtasks.splice(subtaskIndex, 1);
+      this.$store.tasks.updateTask(taskId, { subtasks: task.subtasks });
+
+      // Refresh the detail view
+      if (
+        this.$store.ui.currentDetailTask &&
+        this.$store.ui.currentDetailTask.id === taskId
+      ) {
+        this.$store.ui.currentDetailTask =
+          this.$store.tasks.getTaskById(taskId);
+      }
     },
 
     // Add column
