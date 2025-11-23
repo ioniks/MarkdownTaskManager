@@ -186,6 +186,18 @@
             padding: 1rem;
             cursor: move;
             transition: all 0.2s;
+            animation: taskAppear 0.3s ease-out;
+        }
+
+        @keyframes taskAppear {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .task-card:hover {
@@ -195,6 +207,19 @@
 
         .task-card.dragging {
             opacity: 0.5;
+        }
+
+        .task-card.updating {
+            animation: taskUpdate 0.3s ease-out;
+        }
+
+        @keyframes taskUpdate {
+            0% {
+                background: #f0f9ff;
+            }
+            100% {
+                background: white;
+            }
         }
 
         .task-header {
@@ -455,6 +480,10 @@
 
         .notification.error {
             border-left: 4px solid #EF4444;
+        }
+
+        .notification.info {
+            border-left: 4px solid #3B82F6;
         }
 
         .loading {
@@ -1651,12 +1680,19 @@
 
                     // Verify permission
                     if (await verifyPermission(project.handle)) {
+                        // Stop watching the old project's file
+                        stopFileWatcher();
+
                         directoryHandle = project.handle;
+
+                        // Save the selected project name to localStorage
+                        localStorage.setItem('lastSelectedProject', project.name);
+                        console.log('Saved lastSelectedProject to localStorage:', project.name);
 
                         // Update last accessed time and save
                         await saveDirectoryHandle(directoryHandle);
 
-                        // Load the project
+                        // Load the project (this will start the file watcher again)
                         await loadKanbanFile();
 
                         document.getElementById('welcomeScreen').style.display = 'none';
@@ -1729,6 +1765,13 @@
                             transaction.onerror = () => reject(transaction.error);
                         });
 
+                        // Clear localStorage if this was the selected project
+                        const lastSelected = localStorage.getItem('lastSelectedProject');
+                        if (lastSelected === directoryHandle.name) {
+                            localStorage.removeItem('lastSelectedProject');
+                            console.log('Cleared lastSelectedProject from localStorage');
+                        }
+
                         // Clear current project and show welcome screen
                         directoryHandle = null;
                         kanbanFileHandle = null;
@@ -1753,16 +1796,37 @@
 
         // Try to restore previous directory on page load
         async function tryRestorePreviousDirectory() {
-            const savedHandle = await loadDirectoryHandle();
-            console.log('Attempting to restore previous directory:', savedHandle ? savedHandle.name : 'none');
+            // Try to get the last selected project name from localStorage
+            const lastSelectedProjectName = localStorage.getItem('lastSelectedProject');
+            console.log('Last selected project from localStorage:', lastSelectedProjectName);
 
-            if (savedHandle) {
+            const projects = await loadRecentProjects();
+            let projectToRestore = null;
+
+            if (lastSelectedProjectName) {
+                // Try to find the project by name
+                projectToRestore = projects.find(p => p.name === lastSelectedProjectName);
+                console.log('Found matching project:', projectToRestore ? projectToRestore.name : 'none');
+            }
+
+            // Fallback to most recent project if last selected not found
+            if (!projectToRestore && projects.length > 0) {
+                projectToRestore = projects[0];
+                console.log('Using most recent project as fallback:', projectToRestore.name);
+            }
+
+            if (projectToRestore) {
                 try {
                     // Verify we still have permission
-                    console.log('Verifying permissions...');
-                    if (await verifyPermission(savedHandle)) {
+                    console.log('Verifying permissions for:', projectToRestore.name);
+                    if (await verifyPermission(projectToRestore.handle)) {
                         console.log('Permission granted, loading kanban file...');
-                        directoryHandle = savedHandle;
+                        directoryHandle = projectToRestore.handle;
+
+                        // Save the restored project name to localStorage
+                        localStorage.setItem('lastSelectedProject', projectToRestore.name);
+                        console.log('Saved restored project to localStorage:', projectToRestore.name);
+
                         await loadKanbanFile();
 
                         document.getElementById('welcomeScreen').style.display = 'none';
@@ -1790,6 +1854,13 @@
 
         // Initialize on page load
         window.addEventListener('DOMContentLoaded', async () => {
+            // Check if we just reloaded from a save (for seamless dev server reloads)
+            const justSaved = sessionStorage.getItem('justSaved');
+            if (justSaved) {
+                console.log('📥 Detected reload after save, restoring silently...');
+                sessionStorage.removeItem('justSaved');
+            }
+
             await tryRestorePreviousDirectory();
 
             // Add event listener for project selector
@@ -1799,7 +1870,85 @@
                     await switchProject(projectIndex);
                 }
             });
+
+            // CRITICAL FIX: Prevent browser's default drag-and-drop behavior at document level
+            // This prevents the browser from trying to navigate/reload when dragging elements
+            document.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+
+            document.addEventListener('drop', (e) => {
+                // Only prevent default if not dropping on a valid drop zone
+                // The actual drop zones will handle their own drop events
+                const dropZone = e.target.closest('.task-list');
+                if (!dropZone) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
         });
+
+        // Clean up file watcher on page unload
+        window.addEventListener('beforeunload', () => {
+            stopFileWatcher();
+        });
+
+        // Close modals with ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' || e.key === 'Esc') {
+                // Check which modal is open and close it
+                const taskModal = document.getElementById('taskModal');
+                const taskFormModal = document.getElementById('taskFormModal');
+                const columnsModal = document.getElementById('columnsModal');
+
+                if (taskModal && taskModal.classList.contains('active')) {
+                    closeModal();
+                } else if (taskFormModal && taskFormModal.classList.contains('active')) {
+                    closeTaskModal();
+                } else if (columnsModal && columnsModal.classList.contains('active')) {
+                    closeColumnsModal();
+                }
+            }
+        });
+
+        // Close modals when clicking outside (on the backdrop)
+        document.addEventListener('click', (e) => {
+            // Check if click was directly on a modal (not on modal-content)
+            if (e.target.id === 'taskModal') {
+                closeModal();
+            } else if (e.target.id === 'taskFormModal') {
+                closeTaskModal();
+            } else if (e.target.id === 'columnsModal') {
+                closeColumnsModal();
+            }
+
+            // Close filter dropdowns when clicking outside
+            const filterPillGroup = e.target.closest('.filter-pill-group');
+            if (!filterPillGroup) {
+                document.querySelectorAll('.filter-dropdown').forEach(d => {
+                    d.style.display = 'none';
+                });
+                document.querySelectorAll('.filter-pill').forEach(p => {
+                    p.classList.remove('active');
+                });
+            }
+        });
+
+        // Auto-expand filter bar on first load
+        setTimeout(() => {
+            const filterContent = document.getElementById('filterContent');
+            const filterToggleBtn = document.querySelector('.filter-toggle-btn');
+            if (filterContent && filterToggleBtn) {
+                filterContent.classList.add('expanded');
+                filterToggleBtn.classList.add('expanded');
+            }
+
+            // Debug: Log task count
+            console.log('📊 Task count after load:', tasks ? tasks.length : 'undefined');
+            console.log('🔍 Active filters:', activeFilters);
+            console.log('🔎 Search term:', globalSearchTerm);
+        }, 500);
 
         // Select folder
         document.getElementById('selectFolderBtn').addEventListener('click', async () => {
@@ -1811,6 +1960,11 @@
                 }
 
                 directoryHandle = await window.showDirectoryPicker(options);
+
+                // Save the selected project name to localStorage
+                localStorage.setItem('lastSelectedProject', directoryHandle.name);
+                console.log('Saved lastSelectedProject to localStorage:', directoryHandle.name);
+
                 await saveDirectoryHandle(directoryHandle); // Save for next time
                 await loadKanbanFile();
 
@@ -1845,6 +1999,9 @@
                 await loadArchive(); // Load archive for historical autocomplete data
                 updateAutocomplete();
                 renderKanban();
+
+                // Start watching for external file changes
+                startFileWatcher();
             } catch (error) {
                 // Only create default files if the file truly doesn't exist
                 if (error.name === 'NotFoundError') {
@@ -1871,6 +2028,9 @@
                         parseMarkdown(currentKanbanContent);
                         updateAutocomplete();
                         renderKanban();
+
+                        // Start watching for external file changes
+                        startFileWatcher();
                     } catch (createError) {
                         showNotification(t('notif.filesError'), 'error');
                         console.error(createError);
@@ -2146,6 +2306,19 @@ ${t('markdown.archiveSection')}
             const completedMatch = content.match(/\*\*Finished\*\*:\s*([\d-]+)/);
             if (completedMatch) task.completed = completedMatch[1];
 
+            // Parse Status field (authoritative if present and valid)
+            const validStatuses = ['todo', 'in-progress', 'in-review', 'done'];
+            const statusMatch = content.match(/\*\*Status\*\*:\s*(\S+)/i);
+            if (statusMatch) {
+                const statusValue = statusMatch[1].toLowerCase();
+                if (validStatuses.includes(statusValue)) {
+                    task.status = statusValue;
+                    console.log(`Task ${id}: Using Status field value "${statusValue}"`);
+                } else {
+                    console.warn(`Task ${id}: Ignoring invalid Status value "${statusMatch[1]}", using section position`);
+                }
+            }
+
             // Parse tags
             const tagsMatch = content.match(/\*\*Tags\*\*:\s*(.+)/);
             if (tagsMatch) {
@@ -2294,18 +2467,248 @@ ${t('markdown.archiveSection')}
             return html;
         }
 
-        // Auto-save function
-        async function autoSave() {
+        // Debounce timer for auto-save
+        let autoSaveTimer = null;
+
+        // Track when we last saved (to ignore our own changes)
+        let lastSaveTimestamp = 0;
+
+        // Flag to prevent saving during external updates
+        let isApplyingExternalChanges = false;
+
+        // Actual save function (called by debounced autoSave)
+        async function performSave() {
             if (!kanbanFileHandle) return;
+
             try {
+                console.log('💾 Performing save...');
+
+                // Mark that we're saving (for dev server reload detection)
+                sessionStorage.setItem('justSaved', Date.now().toString());
+
                 const newContent = generateMarkdown();
+                console.log('📝 Generated markdown content, length:', newContent.length);
+
                 const writable = await kanbanFileHandle.createWritable();
+                console.log('✍️ Got writable stream');
+
                 await writable.write(newContent);
+                console.log('💾 Written content');
+
                 await writable.close();
+                console.log('🔒 Closed writable stream');
+
                 currentKanbanContent = newContent;
-                console.log('Auto-saved');
+
+                // Update last save timestamp to ignore this change in file watcher
+                lastSaveTimestamp = Date.now();
+
+                console.log('✅ Save completed successfully');
+
+                // Clear the flag after a short delay
+                // If dev server reloads the page, the flag will still be there on next load
+                setTimeout(() => {
+                    sessionStorage.removeItem('justSaved');
+                    console.log('🟢 justSaved flag cleared');
+                }, 500);
             } catch (error) {
-                console.error('Auto-save failed:', error);
+                console.error('❌ Save failed:', error);
+                sessionStorage.removeItem('justSaved');
+            }
+        }
+
+        // Debounced auto-save function
+        // Waits 500ms after last change before actually saving
+        // This prevents Live Server from reloading on every single change
+        function autoSave() {
+            if (!kanbanFileHandle) return;
+
+            // Don't save while applying external changes
+            if (isApplyingExternalChanges) {
+                console.log('⏭️ Skipping autoSave (applying external changes)');
+                return;
+            }
+
+            // Clear any existing timer
+            if (autoSaveTimer) {
+                clearTimeout(autoSaveTimer);
+                console.log('⏱️ AutoSave debounced (waiting for more changes...)');
+            } else {
+                console.log('🔵 AutoSave scheduled...');
+            }
+
+            // Schedule save for 500ms from now
+            autoSaveTimer = setTimeout(() => {
+                autoSaveTimer = null;
+                performSave();
+            }, 500);
+        }
+
+        // File watcher to detect external changes to kanban.md
+        let fileWatcherInterval = null;
+        let lastCheckedModified = 0;
+
+        // Smart update function that only modifies changed tasks
+        function applyExternalChanges(oldTasks, newTasks) {
+            console.log('🔍 Analyzing changes:', oldTasks.length, 'old tasks,', newTasks.length, 'new tasks');
+
+            // Create maps for quick lookup
+            const oldTasksMap = new Map(oldTasks.map(t => [t.id, t]));
+            const newTasksMap = new Map(newTasks.map(t => [t.id, t]));
+
+            let addedCount = 0;
+            let removedCount = 0;
+            let movedCount = 0;
+            let updatedCount = 0;
+
+            // Find tasks that were removed (in old but not in new)
+            for (const oldTask of oldTasks) {
+                if (!newTasksMap.has(oldTask.id)) {
+                    console.log('🗑️ Removing task:', oldTask.id);
+                    const taskEl = document.querySelector(`[data-task-id="${oldTask.id}"]`);
+                    if (taskEl) {
+                        taskEl.remove();
+                        removedCount++;
+                    }
+                    // Check if column needs empty state
+                    const column = document.querySelector(`[data-column-id="${oldTask.status}"] .task-list`);
+                    if (column && column.children.length === 0) {
+                        const emptyDiv = document.createElement('div');
+                        emptyDiv.className = 'empty-state';
+                        emptyDiv.textContent = t('empty.noTasks');
+                        column.appendChild(emptyDiv);
+                    }
+                }
+            }
+
+            // Find tasks that were added or modified (in new)
+            for (const newTask of newTasks) {
+                const oldTask = oldTasksMap.get(newTask.id);
+
+                if (!oldTask) {
+                    // Task was added
+                    console.log('➕ Adding new task:', newTask.id);
+                    const targetColumn = document.querySelector(`[data-column-id="${newTask.status}"] .task-list`);
+                    if (targetColumn) {
+                        const emptyState = targetColumn.querySelector('.empty-state');
+                        if (emptyState) emptyState.remove();
+
+                        const newCard = createTaskElement(newTask);
+                        targetColumn.appendChild(newCard);
+                        addedCount++;
+                    }
+                } else {
+                    // Task exists, check if it changed
+                    const statusChanged = oldTask.status !== newTask.status;
+                    const contentChanged = JSON.stringify(oldTask) !== JSON.stringify(newTask);
+
+                    if (statusChanged) {
+                        console.log('↔️ Task moved:', newTask.id, 'from', oldTask.status, 'to', newTask.status);
+                        // Update the task in the tasks array first
+                        const taskIndex = tasks.findIndex(t => t.id === newTask.id);
+                        if (taskIndex !== -1) {
+                            tasks[taskIndex] = newTask;
+                        }
+                        moveTaskCard(newTask.id, newTask.status);
+                        movedCount++;
+                    } else if (contentChanged) {
+                        console.log('✏️ Task content changed:', newTask.id);
+                        // Update the task in the tasks array first
+                        const taskIndex = tasks.findIndex(t => t.id === newTask.id);
+                        if (taskIndex !== -1) {
+                            tasks[taskIndex] = newTask;
+                        }
+                        updateTaskCard(newTask.id);
+                        updatedCount++;
+                    }
+                }
+            }
+
+            // Update column counts
+            config.columns.forEach(column => {
+                updateColumnCount(column.id);
+            });
+
+            console.log(`✅ Changes applied: ${addedCount} added, ${removedCount} removed, ${movedCount} moved, ${updatedCount} updated`);
+        }
+
+        async function checkForExternalChanges() {
+            if (!kanbanFileHandle) return;
+
+            try {
+                // Get the current file
+                const file = await kanbanFileHandle.getFile();
+                const fileModified = file.lastModified;
+
+                // Initialize on first check
+                if (lastCheckedModified === 0) {
+                    lastCheckedModified = fileModified;
+                    return;
+                }
+
+                // Check if file was modified since last check
+                if (fileModified > lastCheckedModified) {
+                    // File was modified! But was it us or external?
+                    const timeSinceOurSave = Date.now() - lastSaveTimestamp;
+
+                    // If we saved within the last 2 seconds, ignore (it's our change)
+                    if (timeSinceOurSave < 2000) {
+                        console.log('📝 File change detected, but it was our own save - ignoring');
+                        lastCheckedModified = fileModified;
+                        return;
+                    }
+
+                    // External change detected!
+                    console.log('🔔 External file change detected!');
+                    const newContent = await file.text();
+
+                    // Check if content actually changed
+                    if (newContent !== currentKanbanContent) {
+                        console.log('📥 Loading external changes...');
+
+                        // Set flag to prevent saving during updates
+                        isApplyingExternalChanges = true;
+
+                        try {
+                            // Save old tasks for comparison
+                            const oldTasks = [...tasks];
+
+                            // Parse new content
+                            currentKanbanContent = newContent;
+                            parseMarkdown(currentKanbanContent);
+
+                            // Apply changes reactively (only update what changed)
+                            applyExternalChanges(oldTasks, tasks);
+
+                            showNotification('File updated from external source', 'info');
+                            console.log('✅ Board updated with external changes');
+                        } finally {
+                            // Clear flag after updates complete
+                            isApplyingExternalChanges = false;
+                        }
+                    }
+
+                    lastCheckedModified = fileModified;
+                }
+            } catch (error) {
+                console.error('❌ Error checking for file changes:', error);
+            }
+        }
+
+        // Start file watcher
+        function startFileWatcher() {
+            if (fileWatcherInterval) return; // Already running
+
+            console.log('👁️ Starting file watcher (checking every 2 seconds)...');
+            fileWatcherInterval = setInterval(checkForExternalChanges, 2000);
+        }
+
+        // Stop file watcher
+        function stopFileWatcher() {
+            if (fileWatcherInterval) {
+                clearInterval(fileWatcherInterval);
+                fileWatcherInterval = null;
+                console.log('🛑 File watcher stopped');
             }
         }
 
@@ -2376,40 +2779,18 @@ ${t('markdown.archiveSection')}
             document.getElementById('usersList').innerHTML = users.map(u => `<option value="${u}">`).join('');
             document.getElementById('tagsList').innerHTML = tags.map(t => `<option value="${t}">`).join('');
 
-            // Update filter selects
-            document.getElementById('filterTagSelect').innerHTML = `<option value="">${t('filters.select')}</option>` + tags.map(t => `<option value="${t}">${t}</option>`).join('');
-            document.getElementById('filterCategorySelect').innerHTML = `<option value="">${t('filters.select')}</option>` + categories.map(c => `<option value="${c}">${c}</option>`).join('');
-            document.getElementById('filterUserSelect').innerHTML = `<option value="">${t('filters.select')}</option>` + users.map(u => {
-                const normalizedId = normalizeUserId(u);
-                return `<option value="${normalizedId}">${u}</option>`;
-            }).join('');
-
-            // Update priority filter select from config
-            const priorities = (config.priorities || []);
-            document.getElementById('filterPrioritySelect').innerHTML = `<option value="">${t('filters.select')}</option>` + priorities.map((p, i) => `<option value="${clean(p)}">${displayPriority(p)}</option>`).join('');
+            // Note: Old filter selects removed - using modern dropdown UI instead
+            // Filter options are now dynamically populated when dropdowns are opened
         }
 
-        // Filter functions
-        function addFilter(type) {
-            let value;
-            if (type === 'tag') {
-                value = document.getElementById('filterTagSelect').value;
-                document.getElementById('filterTagSelect').value = '';
-            } else if (type === 'category') {
-                value = document.getElementById('filterCategorySelect').value;
-                document.getElementById('filterCategorySelect').value = '';
-            } else if (type === 'user') {
-                value = document.getElementById('filterUserSelect').value;
-                document.getElementById('filterUserSelect').value = '';
-            } else if (type === 'priority') {
-                value = document.getElementById('filterPrioritySelect').value;
-                document.getElementById('filterPrioritySelect').value = '';
-            }
-
+        // Legacy addFilter function - now handled by toggleFilterOption()
+        // Kept for backwards compatibility
+        function addFilter(type, value) {
             if (value && !activeFilters.find(f => f.type === type && f.value === value)) {
                 activeFilters.push({ type, value });
                 renderFilters();
                 renderKanban();
+                updateFilterCount();
             }
         }
 
@@ -2417,12 +2798,30 @@ ${t('markdown.archiveSection')}
             activeFilters.splice(idx, 1);
             renderFilters();
             renderKanban();
+            updateFilterCount();
+
+            // Refresh any open dropdowns
+            document.querySelectorAll('.filter-dropdown').forEach(dropdown => {
+                if (dropdown.style.display === 'block') {
+                    const type = dropdown.id.replace('Dropdown', '');
+                    populateFilterDropdown(type);
+                }
+            });
         }
 
         function clearFilters() {
             activeFilters = [];
             renderFilters();
             renderKanban();
+            updateFilterCount();
+
+            // Close all dropdowns
+            document.querySelectorAll('.filter-dropdown').forEach(d => {
+                d.style.display = 'none';
+            });
+            document.querySelectorAll('.filter-pill').forEach(p => {
+                p.classList.remove('active');
+            });
         }
 
         // Global search functions
@@ -2432,10 +2831,13 @@ ${t('markdown.archiveSection')}
             globalSearchTerm = input.value.trim();
 
             // Show/hide clear button
-            clearBtn.style.display = globalSearchTerm ? 'block' : 'none';
+            clearBtn.style.display = globalSearchTerm ? 'flex' : 'none';
 
             // Re-render kanban with search filter
             renderKanban();
+
+            // Update filter count
+            updateFilterCount();
         }
 
         function clearGlobalSearch() {
@@ -2447,20 +2849,187 @@ ${t('markdown.archiveSection')}
             renderKanban();
         }
 
+        // Modern filter UI functions
+        function toggleFilterExpand() {
+            const content = document.getElementById('filterContent');
+            const toggleBtn = document.querySelector('.filter-toggle-btn');
+
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                toggleBtn.classList.remove('expanded');
+            } else {
+                content.classList.add('expanded');
+                toggleBtn.classList.add('expanded');
+            }
+        }
+
+        function toggleFilterDropdown(type) {
+            const dropdown = document.getElementById(`${type}Dropdown`);
+            const pill = event.target.closest('.filter-pill');
+
+            // Close all other dropdowns
+            document.querySelectorAll('.filter-dropdown').forEach(d => {
+                if (d.id !== `${type}Dropdown`) {
+                    d.style.display = 'none';
+                }
+            });
+            document.querySelectorAll('.filter-pill').forEach(p => {
+                if (p !== pill) {
+                    p.classList.remove('active');
+                }
+            });
+
+            // Toggle current dropdown
+            if (dropdown.style.display === 'none' || !dropdown.style.display) {
+                dropdown.style.display = 'block';
+                pill.classList.add('active');
+                populateFilterDropdown(type);
+            } else {
+                dropdown.style.display = 'none';
+                pill.classList.remove('active');
+            }
+        }
+
+        function populateFilterDropdown(type) {
+            const content = document.getElementById(`${type}DropdownContent`);
+            if (!content) {
+                console.error('Dropdown content not found for type:', type);
+                return;
+            }
+
+            const options = getFilterOptions(type);
+            console.log(`📋 Filter dropdown for ${type}:`, options.length, 'options');
+
+            content.innerHTML = options.map((option, index) => {
+                const isChecked = activeFilters.some(f => f.type === type && f.value === option.value);
+                const uniqueId = `${type}_${index}`;
+                const escapedValue = option.value.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                const escapedLabel = option.label.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+                return `
+                    <div class="filter-dropdown-item" onclick="toggleFilterOptionByIndex('${type}', ${index})">
+                        <input
+                            type="checkbox"
+                            id="${uniqueId}"
+                            ${isChecked ? 'checked' : ''}
+                            data-filter-type="${type}"
+                            data-filter-value="${escapedValue}"
+                        >
+                        <label for="${uniqueId}">${escapedLabel}</label>
+                    </div>
+                `;
+            }).join('');
+
+            // Store options for reference
+            window.filterOptionsCache = window.filterOptionsCache || {};
+            window.filterOptionsCache[type] = options;
+        }
+
+        function toggleFilterOptionByIndex(type, index) {
+            const options = window.filterOptionsCache && window.filterOptionsCache[type];
+            if (!options || !options[index]) {
+                console.error('Filter option not found:', type, index);
+                return;
+            }
+
+            const value = options[index].value;
+            toggleFilterOption(type, value);
+
+            // Update checkbox state
+            const checkbox = document.getElementById(`${type}_${index}`);
+            if (checkbox) {
+                checkbox.checked = activeFilters.some(f => f.type === type && f.value === value);
+            }
+        }
+
+        function getFilterOptions(type) {
+            const options = [];
+
+            // Safety check
+            if (!tasks || !Array.isArray(tasks)) {
+                console.warn('Tasks not loaded yet');
+                return options;
+            }
+
+            try {
+                if (type === 'tag') {
+                    const tagSet = new Set();
+                    tasks.forEach(task => {
+                        if (task.tags && Array.isArray(task.tags)) {
+                            task.tags.forEach(tag => tagSet.add(tag.startsWith('#') ? tag.substring(1) : tag));
+                        }
+                    });
+                    Array.from(tagSet).sort().forEach(tag => {
+                        options.push({ value: tag, label: `#${tag}` });
+                    });
+                } else if (type === 'category') {
+                    const categorySet = new Set();
+                    tasks.forEach(task => {
+                        if (task.category) categorySet.add(task.category);
+                    });
+                    Array.from(categorySet).sort().forEach(cat => {
+                        options.push({ value: cat, label: cat });
+                    });
+                } else if (type === 'user') {
+                    const userSet = new Set();
+                    tasks.forEach(task => {
+                        if (task.assignees && Array.isArray(task.assignees)) {
+                            task.assignees.forEach(user => userSet.add(normalizeUserId(user)));
+                        }
+                    });
+                    Array.from(userSet).sort().forEach(user => {
+                        options.push({ value: user, label: getUserFullFormat(user) });
+                    });
+                } else if (type === 'priority') {
+                    if (config && config.priorities) {
+                        config.priorities.forEach(priority => {
+                            const cleanedPriority = clean(priority);
+                            options.push({ value: cleanedPriority, label: priority });
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error getting filter options:', error);
+            }
+
+            return options;
+        }
+
+        function toggleFilterOption(type, value) {
+            const existingIndex = activeFilters.findIndex(f => f.type === type && f.value === value);
+
+            if (existingIndex >= 0) {
+                activeFilters.splice(existingIndex, 1);
+            } else {
+                activeFilters.push({ type, value });
+            }
+
+            renderFilters();
+            renderKanban();
+            updateFilterCount();
+        }
+
+        function updateFilterCount() {
+            const badge = document.getElementById('filterCountBadge');
+            const clearAllBtn = document.getElementById('clearAllBtn');
+
+            if (!badge || !clearAllBtn) return; // Safety check
+
+            const count = activeFilters.length + (globalSearchTerm ? 1 : 0);
+
+            badge.textContent = count;
+            clearAllBtn.style.display = count > 0 ? 'inline-flex' : 'none';
+        }
+
         function renderFilters() {
             const container = document.getElementById('activeFilters');
-            const colors = {
-                tag: '#3b82f6',      // Blue
-                category: '#8b5cf6', // Purple
-                user: '#10b981',     // Green
-                priority: '#f59e0b'  // Orange
-            };
+
+            if (!container) return; // Safety check
 
             container.innerHTML = activeFilters.map((f, idx) => {
-                const escapedValue = f.value.replace(/'/g, "\\'");
-
                 // Determine display value based on filter type
                 let displayValue = f.value;
+                let icon = '';
 
                 // For priority filters, display with prefix/emoji from config
                 if (f.type === 'priority' && config.priorities) {
@@ -2468,21 +3037,27 @@ ${t('markdown.archiveSection')}
                     if (priority) {
                         displayValue = priority;
                     }
-                }
-
-                // For user filters, display with full format from config
-                if (f.type === 'user') {
+                    icon = '⚡';
+                } else if (f.type === 'tag') {
+                    displayValue = `#${f.value}`;
+                    icon = '🏷️';
+                } else if (f.type === 'category') {
+                    icon = '📁';
+                } else if (f.type === 'user') {
                     const fullUserFormat = getUserFullFormat(f.value);
                     displayValue = fullUserFormat;
+                    icon = '👤';
                 }
 
                 return `
-                <span style="background: ${colors[f.type]}; color: white; padding: 0.35rem 0.75rem; border-radius: 16px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500;">
-                    ${displayPriority(displayValue)}
-                    <button onclick="removeFilter(${idx})" style="background: none; border: none; color: white; cursor: pointer; padding: 0; font-weight: bold; font-size: 1.1rem; line-height: 1;" title="Supprimer ce filtre">✕</button>
-                </span>
+                <div class="filter-chip">
+                    <span>${icon} ${displayPriority(displayValue)}</span>
+                    <button class="filter-chip-remove" onclick="removeFilter(${idx})" title="Remove filter">✕</button>
+                </div>
                 `;
             }).join('');
+
+            updateFilterCount();
         }
 
         function matchesFilters(task) {
@@ -2677,6 +3252,9 @@ ${t('markdown.archiveSection')}
 
         // Render Kanban board
         function renderKanban() {
+            console.warn('⚠️ renderKanban() called - FULL RE-RENDER');
+            console.trace('Call stack:');
+
             const board = document.getElementById('kanbanBoard');
             board.innerHTML = '';
 
@@ -2702,12 +3280,16 @@ ${t('markdown.archiveSection')}
                         </div>
                         <div class="column-count">${columnTasks.length}</div>
                     </div>
-                    <div class="task-list" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    <div class="task-list">
                         ${columnTasks.length === 0 ? `<div class="empty-state">${t('empty.noTasks')}</div>` : ''}
                     </div>
                 `;
 
                 const taskList = columnEl.querySelector('.task-list');
+
+                // Add event listeners programmatically (better than inline handlers)
+                taskList.addEventListener('dragover', allowDrop);
+                taskList.addEventListener('drop', drop);
 
                 columnTasks.forEach(task => {
                     const taskEl = createTaskElement(task);
@@ -2771,6 +3353,132 @@ ${t('markdown.archiveSection')}
             return taskEl;
         }
 
+        // Helper function to update a single task card in place
+        function updateTaskCard(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            const existingCard = document.querySelector(`[data-task-id="${taskId}"]`);
+            if (!existingCard) return;
+
+            const newCard = createTaskElement(task);
+            newCard.classList.add('updating');
+            existingCard.replaceWith(newCard);
+
+            // Remove animation class after animation completes
+            setTimeout(() => {
+                newCard.classList.remove('updating');
+            }, 300);
+        }
+
+        // Helper function to move task card between columns
+        function moveTaskCard(taskId, newColumnId) {
+            try {
+                console.log(`🚀 moveTaskCard() called for task ${taskId} to column ${newColumnId}`);
+
+                const taskEl = document.querySelector(`[data-task-id="${taskId}"]`);
+                if (!taskEl) {
+                    console.warn('⚠️ Task element not found:', taskId);
+                    return;
+                }
+
+                const task = tasks.find(t => t.id === taskId);
+                if (!task) {
+                    console.warn('⚠️ Task not found in tasks array:', taskId);
+                    return;
+                }
+
+                const oldColumnId = task.status;
+                console.log(`📊 Task moving from ${oldColumnId} to ${newColumnId}`);
+
+                // Update task status
+                task.status = newColumnId;
+
+                // Check if task still matches filters after status change
+                if (!matchesFilters(task)) {
+                    console.log('🔍 Task no longer matches filters, removing from DOM');
+                    // Task no longer matches filters, remove it from DOM
+                    taskEl.remove();
+                    updateColumnCount(oldColumnId);
+
+                    // Check if old column is now empty
+                    const oldColumn = document.querySelector(`[data-column-id="${oldColumnId}"] .task-list`);
+                    if (oldColumn && oldColumn.children.length === 0) {
+                        const emptyDiv = document.createElement('div');
+                        emptyDiv.className = 'empty-state';
+                        emptyDiv.textContent = t('empty.noTasks');
+                        oldColumn.appendChild(emptyDiv);
+                    }
+
+                    console.log('💾 Calling autoSave() after filter removal');
+                    autoSave();
+                    return;
+                }
+
+                // Find target column's task list
+                const targetColumn = document.querySelector(`[data-column-id="${newColumnId}"] .task-list`);
+                if (!targetColumn) {
+                    console.warn('⚠️ Target column not found:', newColumnId);
+                    return;
+                }
+
+                // Remove empty state if it exists
+                const emptyState = targetColumn.querySelector('.empty-state');
+                if (emptyState) {
+                    console.log('🗑️ Removing empty state from target column');
+                    emptyState.remove();
+                }
+
+                // Add animation class before moving
+                taskEl.classList.add('updating');
+
+                // Move the task element
+                console.log('➡️ Appending task to target column');
+                targetColumn.appendChild(taskEl);
+
+                // Remove animation class after animation completes
+                setTimeout(() => {
+                    taskEl.classList.remove('updating');
+                }, 300);
+
+                // Update column counts
+                console.log('🔢 Updating column counts');
+                updateColumnCount(oldColumnId);
+                updateColumnCount(newColumnId);
+
+                // Check if old column is now empty
+                const oldColumn = document.querySelector(`[data-column-id="${oldColumnId}"] .task-list`);
+                if (oldColumn && oldColumn.children.length === 0) {
+                    console.log('📭 Old column is now empty, adding empty state');
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.className = 'empty-state';
+                    emptyDiv.textContent = t('empty.noTasks');
+                    oldColumn.appendChild(emptyDiv);
+                }
+
+                console.log('💾 Calling autoSave() after successful move');
+                autoSave();
+                console.log('✨ moveTaskCard() completed successfully');
+            } catch (error) {
+                console.error('💥 ERROR in moveTaskCard():', error);
+                console.trace();
+            }
+        }
+
+        // Helper function to update column count
+        function updateColumnCount(columnId) {
+            const columnEl = document.querySelector(`[data-column-id="${columnId}"]`);
+            if (!columnEl) return;
+
+            const countEl = columnEl.querySelector('.column-count');
+            const taskList = columnEl.querySelector('.task-list');
+            const taskCount = taskList.querySelectorAll('.task-card').length;
+
+            if (countEl) {
+                countEl.textContent = taskCount;
+            }
+        }
+
         // Drag & Drop
         function allowDrop(event) {
             event.preventDefault();
@@ -2782,32 +3490,42 @@ ${t('markdown.archiveSection')}
         }
 
         function drop(event) {
-            event.preventDefault();
-            const taskId = event.dataTransfer.getData('taskId');
-            const taskEl = document.querySelector(`[data-task-id="${taskId}"]`);
+            try {
+                event.preventDefault();
+                event.stopPropagation();
+                console.log('🎯 Drop event triggered');
 
-            if (taskEl) {
-                taskEl.classList.remove('dragging');
+                const taskId = event.dataTransfer.getData('taskId');
+                const taskEl = document.querySelector(`[data-task-id="${taskId}"]`);
 
-                // Find the column
-                let dropTarget = event.target;
-                while (dropTarget && !dropTarget.classList.contains('task-list')) {
-                    dropTarget = dropTarget.parentElement;
-                }
+                if (taskEl) {
+                    taskEl.classList.remove('dragging');
 
-                if (dropTarget && dropTarget.classList.contains('task-list')) {
-                    const columnEl = dropTarget.closest('.kanban-column');
-                    const newStatus = columnEl.dataset.columnId;
+                    // Find the column
+                    let dropTarget = event.target;
+                    while (dropTarget && !dropTarget.classList.contains('task-list')) {
+                        dropTarget = dropTarget.parentElement;
+                    }
 
-                    // Update task status
-                    const task = tasks.find(t => t.id === taskId);
-                    if (task && task.status !== newStatus) {
-                        task.status = newStatus;
-                        renderKanban();
-                        autoSave();
-                        showNotification(t('notif.taskMoved'), 'success');
+                    if (dropTarget && dropTarget.classList.contains('task-list')) {
+                        const columnEl = dropTarget.closest('.kanban-column');
+                        const newStatus = columnEl.dataset.columnId;
+
+                        // Update task status
+                        const task = tasks.find(t => t.id === taskId);
+                        if (task && task.status !== newStatus) {
+                            console.log(`📦 Moving task ${taskId} from ${task.status} to ${newStatus}`);
+                            // Use reactive update instead of full re-render
+                            moveTaskCard(taskId, newStatus);
+                            showNotification(t('notif.taskMoved'), 'success');
+                            console.log('✅ Task moved successfully - NO renderKanban() called');
+                        }
                     }
                 }
+                console.log('🏁 Drop event completed without errors');
+            } catch (error) {
+                console.error('💥 ERROR in drop():', error);
+                console.trace();
             }
         }
 
@@ -2973,7 +3691,7 @@ ${t('markdown.archiveSection')}
                 task.subtasks[subtaskIdx].completed = !task.subtasks[subtaskIdx].completed;
                 currentDetailTask = task; // Update reference
                 showTaskDetail(task); // Refresh display
-                renderKanban(); // Update card progress
+                updateTaskCard(taskId); // Update card progress reactively
                 autoSave();
             }
         }
@@ -2984,7 +3702,7 @@ ${t('markdown.archiveSection')}
                 task.subtasks.splice(subtaskIdx, 1);
                 currentDetailTask = task;
                 showTaskDetail(task);
-                renderKanban();
+                updateTaskCard(taskId); // Update card reactively
                 autoSave();
             }
         }
@@ -3000,7 +3718,7 @@ ${t('markdown.archiveSection')}
                 currentDetailTask = task;
                 input.value = '';
                 showTaskDetail(task);
-                renderKanban();
+                updateTaskCard(taskId); // Update card reactively
                 autoSave();
             }
         }
@@ -3014,7 +3732,7 @@ ${t('markdown.archiveSection')}
                 task.subtasks[subtaskIdx].text = newText.trim();
                 currentDetailTask = task;
                 showTaskDetail(task);
-                renderKanban();
+                updateTaskCard(taskId); // Update card reactively
                 autoSave();
             }
         }
@@ -3046,6 +3764,8 @@ ${t('markdown.archiveSection')}
                 const taskId = document.getElementById('taskEditId').value;
                 const task = tasks.find(t => t.id === taskId);
                 if (task) {
+                    const oldStatus = task.status;
+
                     task.title = title;
                     task.status = status;
                     task.priority = priority;
@@ -3059,13 +3779,22 @@ ${t('markdown.archiveSection')}
                     task.description = description;
                     task.subtasks = formSubtasks;
                     task.notes = notes;
+
+                    // If status changed, move the card between columns
+                    if (oldStatus !== status) {
+                        moveTaskCard(taskId, status);
+                    } else {
+                        // Just update the card in place
+                        updateTaskCard(taskId);
+                    }
+
                     showNotification(t('notif.taskEdited', {id: taskId}), 'success');
                 }
             } else {
                 // Create new task
                 config.lastTaskId++;
                 const newTaskId = 'TASK-' + String(config.lastTaskId).padStart(3, '0');
-                tasks.push({
+                const newTask = {
                     id: newTaskId,
                     title,
                     status,
@@ -3080,12 +3809,28 @@ ${t('markdown.archiveSection')}
                     description,
                     subtasks: formSubtasks,
                     notes
-                });
+                };
+                tasks.push(newTask);
+
+                // Add the new task card to the appropriate column
+                const targetColumn = document.querySelector(`[data-column-id="${status}"] .task-list`);
+                if (targetColumn) {
+                    // Remove empty state if it exists
+                    const emptyState = targetColumn.querySelector('.empty-state');
+                    if (emptyState) emptyState.remove();
+
+                    // Create and append new task card
+                    const newCard = createTaskElement(newTask);
+                    targetColumn.appendChild(newCard);
+
+                    // Update column count
+                    updateColumnCount(status);
+                }
+
                 showNotification(t('notif.taskCreated', {id: newTaskId}), 'success');
             }
 
             closeTaskModal();
-            renderKanban();
             autoSave();
         });
 
@@ -3128,6 +3873,7 @@ ${t('markdown.archiveSection')}
                 let meta = '';
                 if (task.priority) meta += `**Priority**: ${task.priority}`;
                 if (task.category) meta += ` | **Category**: ${task.category}`;
+                meta += ` | **Status**: ${task.status}`;
                 if (task.assignees.length > 0) meta += ` | **Assigned**: ${task.assignees.join(', ')}`;
                 if (meta) md += `${meta}\n`;
 
@@ -3162,11 +3908,30 @@ ${t('markdown.archiveSection')}
                 const idx = tasks.findIndex(t => t.id === currentDetailTask.id);
                 if (idx >= 0) {
                     const task = tasks.splice(idx, 1)[0];
+                    const taskCard = document.querySelector(`[data-task-id="${task.id}"]`);
+
+                    // Remove the card from DOM
+                    if (taskCard) {
+                        const columnId = task.status;
+                        taskCard.remove();
+
+                        // Update column count
+                        updateColumnCount(columnId);
+
+                        // Check if column is now empty
+                        const column = document.querySelector(`[data-column-id="${columnId}"] .task-list`);
+                        if (column && column.children.length === 0) {
+                            const emptyDiv = document.createElement('div');
+                            emptyDiv.className = 'empty-state';
+                            emptyDiv.textContent = t('empty.noTasks');
+                            column.appendChild(emptyDiv);
+                        }
+                    }
+
                     archivedTasks.push(task);
                     saveArchive();
                     autoSave();
                     updateAutocomplete(); // Keep historical values in autocomplete
-                    renderKanban();
                     closeModal();
                     showNotification(t('notif.taskArchived'), 'success');
                 }
@@ -3197,15 +3962,33 @@ ${t('markdown.archiveSection')}
                     if (fromArchive) {
                         saveArchive();
                     } else {
+                        const taskCard = document.querySelector(`[data-task-id="${taskId}"]`);
+
+                        // Remove the card from DOM
+                        if (taskCard) {
+                            const columnId = task.status;
+                            taskCard.remove();
+
+                            // Update column count
+                            updateColumnCount(columnId);
+
+                            // Check if column is now empty
+                            const column = document.querySelector(`[data-column-id="${columnId}"] .task-list`);
+                            if (column && column.children.length === 0) {
+                                const emptyDiv = document.createElement('div');
+                                emptyDiv.className = 'empty-state';
+                                emptyDiv.textContent = t('empty.noTasks');
+                                column.appendChild(emptyDiv);
+                            }
+                        }
+
                         autoSave();
+                        closeModal();
                     }
 
-                    // Update UI
+                    // Update UI for archive list
                     if (fromArchive) {
                         renderArchiveList(document.getElementById('archiveSearch').value);
-                    } else {
-                        renderKanban();
-                        closeModal();
                     }
 
                     showNotification(t('notif.taskDeleted'), 'success');
@@ -3286,10 +4069,25 @@ ${t('markdown.archiveSection')}
                     task.status = config.columns[0]?.id || 'todo';
                 }
                 tasks.push(task);
+
+                // Add the restored task card to the appropriate column
+                const targetColumn = document.querySelector(`[data-column-id="${task.status}"] .task-list`);
+                if (targetColumn) {
+                    // Remove empty state if it exists
+                    const emptyState = targetColumn.querySelector('.empty-state');
+                    if (emptyState) emptyState.remove();
+
+                    // Create and append restored task card
+                    const newCard = createTaskElement(task);
+                    targetColumn.appendChild(newCard);
+
+                    // Update column count
+                    updateColumnCount(task.status);
+                }
+
                 saveArchive();
                 autoSave();
                 updateAutocomplete(); // Update autocomplete after restoring
-                renderKanban();
                 renderArchiveList(document.getElementById('archiveSearch').value);
                 showNotification(t('notif.taskRestored'), 'success');
             }
@@ -3359,6 +4157,7 @@ ${t('markdown.archiveSection')}
                     let meta = '';
                     if (task.priority) meta += `**Priority**: ${task.priority}`;
                     if (task.category) meta += ` | **Category**: ${task.category}`;
+                    meta += ` | **Status**: ${task.status}`;
                     if (task.assignees.length > 0) meta += ` | **Assigned**: ${task.assignees.join(', ')}`;
                     if (meta) md += meta + '\n';
 
