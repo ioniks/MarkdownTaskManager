@@ -606,7 +606,7 @@
                             <template x-if="$store.ui.currentDetailTask.priority">
                                 <div>
                                     <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;" x-text="t('meta.priority')"></div>
-                                    <div style="font-weight: 500;" x-text="$store.ui.currentDetailTask.priority"></div>
+                                    <div style="font-weight: 500;" x-text="config.priorities?.find(p => p.toLowerCase().includes($store.ui.currentDetailTask.priority.toLowerCase())) || $store.ui.currentDetailTask.priority"></div>
                                 </div>
                             </template>
 
