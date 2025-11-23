@@ -2283,14 +2283,20 @@ ${t('markdown.archiveSection')}
                 notes: ''
             };
 
-            // Parse metadata line
-            const metaMatch = content.match(/\*\*Priority\*\*:\s*(\w+)\s*\|\s*\*\*Category\*\*:\s*([^|]+?)(?:\s*\|\s*\*\*Assigned\*\*:\s*(.+?))?$/m);
+            // Parse metadata line - now with Status field support
+            const metaMatch = content.match(/\*\*Priority\*\*:\s*([^|]+)/);
             if (metaMatch) {
                 task.priority = metaMatch[1].trim();
-                task.category = metaMatch[2].trim();
-                if (metaMatch[3]) {
-                    task.assignees = metaMatch[3].split(',').map(a => a.trim());
-                }
+            }
+            
+            const categoryMatch = content.match(/\*\*Category\*\*:\s*([^|]+)/);
+            if (categoryMatch) {
+                task.category = categoryMatch[1].trim();
+            }
+            
+            const assignedMatch = content.match(/\*\*Assigned\*\*:\s*(.+?)(?:\s*\||$)/m);
+            if (assignedMatch) {
+                task.assignees = assignedMatch[1].split(',').map(a => a.trim());
             }
 
             // Parse dates - support all date fields
