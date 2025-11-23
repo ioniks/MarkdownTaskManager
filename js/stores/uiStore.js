@@ -115,10 +115,14 @@ document.addEventListener("alpine:init", () => {
           due: task.due,
           completed: task.completed,
           description: task.description,
-          subtasks: task.subtasks.map((st) => ({ ...st })),
+          subtasks: task.subtasks ? task.subtasks.map((st) => ({ ...st })) : [],
           notes: task.notes,
         };
-        this.formSubtasks = [...task.subtasks];
+        this.formSubtasks = task.subtasks ? [...task.subtasks] : [];
+
+        // Populate input fields for assignees and tags
+        this.taskFormAssigneesInput = this.formatAssignees(task.assignees);
+        this.taskFormTagsInput = this.formatTags(task.tags);
       } else {
         // New task mode
         this.isEditMode = false;
@@ -153,6 +157,9 @@ document.addEventListener("alpine:init", () => {
         notes: "",
       };
       this.formSubtasks = [];
+      this.taskFormAssigneesInput = "";
+      this.taskFormTagsInput = "";
+      this.newSubtaskText = "";
     },
 
     // Submit task form
@@ -360,6 +367,18 @@ document.addEventListener("alpine:init", () => {
     // Format assignees for display
     formatAssignees(assignees) {
       return assignees.join(", ");
+    },
+
+    // Update task form assignees from input string
+    updateTaskFormAssignees() {
+      this.taskForm.assignees = this.parseAssignees(
+        this.taskFormAssigneesInput,
+      );
+    },
+
+    // Update task form tags from input string
+    updateTaskFormTags() {
+      this.taskForm.tags = this.parseTags(this.taskFormTagsInput);
     },
 
     // Get priority class

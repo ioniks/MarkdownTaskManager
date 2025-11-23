@@ -58,6 +58,7 @@
                     <template x-if="$store.ui.showProjectSelector">
                         <select
                             @change="switchProject($event.target.value)"
+                            :value="getCurrentProjectIndex()"
                             style="
                                 padding: 0.6rem 1rem;
                                 border: 1px solid var(--border-color);
@@ -78,7 +79,6 @@
                             >
                                 <option
                                     :value="index"
-                                    :selected="project.handle === $store.tasks.directoryHandle"
                                     x-text="project.displayName || project.name"
                                 ></option>
                             </template>
@@ -145,7 +145,7 @@
 
         <!-- Filter Bar -->
         <div
-            x-show="$store.tasks.directoryHandle && ($store.filters.showFilterBar || $store.filters.hasActiveFilters())"
+            x-show="$store.tasks.directoryHandle"
             style="
                 background: white;
                 border-bottom: 1px solid var(--border-color);

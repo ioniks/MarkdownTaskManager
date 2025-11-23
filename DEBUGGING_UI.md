@@ -1,8 +1,9 @@
+
 # Alpine.js Migration - UI Debugging Guide
 
 **Date**: 2025-11-23  
 **Branch**: alpine-migration-v2  
-**Status**: Translation fix applied, awaiting browser testing
+**Status**: UI fixes applied, ready for testing
 
 ## What Was Fixed
 
@@ -11,6 +12,29 @@
 **Solution**: Added `window.t = t;` to translations.js  
 **File**: `js/utils/translations.js`  
 **Impact**: All x-text="t(...)" calls should now work
+
+### ✅ Fix #2: Filters Not Showing
+**Problem**: Filter bar had condition requiring `showFilterBar` to be true, but it was always false  
+**Solution**: Changed filter bar x-show to `$store.tasks.directoryHandle` (always show when project loaded)  
+**File**: `task-manager.html:147`  
+**Impact**: Filter bar now visible when project is loaded
+
+### ✅ Fix #3: Subtasks Not Visible When Editing
+**Problem**: Subtasks were not populated in edit mode; assignees/tags input fields were empty  
+**Solution**: 
+- Populate `formSubtasks` from task.subtasks with null checks
+- Populate `taskFormAssigneesInput` and `taskFormTagsInput` when opening edit form
+- Added missing `updateTaskFormAssignees()` and `updateTaskFormTags()` methods
+**Files**: `js/stores/uiStore.js:123-125, 368-378`  
+**Impact**: Edit form now shows subtasks, assignees, and tags correctly
+
+### ✅ Fix #4: Project Selector Not Showing Selected Folder
+**Problem**: Used `:selected="project.handle === $store.tasks.directoryHandle"` (object comparison, always false)  
+**Solution**: 
+- Use `:value="getCurrentProjectIndex()"` on select element
+- Added `getCurrentProjectIndex()` method that compares by name
+**Files**: `task-manager.html:60`, `js/app.js:141-150`  
+**Impact**: Project selector dropdown now shows currently selected project
 
 ## How to Test the Application
 
