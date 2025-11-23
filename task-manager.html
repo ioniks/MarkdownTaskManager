@@ -704,7 +704,8 @@
                         class="btn btn-secondary"
                         @click="$store.ui.deleteCurrentTask()"
                         style="background: #ef4444; color: white;"
-                    >🗑️ <span x-text="t('taskDetail.delete')"></span></button>
+                        x-text="t('taskDetail.delete')"
+                    ></button>
                     <template
                         x-if="$store.ui.currentDetailTask && $store.ui.currentDetailTask.status !== 'archived'"
                     >
@@ -712,12 +713,14 @@
                             class="btn btn-secondary"
                             @click="$store.ui.archiveCurrentTask()"
                             style="background: #f59e0b; color: white;"
-                        >📦 <span x-text="t('taskDetail.archive')"></span></button>
+                            x-text="t('taskDetail.archive')"
+                        ></button>
                     </template>
                     <button
                         class="btn btn-primary"
                         @click="$store.ui.editCurrentTask()"
-                    >✏️ <span x-text="t('taskDetail.edit')"></span></button>
+                        x-text="t('taskDetail.edit')"
+                    ></button>
                 </div>
 
         <!-- Task Form Modal -->
