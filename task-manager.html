@@ -2630,6 +2630,15 @@ ${t('markdown.archiveSection')}
             });
 
             console.log(`✅ Changes applied: ${addedCount} added, ${removedCount} removed, ${movedCount} moved, ${updatedCount} updated`);
+
+            // Auto-reorganize: If any task moved due to Status field change, save to reorganize the .md file
+            if (movedCount > 0) {
+                console.log('🔄 Status field changes detected, reorganizing markdown file...');
+                setTimeout(() => {
+                    autoSave();
+                    console.log('✅ Markdown file reorganized based on Status field changes');
+                }, 500); // Small delay to avoid rapid saves
+            }
         }
 
         async function checkForExternalChanges() {
