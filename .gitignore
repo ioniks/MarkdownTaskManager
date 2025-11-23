@@ -26,3 +26,4 @@ TASK_MANAGER_HTML_CHANGES.md
 # System files
 .DS_Store
 Thumbs.db
+node_modules/
