@@ -618,6 +618,44 @@
                             </div>
                         </template>
 
+                        <template
+                            x-if="$store.ui.currentDetailTask.subtasks && $store.ui.currentDetailTask.subtasks.length > 0"
+                        >
+                            <div>
+                                <strong
+                                    x-text="t('taskForm.subtasksLabel') + ':'"
+                                ></strong>
+                                <div style="margin-top: 0.5rem">
+                                    <template
+                                        x-for="(subtask, index) in $store.ui.currentDetailTask.subtasks"
+                                        :key="index"
+                                    >
+                                        <div
+                                            style="
+                                                display: flex;
+                                                align-items: center;
+                                                margin-bottom: 0.5rem;
+                                                padding: 0.5rem;
+                                                background: #f7f7f7;
+                                                border-radius: 4px;
+                                            "
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                :checked="subtask.completed"
+                                                disabled
+                                                style="margin-right: 0.5rem"
+                                            />
+                                            <span
+                                                :style="subtask.completed ? 'text-decoration: line-through; color: #999;' : ''"
+                                                x-text="subtask.text"
+                                            ></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+
                         <template x-if="$store.ui.currentDetailTask.notes">
                             <div>
                                 <strong x-text="t('meta.notes') + ':'"></strong>

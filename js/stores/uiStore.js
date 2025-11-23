@@ -101,28 +101,47 @@ document.addEventListener("alpine:init", () => {
     openTaskForm(task = null) {
       if (task) {
         // Edit mode
+        console.log("Opening task form for edit:", task);
+        console.log("Task subtasks:", task.subtasks);
+
         this.isEditMode = true;
         this.editingTaskId = task.id;
+
+        // Deep copy subtasks
+        const subtasksCopy =
+          task.subtasks && Array.isArray(task.subtasks)
+            ? task.subtasks.map((st) => ({
+                completed: st.completed,
+                text: st.text,
+              }))
+            : [];
+
+        console.log("Subtasks copy:", subtasksCopy);
+
         this.taskForm = {
           title: task.title,
           status: task.status,
           priority: task.priority,
           category: task.category,
-          assignees: [...task.assignees],
-          tags: [...task.tags],
+          assignees: [...(task.assignees || [])],
+          tags: [...(task.tags || [])],
           created: task.created,
           started: task.started,
           due: task.due,
           completed: task.completed,
           description: task.description,
-          subtasks: task.subtasks ? task.subtasks.map((st) => ({ ...st })) : [],
+          subtasks: subtasksCopy,
           notes: task.notes,
         };
-        this.formSubtasks = task.subtasks ? [...task.subtasks] : [];
+
+        this.formSubtasks = subtasksCopy;
+        console.log("formSubtasks set to:", this.formSubtasks);
 
         // Populate input fields for assignees and tags
-        this.taskFormAssigneesInput = this.formatAssignees(task.assignees);
-        this.taskFormTagsInput = this.formatTags(task.tags);
+        this.taskFormAssigneesInput = this.formatAssignees(
+          task.assignees || [],
+        );
+        this.taskFormTagsInput = this.formatTags(task.tags || []);
       } else {
         // New task mode
         this.isEditMode = false;
