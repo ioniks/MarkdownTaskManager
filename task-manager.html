@@ -4165,8 +4165,8 @@ ${t('markdown.archiveSection')}
 
                     let meta = '';
                     if (task.priority) meta += `**Priority**: ${task.priority}`;
-                    if (task.category) meta += ` | **Category**: ${task.category}`;
-                    meta += ` | **Status**: ${task.status}`;
+                    if (task.category) meta += (meta ? " | " : "") + `**Category**: ${task.category}`;
+                    meta += (meta ? " | " : "") + `**Status**: ${task.status}`;
                     if (task.assignees.length > 0) meta += ` | **Assigned**: ${task.assignees.join(', ')}`;
                     if (meta) md += meta + '\n';
 
