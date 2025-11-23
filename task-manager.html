@@ -454,8 +454,8 @@
                             @dragover="handleDragOver($event)"
                         >
                             <template
-                                x-for="task in getColumnTasks(column.id)"
-                                :key="task.id"
+                                x-for="(task, taskIdx) in getColumnTasks(column.id)"
+                                :key="column.id + '-' + task.id + '-' + taskIdx"
                             >
                                 <div
                                     class="task-card"
@@ -995,8 +995,8 @@
 
                     <div style="max-height: 500px; overflow-y: auto">
                         <template
-                            x-for="task in $store.filters.getFilteredArchivedTasks($store.tasks.archivedTasks)"
-                            :key="task.id"
+                            x-for="(task, idx) in $store.filters.getFilteredArchivedTasks($store.tasks.archivedTasks || [])"
+                            :key="'archive-' + task.id + '-' + idx"
                         >
                             <div
                                 class="task-card"
