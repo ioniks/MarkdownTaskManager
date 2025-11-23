@@ -402,11 +402,36 @@ document.addEventListener("alpine:init", () => {
 
     // Get priority class
     getPriorityClass(priority) {
+      if (!priority) return "Default";
+
       const iconClasses = window.translationSystem.priorityIconClasses;
 
-      // Extract emoji from priority string
+      // First, try to extract emoji from priority string
       const emoji = priority.match(/^(.)/)?.["1"] || "";
-      return iconClasses[emoji] || "Default";
+      if (iconClasses[emoji]) {
+        return iconClasses[emoji];
+      }
+
+      // If no emoji, map text-based priorities to colors
+      const textPriorityMap = {
+        Critical: "Red",
+        Critique: "Red",
+        High: "Orange",
+        Haute: "Orange",
+        Medium: "Yellow",
+        Moyenne: "Yellow",
+        Low: "Green",
+        Basse: "Green",
+      };
+
+      // Check if priority contains one of the text keywords
+      for (const [key, color] of Object.entries(textPriorityMap)) {
+        if (priority.toLowerCase().includes(key.toLowerCase())) {
+          return color;
+        }
+      }
+
+      return "Default";
     },
   });
 });
