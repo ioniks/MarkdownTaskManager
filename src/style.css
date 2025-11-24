@@ -1,39 +1,54 @@
 @import "tailwindcss";
 
 @theme {
-    --color-background: oklch(100% 0 0);
-    --color-foreground: oklch(9.8% 0.084 222.2);
-    --color-card: oklch(100% 0 0);
-    --color-card-foreground: oklch(9.8% 0.084 222.2);
-    --color-primary: oklch(22.4% 0.113 222.2);
-    --color-primary-foreground: oklch(98% 0.04 210);
-    --color-secondary: oklch(96.1% 0.04 210);
-    --color-secondary-foreground: oklch(22.4% 0.113 222.2);
-    --color-muted: oklch(96.1% 0.04 210);
-    --color-muted-foreground: oklch(46.9% 0.163 215.4);
-    --color-accent: oklch(96.1% 0.04 210);
-    --color-accent-foreground: oklch(22.4% 0.113 222.2);
-    --color-destructive: oklch(60.2% 0.842 0);
-    --color-destructive-foreground: oklch(98% 0.04 210);
-    --color-border: oklch(91.4% 0.318 214.3);
-    --color-input: oklch(91.4% 0.318 214.3);
-    --color-ring: oklch(9.8% 0.084 222.2);
-    --radius: 0.5rem;
+    /* Original color scheme from task-manager-old.html */
+    --color-bg-primary: #f5f5f5;
+    --color-bg-secondary: #ffffff;
+    --color-border: #e0e0e0;
+    --color-text-primary: #212121;
+    --color-text-secondary: #757575;
+    --color-accent: #2196f3;
+    --color-accent-hover: #1976d2;
+
+    /* Priority colors - original scheme */
+    --color-priority-default: #888888;
+    --color-priority-red: #ef4444;
+    --color-priority-orange: #f97316;
+    --color-priority-yellow: #eab308;
+    --color-priority-green: #22c55e;
+    --color-priority-blue: #3b82f6;
+    --color-priority-purple: #a855f7;
+    --color-priority-white: #e5e7eb;
+    --color-priority-black: #1f2937;
+
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
+
+    --radius: 0.375rem;
 }
 
-/* Custom task card styling */
+body {
+    font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+        Arial, sans-serif;
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+}
+
+/* Custom task card styling - matching original */
 .task-card {
-    background-color: white;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    border: 1px solid rgb(229 231 235);
+    background-color: var(--color-bg-secondary);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
     padding: 1rem;
     cursor: pointer;
-    transition: box-shadow 150ms;
+    transition: box-shadow 0.2s;
 }
 
 .task-card:hover {
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    box-shadow: var(--shadow-md);
 }
 
 .task-card.dragging {
@@ -42,43 +57,57 @@
 
 /* Kanban columns */
 .kanban-column {
-    background-color: rgb(249 250 251);
-    border-radius: 0.5rem;
+    background-color: var(--color-bg-secondary);
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
     padding: 1rem;
     min-width: 300px;
 }
 
-/* Priority badges */
+/* Priority badges - matching original colors exactly */
 .badge-priority {
     display: inline-flex;
     align-items: center;
-    padding: 0.125rem 0.625rem;
-    border-radius: 9999px;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.25rem;
     font-size: 0.75rem;
     font-weight: 500;
+    color: white;
 }
 
 .badge-priority.Red {
-    background-color: rgb(254 226 226);
-    color: rgb(153 27 27);
+    background-color: var(--color-priority-red);
 }
 
 .badge-priority.Orange {
-    background-color: rgb(255 237 213);
-    color: rgb(154 52 18);
+    background-color: var(--color-priority-orange);
 }
 
 .badge-priority.Yellow {
-    background-color: rgb(254 249 195);
-    color: rgb(133 77 14);
+    background-color: var(--color-priority-yellow);
 }
 
 .badge-priority.Green {
-    background-color: rgb(220 252 231);
-    color: rgb(22 101 52);
+    background-color: var(--color-priority-green);
+}
+
+.badge-priority.Blue {
+    background-color: var(--color-priority-blue);
+}
+
+.badge-priority.Purple {
+    background-color: var(--color-priority-purple);
+}
+
+.badge-priority.White {
+    background-color: var(--color-priority-white);
+    color: var(--color-text-primary);
+}
+
+.badge-priority.Black {
+    background-color: var(--color-priority-black);
 }
 
 .badge-priority.Default {
-    background-color: rgb(243 244 246);
-    color: rgb(31 41 55);
+    background-color: var(--color-priority-default);
 }
