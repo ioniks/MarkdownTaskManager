@@ -1454,26 +1454,27 @@ function App() {
 
       {/* Task Detail Modal */}
       <Dialog open={showTaskModal} onOpenChange={setShowTaskModal}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[80%] max-w-[900px] max-h-[90vh] overflow-y-auto">
           {currentDetailTask && (
             <>
-              <DialogHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <span className="text-xs font-mono text-gray-500 font-medium mb-2 block">
-                      {currentDetailTask.id}
-                    </span>
-                    <DialogTitle className="text-2xl">
-                      {currentDetailTask.title}
-                    </DialogTitle>
-                  </div>
+              <DialogHeader className="border-b pb-4 mb-6">
+                <div className="flex items-start justify-between mb-4">
+                  <h2 className="text-xl font-semibold">
+                    {t("taskDetail.title")}
+                  </h2>
                   <button
                     onClick={closeTaskDetail}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
                   >
-                    <X className="h-6 w-6" />
+                    ×
                   </button>
                 </div>
+                <div className="inline-block bg-blue-500 text-white px-3 py-1 rounded text-sm font-semibold mb-4">
+                  {currentDetailTask.id}
+                </div>
+                <h3 className="text-2xl font-normal mb-0">
+                  {currentDetailTask.title}
+                </h3>
               </DialogHeader>
 
               <div className="space-y-6">
