@@ -1334,4 +1334,473 @@ open ~/tools/task-manager.html
 
 ---
 
+## 👨‍💻 Developer Documentation
+
+### Architecture Overview
+
+This project has been completely rewritten using **React** for better maintainability and developer experience, while still outputting a single, standalone HTML file.
+
+**Key Technologies:**
+- **React 18** - Modern UI framework with hooks
+- **Vite** - Lightning-fast build tool
+- **Lucide React** - Consistent icon system
+- **Tailwind CSS** - Utility-first styling
+- **DOMPurify** - XSS protection for markdown rendering
+
+**Build Output:**
+- Single `dist/index.html` file (~380KB)
+- All JavaScript and CSS inlined
+- No external dependencies at runtime
+- Works offline without any server
+
+### Project Structure
+
+```
+MarkdownTaskManager/
+├── src/
+│   ├── App.jsx                 # Main application component
+│   ├── main.jsx                # React entry point
+│   ├── style.css               # Global styles with theme system
+│   ├── components/
+│   │   └── ui/                 # Reusable UI components
+│   │       ├── button.jsx
+│   │       ├── dialog.jsx
+│   │       ├── input.jsx
+│   │       ├── select.jsx
+│   │       └── ...
+│   ├── utils/
+│   │   ├── fileSystem.js       # File System Access API wrapper
+│   │   ├── fileWatcher.js      # Live file watching & sync
+│   │   ├── markdown.js         # Markdown parsing & generation
+│   │   └── translations.js     # i18n system
+│   └── theme/
+│       └── index.js            # Global theme configuration
+├── dist/
+│   └── index.html              # Built single-file app
+├── vite.config.js              # Vite configuration
+├── package.json                # Dependencies
+└── README.md                   # This file
+```
+
+### Getting Started as a Developer
+
+#### Prerequisites
+
+- **Node.js** 18+ (LTS recommended)
+- **npm** 9+ (comes with Node.js)
+- Compatible browser: Chrome 86+, Edge 86+, or Opera 72+
+
+#### Clone and Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/gribdesbois/markdown-task-manager.git
+cd MarkdownTaskManager
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+The app will open at `http://localhost:5173` with hot module replacement (HMR).
+
+#### Development Workflow
+
+```bash
+# Start dev server with HMR
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Lint code
+npm run lint
+```
+
+### Key Features & Implementation
+
+#### 1. Automatic Task Reorganization
+
+**Feature:** Tasks automatically move to the correct section when the `**Status**` field is changed in the markdown file.
+
+**How it works:**
+```javascript
+// In src/utils/markdown.js
+const statusMatch = content.match(/\*\*Status\*\*:\s*(\S+)/i);
+if (statusMatch) {
+  const parsedStatus = statusMatch[1].toLowerCase().trim();
+  
+  if (parsedStatus !== status) {
+    // Mark task for reorganization
+    task._needsReorganization = true;
+    task.status = parsedStatus;
+  }
+}
+```
+
+**Benefits:**
+- Reuses existing drag-drop logic for consistency
+- Works on initial load and external file changes
+- Saves AI tokens by avoiding manual moves
+- Prevents infinite loops with content tracking
+
+**Implementation details:**
+- Detection happens during markdown parsing (`parseMarkdown()`)
+- Reorganization triggers a file save with updated task positions
+- File watcher ignores self-generated saves via `setCurrentContent()`
+
+#### 2. Live File Watching
+
+**Feature:** The app watches for external changes to markdown files and syncs automatically.
+
+**Implementation:**
+```javascript
+// In src/utils/fileWatcher.js
+setInterval(async () => {
+  const file = await fileHandle.getFile();
+  const newContent = await file.text();
+  
+  if (newContent !== currentContent) {
+    onExternalChange(newContent);
+  }
+}, 2000); // Check every 2 seconds
+```
+
+**Key considerations:**
+- Polling interval: 2 seconds (balance between responsiveness and performance)
+- Content comparison prevents false positives
+- Cleanup on unmount prevents memory leaks
+- Auto-save disabled during external change processing
+
+#### 3. Security: XSS Protection
+
+**Feature:** Markdown notes are sanitized before rendering to prevent XSS attacks.
+
+**Implementation:**
+```javascript
+// In src/utils/markdown.js
+import DOMPurify from 'dompurify';
+
+function markdownToHtml(markdown) {
+  // ... markdown conversion ...
+  
+  // Sanitize before returning
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['h1', 'h2', 'h3', 'p', 'strong', 'em', 'code', 'pre', 'ul', 'li', 'a', 'br'],
+    ALLOWED_ATTR: ['href', 'target', 'class']
+  });
+}
+```
+
+**Why it matters:**
+- User-generated content could contain malicious scripts
+- DOMPurify removes dangerous HTML/JS while preserving formatting
+- Whitelist approach (only allow safe tags/attributes)
+
+### Adding New Features
+
+#### Creating a New Component
+
+```jsx
+// src/components/ui/my-component.jsx
+import * as React from "react";
+import { cn } from "../../lib/utils";
+
+export function MyComponent({ className, children, ...props }) {
+  return (
+    <div className={cn("my-base-classes", className)} {...props}>
+      {children}
+    </div>
+  );
+}
+```
+
+#### Adding a New Utility Function
+
+```javascript
+// src/utils/myUtility.js
+export function myFunction(param) {
+  // Implementation
+  return result;
+}
+
+// In App.jsx
+import { myFunction } from "./utils/myUtility";
+```
+
+#### Extending the Theme
+
+```css
+/* src/style.css */
+:root {
+  --my-custom-color: #3b82f6;
+  --my-spacing: 1rem;
+}
+
+.my-component {
+  color: var(--my-custom-color);
+  padding: var(--my-spacing);
+}
+```
+
+### Building for Production
+
+```bash
+# Build the single HTML file
+npm run build
+
+# Output: dist/index.html (~380KB)
+```
+
+The build process:
+1. Vite bundles all React components
+2. Inlines all JavaScript into the HTML
+3. Inlines all CSS styles
+4. Optimizes and minifies everything
+5. Outputs a single, standalone file
+
+**Configuration:** See `vite.config.js` for the `vitejs-plugin-singlefile` setup.
+
+### Testing Your Changes
+
+#### Manual Testing Checklist
+
+- [ ] Create a test folder with `kanban.md` and `archive.md`
+- [ ] Open the built `dist/index.html` in browser
+- [ ] Grant file system permissions
+- [ ] Test all CRUD operations on tasks
+- [ ] Test drag-and-drop between columns
+- [ ] Test filters (tags, categories, users, priority)
+- [ ] Edit markdown file externally and verify live sync
+- [ ] Change a task's `**Status**` field and verify auto-reorganization
+- [ ] Test archiving and restoring tasks
+- [ ] Verify no console errors
+- [ ] Test on Chrome, Edge, and Opera
+
+#### Performance Testing
+
+```bash
+# Check build size
+ls -lh dist/index.html
+
+# Test with large datasets
+# Create a kanban.md with 500+ tasks and test responsiveness
+```
+
+### Common Issues & Solutions
+
+#### Issue: File watcher not detecting changes
+
+**Solution:** Check that cleanup is working:
+```javascript
+useEffect(() => {
+  return () => {
+    fileWatcher.stopFileWatcher();
+  };
+}, [kanbanFileHandle]);
+```
+
+#### Issue: Infinite loop when saving
+
+**Solution:** Always update file watcher content after save:
+```javascript
+await writable.write(markdown);
+await writable.close();
+fileWatcher.setCurrentContent(markdown); // Critical!
+```
+
+#### Issue: React state not updating
+
+**Solution:** Use functional updates and deep cloning:
+```javascript
+setTasks(prev => {
+  const newTasks = prev.map(task => ({
+    ...task,
+    subtasks: task.subtasks.map(st => ({ ...st }))
+  }));
+  return newTasks;
+});
+```
+
+### Contributing Guidelines
+
+#### Code Style
+
+- Use **functional components** with hooks (no class components)
+- Use **arrow functions** for consistency
+- Keep components **small and focused** (< 200 lines)
+- Use **meaningful variable names**
+- Add **comments for complex logic**
+- Follow **existing patterns** in the codebase
+
+#### Git Workflow
+
+```bash
+# Create a feature branch
+git checkout -b feature/my-feature
+
+# Make changes and commit
+git add .
+git commit -m "feat: Add my feature
+
+- Detailed description
+- What was changed
+- Why it was changed"
+
+# Push and create PR
+git push origin feature/my-feature
+```
+
+#### Commit Message Format
+
+Follow conventional commits:
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+**Types:**
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation only
+- `style`: Formatting, no code change
+- `refactor`: Code change that neither fixes nor adds
+- `perf`: Performance improvement
+- `test`: Adding tests
+- `chore`: Build process, dependencies
+
+**Example:**
+```
+feat(auto-reorganization): Implement status-based task movement
+
+- Parse Status field from markdown tasks
+- Compare with section location
+- Automatically save file to reorganize tasks
+- Prevent infinite loops with content tracking
+
+Fixes #42
+```
+
+#### Pull Request Checklist
+
+- [ ] Code follows project style guidelines
+- [ ] Commit messages are clear and follow convention
+- [ ] Changes are tested manually
+- [ ] No console errors or warnings
+- [ ] Build succeeds (`npm run build`)
+- [ ] Documentation updated if needed
+- [ ] PR description explains what and why
+
+### Debugging Tips
+
+#### Enable React DevTools
+
+Install the React DevTools browser extension for component inspection and profiling.
+
+#### Debug File System Operations
+
+```javascript
+// Add detailed logging
+console.log('📁 File handle:', fileHandle);
+console.log('📝 Content:', await file.text());
+console.log('✍️ Writing:', markdown);
+```
+
+#### Debug Markdown Parsing
+
+```javascript
+// In parseMarkdown()
+console.log('Input markdown:', content);
+console.log('Parsed tasks:', tasks);
+console.log('Parsed config:', config);
+```
+
+#### Debug State Updates
+
+```javascript
+// Use useEffect to log state changes
+useEffect(() => {
+  console.log('Tasks updated:', tasks);
+}, [tasks]);
+```
+
+### Architecture Decisions
+
+#### Why React over Vanilla JS?
+
+- **Component reusability**: UI components can be easily reused
+- **State management**: React's hooks provide clean state handling
+- **Developer experience**: Modern tooling, HMR, better debugging
+- **Maintainability**: Easier to understand and modify
+- **Community**: Large ecosystem of libraries and tools
+
+#### Why Single HTML File?
+
+- **Portability**: Easy to distribute and use
+- **Simplicity**: No server setup, no dependencies
+- **Offline**: Works completely offline
+- **Version control**: Single file is easy to track in Git
+
+#### Why Lucide Icons?
+
+- **Consistency**: All icons from same family
+- **React integration**: First-class React components
+- **Size**: Tree-shakeable (only include used icons)
+- **Quality**: Professional, well-designed icons
+
+### Performance Optimizations
+
+The app implements several performance optimizations:
+
+1. **Memoization**:
+   ```javascript
+   const filteredTasks = useMemo(() => {
+     // Expensive filtering logic
+   }, [tasks, filters]);
+   ```
+
+2. **useCallback** for functions passed as props:
+   ```javascript
+   const handleClick = useCallback(() => {
+     // Handler logic
+   }, [dependencies]);
+   ```
+
+3. **Debounced search**:
+   ```javascript
+   useEffect(() => {
+     const timer = setTimeout(() => {
+       setDebouncedSearchTerm(globalSearchTerm);
+     }, 300);
+     return () => clearTimeout(timer);
+   }, [globalSearchTerm]);
+   ```
+
+4. **Lazy state updates**:
+   ```javascript
+   // Batch updates automatically in React 18
+   setTasks(newTasks);
+   setConfig(newConfig);
+   ```
+
+### Resources
+
+- **React Documentation**: https://react.dev/
+- **Vite Documentation**: https://vitejs.dev/
+- **File System Access API**: https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API
+- **Lucide Icons**: https://lucide.dev/
+- **Tailwind CSS**: https://tailwindcss.com/
+- **DOMPurify**: https://github.com/cure53/DOMPurify
+
+---
+
 **🎉 You're ready! Start organizing your tasks now.**
