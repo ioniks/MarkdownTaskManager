@@ -138,70 +138,108 @@ select:focus {
     box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
 }
 
-/* Priority badges - matching original colors exactly */
-.badge-priority {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.75rem;
-    border-radius: 0.25rem;
+/* Badge base styling */
+.badge {
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
     font-size: 0.75rem;
     font-weight: 500;
-    color: white;
+    display: inline-flex;
+    align-items: center;
 }
 
-.badge-priority.Red {
-    background-color: var(--priority-red) !important;
+/* Priority badges - matching original colors exactly */
+.badge-priority {
     color: white !important;
-}
-
-.badge-priority.Orange {
-    background-color: var(--priority-orange) !important;
-    color: white !important;
-}
-
-.badge-priority.Yellow {
-    background-color: var(--priority-yellow) !important;
-    color: white !important;
-}
-
-.badge-priority.Green {
-    background-color: var(--priority-green) !important;
-    color: white !important;
-}
-
-.badge-priority.Blue {
-    background-color: var(--priority-blue) !important;
-    color: white !important;
-}
-
-.badge-priority.Purple {
-    background-color: var(--priority-purple) !important;
-    color: white !important;
-}
-
-.badge-priority.White {
-    background-color: var(--priority-white) !important;
-    color: var(--text-primary) !important;
-}
-
-.badge-priority.Black {
-    background-color: var(--priority-black) !important;
-    color: white !important;
+    background: var(--priority-default) !important;
+    padding: 0.25rem 0.6rem !important;
+    border-radius: 4px !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
 }
 
 .badge-priority.Default {
     background-color: var(--priority-default) !important;
-    color: white !important;
 }
 
-/* General badge styling */
-[class*="badge"],
-[class*="Badge"] {
-    background-color: var(--bg-primary) !important;
-    color: var(--text-primary) !important;
-    border-radius: 0.25rem;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
+.badge-priority.Red {
+    background-color: var(--priority-red) !important;
+}
+
+.badge-priority.Orange {
+    background-color: var(--priority-orange) !important;
+}
+
+.badge-priority.Yellow {
+    background-color: var(--priority-yellow) !important;
+}
+
+.badge-priority.Green {
+    background-color: var(--priority-green) !important;
+}
+
+.badge-priority.Blue {
+    background-color: var(--priority-blue) !important;
+}
+
+.badge-priority.Purple {
+    background-color: var(--priority-purple) !important;
+}
+
+.badge-priority.White {
+    background-color: var(--priority-white) !important;
+    color: #1f2937 !important;
+}
+
+.badge-priority.Black {
+    background-color: var(--priority-black) !important;
+}
+
+/* Category badges - light blue background */
+.badge-category {
+    background-color: #e3f2fd !important;
+    color: #1565c0 !important;
+    padding: 0.25rem 0.6rem !important;
+    border-radius: 4px !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+}
+
+/* Assignee badges - light purple background */
+.badge-assignee {
+    background-color: #f3e5f5 !important;
+    color: #6a1b9a !important;
+    padding: 0.25rem 0.6rem !important;
+    border-radius: 4px !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+}
+
+/* Tags - orange background */
+.tag {
+    background-color: #fff3e0 !important;
+    color: #e65100 !important;
+    padding: 0.2rem 0.5rem !important;
+    border-radius: 3px !important;
+    font-size: 0.7rem !important;
+    font-weight: 500 !important;
+}
+
+/* Progress bar for subtasks */
+.progress-bar {
+    width: 100%;
+    height: 4px;
+    background-color: var(--border-color);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: var(--accent) !important;
+    border-radius: 2px;
+    transition: width 0.3s ease;
 }
 
 /* Text colors */
