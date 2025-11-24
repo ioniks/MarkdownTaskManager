@@ -22,33 +22,23 @@ async function performSave(fileHandle, content) {
   if (!fileHandle) return;
 
   try {
-    console.log("💾 Performing save...");
-
     // Mark that we're saving (for dev server reload detection)
     sessionStorage.setItem("justSaved", Date.now().toString());
 
-    console.log("📝 Generated markdown content, length:", content.length);
-
     const writable = await fileHandle.createWritable();
-    console.log("✍️ Got writable stream");
 
     await writable.write(content);
-    console.log("💾 Written content");
 
     await writable.close();
-    console.log("🔒 Closed writable stream");
 
     currentKanbanContent = content;
 
     // Update last save timestamp to ignore this change in file watcher
     lastSaveTimestamp = Date.now();
 
-    console.log("✅ Save completed successfully");
-
     // Clear the flag after a short delay
     setTimeout(() => {
       sessionStorage.removeItem("justSaved");
-      console.log("🟢 justSaved flag cleared");
     }, 500);
 
     return true;
@@ -66,14 +56,12 @@ function autoSave(fileHandle, generateContent) {
 
   // Don't save while applying external changes
   if (isApplyingExternalChanges) {
-    console.log("⏭️ Skipping autoSave (applying external changes)");
     return;
   }
 
   // Clear any existing timer
   if (autoSaveTimer) {
     clearTimeout(autoSaveTimer);
-    console.log("⏱️ AutoSave debounced (waiting for more changes...)");
   } else {
     console.log("🔵 AutoSave scheduled...");
   }
@@ -88,14 +76,6 @@ function autoSave(fileHandle, generateContent) {
 
 // Smart update function that only modifies changed tasks
 function applyExternalChanges(oldTasks, newTasks, callbacks) {
-  console.log(
-    "🔍 Analyzing changes:",
-    oldTasks.length,
-    "old tasks,",
-    newTasks.length,
-    "new tasks",
-  );
-
   // Create maps for quick lookup
   const oldTasksMap = new Map(oldTasks.map((t) => [t.id, t]));
   const newTasksMap = new Map(newTasks.map((t) => [t.id, t]));
@@ -108,7 +88,6 @@ function applyExternalChanges(oldTasks, newTasks, callbacks) {
   // Find tasks that were removed (in old but not in new)
   for (const oldTask of oldTasks) {
     if (!newTasksMap.has(oldTask.id)) {
-      console.log("🗑️ Removing task:", oldTask.id);
       if (callbacks.onTaskRemoved) {
         callbacks.onTaskRemoved(oldTask);
       }
@@ -122,7 +101,6 @@ function applyExternalChanges(oldTasks, newTasks, callbacks) {
 
     if (!oldTask) {
       // Task was added
-      console.log("➕ Adding new task:", newTask.id);
       if (callbacks.onTaskAdded) {
         callbacks.onTaskAdded(newTask);
       }
@@ -134,20 +112,11 @@ function applyExternalChanges(oldTasks, newTasks, callbacks) {
         JSON.stringify(oldTask) !== JSON.stringify(newTask);
 
       if (statusChanged) {
-        console.log(
-          "↔️ Task moved:",
-          newTask.id,
-          "from",
-          oldTask.status,
-          "to",
-          newTask.status,
-        );
         if (callbacks.onTaskMoved) {
           callbacks.onTaskMoved(newTask, oldTask.status);
         }
         movedCount++;
       } else if (contentChanged) {
-        console.log("✏️ Task content changed:", newTask.id);
         if (callbacks.onTaskUpdated) {
           callbacks.onTaskUpdated(newTask);
         }
@@ -156,18 +125,10 @@ function applyExternalChanges(oldTasks, newTasks, callbacks) {
     }
   }
 
-  console.log(
-    `✅ Changes applied: ${addedCount} added, ${removedCount} removed, ${movedCount} moved, ${updatedCount} updated`,
-  );
-
   // Auto-reorganize: If any task moved due to Status field change, save to reorganize the .md file
   if (movedCount > 0 && callbacks.onReorganizeNeeded) {
-    console.log(
-      "🔄 Status field changes detected, reorganizing markdown file...",
-    );
     setTimeout(() => {
       callbacks.onReorganizeNeeded();
-      console.log("✅ Markdown file reorganized based on Status field changes");
     }, 500); // Small delay to avoid rapid saves
   }
 
@@ -196,15 +157,11 @@ async function checkForExternalChanges(fileHandle, callbacks) {
 
       // If we saved within the last 2 seconds, ignore (it's our change)
       if (timeSinceOurSave < 2000) {
-        console.log(
-          "📝 File change detected, but it was our own save - ignoring",
-        );
         lastCheckedModified = fileModified;
         return;
       }
 
       // External change detected!
-      console.log("🔔 External file change detected!");
       const newContent = await file.text();
 
       // Check if content actually changed
@@ -220,8 +177,6 @@ async function checkForExternalChanges(fileHandle, callbacks) {
           if (callbacks.onExternalChange) {
             callbacks.onExternalChange(newContent);
           }
-
-          console.log("✅ Board updated with external changes");
         } finally {
           // Clear flag after updates complete
           isApplyingExternalChanges = false;
@@ -250,7 +205,6 @@ function stopFileWatcher() {
   if (fileWatcherInterval) {
     clearInterval(fileWatcherInterval);
     fileWatcherInterval = null;
-    console.log("🛑 File watcher stopped");
   }
 }
 

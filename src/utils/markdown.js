@@ -13,13 +13,10 @@ function parseMarkdown(content) {
     tags: [],
   };
 
-  console.log("=== Starting parseMarkdown ===");
-
   // Parse config comment
   const configMatch = content.match(/<!-- Config: Last Task ID: (\d+) -->/);
   if (configMatch) {
     config.lastTaskId = parseInt(configMatch[1]);
-    console.log("Last Task ID:", config.lastTaskId);
   }
 
   // Parse config section
@@ -28,12 +25,10 @@ function parseMarkdown(content) {
   );
   if (configSection) {
     const configText = configSection[1];
-    console.log("Config section found");
 
     // Parse columns
     const columnsMatch = configText.match(/\*\*Columns\*\*:\s*(.+)/);
     if (columnsMatch) {
-      console.log("Raw columns:", columnsMatch[1]);
       config.columns = columnsMatch[1]
         .split("|")
         .map((col) => {
@@ -44,7 +39,6 @@ function parseMarkdown(content) {
           return null;
         })
         .filter(Boolean);
-      console.log("Parsed columns:", config.columns);
     }
 
     // Parse categories
@@ -54,7 +48,6 @@ function parseMarkdown(content) {
         .split(",")
         .map((c) => c.trim())
         .filter(Boolean);
-      console.log("Parsed categories:", config.categories);
     }
 
     // Parse users
@@ -64,7 +57,6 @@ function parseMarkdown(content) {
         .split(",")
         .map((u) => u.trim())
         .filter(Boolean);
-      console.log("Parsed users:", config.users);
     }
 
     // Parse priorities
@@ -74,7 +66,6 @@ function parseMarkdown(content) {
         .split("|")
         .map((p) => p.trim())
         .filter(Boolean);
-      console.log("Parsed priorities:", config.priorities);
     }
 
     // Parse tags
@@ -84,7 +75,6 @@ function parseMarkdown(content) {
         .split(/\s+/)
         .filter((t) => t.startsWith("#"))
         .map((t) => t.replace("#", ""));
-      console.log("Parsed tags:", config.tags);
     }
   }
 
@@ -96,7 +86,6 @@ function parseMarkdown(content) {
       { name: "👀 In Review", id: "in-review" },
       { name: "✅ Done", id: "done" },
     ];
-    console.log("Using default columns");
   }
 
   // Default categories if not found
@@ -141,17 +130,11 @@ function parseMarkdown(content) {
     tasks.push(...columnTasks);
   });
 
-  console.log(`\n=== Total tasks parsed: ${tasks.length} ===`);
-  console.log("Tasks:", tasks.map((t) => `${t.id} (${t.status})`).join(", "));
-
   return { tasks, config };
 }
 
 // Parse tasks from a markdown section (reusable for both kanban and archive)
 function parseTasksFromSection(content, sectionName, statusId) {
-  console.log(
-    `\n--- Parsing section: ${sectionName} (status: ${statusId}) ---`,
-  );
   const tasksFound = [];
 
   // Split by ## to get sections
@@ -167,22 +150,16 @@ function parseTasksFromSection(content, sectionName, statusId) {
   }
 
   if (!sectionContent) {
-    console.log(`Section "${sectionName}" not found or empty`);
     return tasksFound;
   }
 
-  console.log(`Section content length: ${sectionContent.length}`);
-
   // SIMPLE PARSING: Split by ### TASK-
   const taskBlocks = sectionContent.split(/###\s+TASK-/).slice(1); // Skip first empty element
-  console.log(`Found ${taskBlocks.length} task blocks`);
 
-  taskBlocks.forEach((block, index) => {
+  taskBlocks.forEach((block) => {
     // Each block starts with: XXX | Title
     const lines = block.split("\n");
     const firstLine = lines[0].trim();
-
-    console.log(`Block ${index + 1} first line: "${firstLine}"`);
 
     // Extract ID and title from first line
     const pipeIndex = firstLine.indexOf("|");
@@ -197,25 +174,14 @@ function parseTasksFromSection(content, sectionName, statusId) {
         const title = titlePart;
         const taskContent = lines.slice(1).join("\n");
 
-        console.log(`✓ Matched! Parsing task: ${taskId} - ${title}`);
         const task = parseTask(taskId, title, taskContent, statusId);
         if (task) {
           tasksFound.push(task);
-          console.log(
-            `✓ Task added. Total in this section: ${tasksFound.length}`,
-          );
-        } else {
-          console.log(`✗ parseTask returned null`);
         }
-      } else {
-        console.log(`✗ Invalid ID format: "${idPart}"`);
       }
-    } else {
-      console.log(`✗ No pipe character found in first line`);
     }
   });
 
-  console.log(`Total tasks parsed from "${sectionName}": ${tasksFound.length}`);
   return tasksFound;
 }
 
@@ -274,7 +240,6 @@ function parseTask(id, title, content, status) {
     const statusValue = statusMatch[1].toLowerCase();
     if (validStatuses.includes(statusValue)) {
       task.status = statusValue;
-      console.log(`Task ${id}: Using Status field value "${statusValue}"`);
     } else {
       console.warn(
         `Task ${id}: Ignoring invalid Status value "${statusMatch[1]}", using section position`,
@@ -615,7 +580,6 @@ function scheduleStatusReorganization(tasks, config, saveCallback) {
 
   // Set new timer for 2-3 seconds
   statusReorganizationTimer = setTimeout(() => {
-    console.log("Reorganizing tasks based on Status field...");
     const markdown = generateMarkdown(tasks, config);
     saveCallback(markdown);
   }, 2500); // 2.5 seconds delay

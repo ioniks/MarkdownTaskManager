@@ -47,7 +47,6 @@ async function saveDirectoryHandle(handle, customName = null) {
 
     // Check if project already exists
     const existingIndex = projects.findIndex((p) => p.name === projectName);
-    const isNewProject = existingIndex < 0;
 
     // Ask for custom name for new projects if not provided
     const projectDisplayName = customName || projectName;

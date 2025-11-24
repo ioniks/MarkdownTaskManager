@@ -14,7 +14,6 @@ import {
 } from "./components/ui/dialog";
 import { Input } from "./components/ui/input";
 import { Label } from "./components/ui/label";
-import { Badge } from "./components/ui/badge";
 import { Checkbox } from "./components/ui/checkbox";
 import { Select } from "./components/ui/select";
 import { Textarea } from "./components/ui/textarea";
@@ -28,6 +27,10 @@ import {
   Edit,
   Trash2,
   RotateCcw,
+  ArrowDown,
+  ArrowUp,
+  AlertCircle,
+  Type,
 } from "lucide-react";
 
 function App() {
@@ -72,6 +75,12 @@ function App() {
   const [globalSearchTerm, setGlobalSearchTerm] = useState("");
   const [archiveSearchTerm, setArchiveSearchTerm] = useState("");
 
+  // Sort state
+  const [sortConfig, setSortConfig] = useState({
+    mainBoard: { field: "created", direction: "desc" },
+    archive: { field: "completed", direction: "desc" },
+  });
+
   // Notification state
   const [notification, setNotification] = useState({
     show: false,
@@ -106,7 +115,7 @@ function App() {
 
   // Translation helper
   const t = (key, params) => translationSystem.t(key, params);
-
+  5;
   // Initialize
   useEffect(() => {
     translationSystem.initLanguage();
@@ -131,6 +140,26 @@ function App() {
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  // Auto-save when tasks or config changes
+  useEffect(() => {
+    if (kanbanFileHandle && tasks.length >= 0) {
+      const timer = setTimeout(() => {
+        saveFile();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [tasks, config, kanbanFileHandle, saveFile]);
+
+  // Auto-save archive when archivedTasks changes
+  useEffect(() => {
+    if (archiveFileHandle && archivedTasks.length >= 0) {
+      const timer = setTimeout(() => {
+        saveArchive();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [archivedTasks, archiveFileHandle, saveArchive]);
 
   // Load recent projects
   const loadRecentProjects = async () => {
@@ -455,6 +484,15 @@ function App() {
     setTaskFormAssigneesInput("");
     setTaskFormTagsInput("");
     setNewSubtaskText("");
+  };
+
+  // Open task form with pre-filled status
+  const openTaskFormWithStatus = (statusId) => {
+    setIsEditMode(false);
+    setEditingTaskId(null);
+    resetTaskForm();
+    setTaskForm((prev) => ({ ...prev, status: statusId }));
+    setShowTaskFormModal(true);
   };
 
   // Submit task form
@@ -925,25 +963,84 @@ function App() {
       });
     }
 
+    // Apply sorting
+    filtered = sortTasks(filtered, sortConfig.mainBoard);
+
     return filtered;
   };
 
   // Get filtered archived tasks
-  const getFilteredArchivedTasks = (taskList) => {
-    if (!archiveSearchTerm) return taskList;
+  // Sort tasks utility
+  const sortTasks = (taskList, config) => {
+    if (!config || !config.field) return taskList;
 
-    const searchLower = archiveSearchTerm.toLowerCase();
-    return taskList.filter((task) => {
-      return (
-        task.title.toLowerCase().includes(searchLower) ||
-        task.description.toLowerCase().includes(searchLower) ||
-        task.notes.toLowerCase().includes(searchLower) ||
-        task.id.toLowerCase().includes(searchLower) ||
-        task.tags.some((tag) => tag.toLowerCase().includes(searchLower)) ||
-        task.category?.toLowerCase().includes(searchLower) ||
-        task.assignees.some((user) => user.toLowerCase().includes(searchLower))
-      );
+    const sorted = [...taskList].sort((a, b) => {
+      let aVal, bVal;
+
+      switch (config.field) {
+        case "created":
+          aVal = new Date(a.created || 0);
+          bVal = new Date(b.created || 0);
+          break;
+        case "completed":
+          aVal = new Date(a.completed || 0);
+          bVal = new Date(b.completed || 0);
+          break;
+        case "due":
+          aVal = new Date(a.due || "9999-12-31");
+          bVal = new Date(b.due || "9999-12-31");
+          break;
+        case "priority":
+          const priorityOrder = {
+            critical: 4,
+            high: 3,
+            medium: 2,
+            low: 1,
+            "": 0,
+          };
+          aVal = priorityOrder[a.priority?.toLowerCase()] || 0;
+          bVal = priorityOrder[b.priority?.toLowerCase()] || 0;
+          break;
+        case "title":
+          aVal = a.title.toLowerCase();
+          bVal = b.title.toLowerCase();
+          break;
+        default:
+          return 0;
+      }
+
+      if (aVal < bVal) return config.direction === "asc" ? -1 : 1;
+      if (aVal > bVal) return config.direction === "asc" ? 1 : -1;
+      return 0;
     });
+
+    return sorted;
+  };
+
+  const getFilteredArchivedTasks = (taskList) => {
+    let filtered = taskList;
+
+    if (archiveSearchTerm) {
+      const searchLower = archiveSearchTerm.toLowerCase();
+      filtered = filtered.filter((task) => {
+        return (
+          task.title.toLowerCase().includes(searchLower) ||
+          task.description.toLowerCase().includes(searchLower) ||
+          task.notes.toLowerCase().includes(searchLower) ||
+          task.id.toLowerCase().includes(searchLower) ||
+          task.tags.some((tag) => tag.toLowerCase().includes(searchLower)) ||
+          task.category?.toLowerCase().includes(searchLower) ||
+          task.assignees.some((user) =>
+            user.toLowerCase().includes(searchLower),
+          )
+        );
+      });
+    }
+
+    // Apply sorting
+    filtered = sortTasks(filtered, sortConfig.archive);
+
+    return filtered;
   };
 
   // Get column tasks
@@ -998,26 +1095,6 @@ function App() {
     }
   };
 
-  // Get priority badge variant
-  const getPriorityVariant = (priority) => {
-    if (!priority) return "default";
-
-    const priorityLower = priority.toLowerCase();
-    if (
-      priorityLower.includes("critical") ||
-      priorityLower.includes("critique")
-    )
-      return "destructive";
-    if (priorityLower.includes("high") || priorityLower.includes("haute"))
-      return "warning";
-    if (priorityLower.includes("medium") || priorityLower.includes("moyenne"))
-      return "info";
-    if (priorityLower.includes("low") || priorityLower.includes("basse"))
-      return "success";
-
-    return "default";
-  };
-
   // Get subtask progress
   const getSubtaskProgress = (subtasks) => {
     if (!subtasks || subtasks.length === 0) {
@@ -1038,12 +1115,14 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900">
-              {t("header.title")}
-            </h1>
-            <div className="flex items-center gap-3">
+        <div className="max-w-full mx-auto px-6 py-4">
+          <div className="flex items-center justify-between gap-6">
+            {/* Left Section: Branding & Context */}
+            <div className="flex items-center gap-4">
+              <h1 className="text-xl font-bold text-gray-900">
+                {t("header.title")}
+              </h1>
+
               {/* Language Selector */}
               <Select
                 onChange={(e) => {
@@ -1075,10 +1154,10 @@ function App() {
 
               {/* Project Actions */}
               {directoryHandle && (
-                <>
+                <div className="flex items-center gap-1">
                   <Button
                     onClick={renameCurrentProject}
-                    variant="outline"
+                    variant="ghost"
                     size="icon"
                     title={t("header.renameProject")}
                   >
@@ -1087,44 +1166,111 @@ function App() {
 
                   <Button
                     onClick={deleteCurrentProject}
-                    variant="outline"
+                    variant="ghost"
                     size="icon"
                     title={t("header.deleteProject")}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
-                </>
+
+                  <Button
+                    onClick={selectFolder}
+                    variant="ghost"
+                    size="icon"
+                    title={t("header.folder")}
+                  >
+                    <FolderOpen className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* Right Section: Actions & Settings */}
+            <div className="flex items-center gap-2">
+              {!directoryHandle && (
+                <Button onClick={selectFolder} variant="default">
+                  <FolderOpen className="h-4 w-4 mr-2" />
+                  {t("header.folder")}
+                </Button>
               )}
 
-              {/* Folder Button */}
-              <button onClick={selectFolder} className="btn btn-primary">
-                <FolderOpen className="h-4 w-4 mr-2 inline" />
-                {t("header.folder")}
-              </button>
-
-              {/* Action Buttons */}
+              {/* Primary Action - New Task */}
               {directoryHandle && (
                 <>
-                  <button onClick={createTask} className="btn btn-primary">
-                    <Plus className="h-4 w-4 mr-2 inline" />
+                  <Button
+                    onClick={createTask}
+                    variant="default"
+                    size="default"
+                    className="text-white font-medium px-4"
+                    style={{ backgroundColor: "#2196F3" }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.backgroundColor = "#1976D2")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.backgroundColor = "#2196F3")
+                    }
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
                     {t("header.newTask")}
-                  </button>
+                  </Button>
 
-                  <button
+                  <div className="h-6 w-px bg-gray-300" />
+
+                  {/* Secondary Actions */}
+                  <Button
                     onClick={() => setShowArchiveModal(true)}
-                    className="btn btn-secondary"
+                    variant="outline"
+                    size="default"
                   >
-                    <Archive className="h-4 w-4 mr-2 inline" />
+                    <Archive className="h-4 w-4 mr-2" />
                     {t("header.archives")}
-                  </button>
+                  </Button>
 
-                  <button
-                    onClick={() => setShowColumnsModal(true)}
-                    className="btn btn-secondary"
+                  <Button
+                    onClick={() => {
+                      const daysOld = parseInt(
+                        prompt(
+                          "Archive tasks completed more than X days ago:",
+                          "30",
+                        ),
+                      );
+                      if (daysOld && !isNaN(daysOld)) {
+                        const cutoffDate = new Date();
+                        cutoffDate.setDate(cutoffDate.getDate() - daysOld);
+                        const toArchive = tasks.filter(
+                          (t) =>
+                            t.completed && new Date(t.completed) < cutoffDate,
+                        );
+                        toArchive.forEach((task) => archiveTask(task.id));
+                        showNotification(
+                          `Archived ${toArchive.length} tasks older than ${daysOld} days`,
+                          "success",
+                        );
+                      }
+                    }}
+                    variant="outline"
+                    size="default"
                   >
-                    <Settings className="h-4 w-4 mr-2 inline" />
-                    {t("header.columns")}
-                  </button>
+                    Auto-Archive
+                  </Button>
+
+                  <Button
+                    onClick={() => setShowColumnsModal(true)}
+                    variant="ghost"
+                    size="icon"
+                    title={t("header.columns")}
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
+
+                  {/* Task Progress Indicator */}
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg text-sm">
+                    <span className="text-gray-600 font-medium">
+                      {tasks.length > 0
+                        ? `${Math.round((tasks.filter((t) => t.status === "done").length / tasks.length) * 100)}%`
+                        : "0%"}
+                    </span>
+                  </div>
                 </>
               )}
             </div>
@@ -1139,22 +1285,102 @@ function App() {
             {/* Global Search */}
             <div className="flex justify-center mb-4">
               <div className="relative w-full max-w-2xl">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400" />
+                </div>
                 <Input
-                  type="text"
+                  type="search"
                   value={globalSearchTerm}
                   onChange={(e) => setGlobalSearchTerm(e.target.value)}
                   placeholder={t("filters.search")}
-                  className="pl-10 pr-10"
+                  className="pl-10 pr-10 w-full"
                 />
                 {globalSearchTerm && (
-                  <button
-                    onClick={() => setGlobalSearchTerm("")}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <button
+                      onClick={() => setGlobalSearchTerm("")}
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
                 )}
+              </div>
+            </div>
+
+            {/* Sort Controls */}
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <span className="text-sm font-medium text-gray-700">Sort:</span>
+              <div
+                className="inline-flex rounded-lg border border-gray-300"
+                role="group"
+              >
+                <button
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      ...prev,
+                      mainBoard: { field: "created", direction: "desc" },
+                    }))
+                  }
+                  className={`px-3 py-1.5 text-sm font-medium flex items-center gap-1 ${
+                    sortConfig.mainBoard.field === "created" &&
+                    sortConfig.mainBoard.direction === "desc"
+                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <ArrowDown className="h-3 w-3" />
+                  Newest
+                </button>
+                <button
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      ...prev,
+                      mainBoard: { field: "created", direction: "asc" },
+                    }))
+                  }
+                  className={`px-3 py-1.5 text-sm font-medium border-l flex items-center gap-1 ${
+                    sortConfig.mainBoard.field === "created" &&
+                    sortConfig.mainBoard.direction === "asc"
+                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <ArrowUp className="h-3 w-3" />
+                  Oldest
+                </button>
+                <button
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      ...prev,
+                      mainBoard: { field: "priority", direction: "desc" },
+                    }))
+                  }
+                  className={`px-3 py-1.5 text-sm font-medium border-l flex items-center gap-1 ${
+                    sortConfig.mainBoard.field === "priority"
+                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <AlertCircle className="h-3 w-3" />
+                  Priority
+                </button>
+                <button
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      ...prev,
+                      mainBoard: { field: "title", direction: "asc" },
+                    }))
+                  }
+                  className={`px-3 py-1.5 text-sm font-medium border-l flex items-center gap-1 ${
+                    sortConfig.mainBoard.field === "title"
+                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <Type className="h-3 w-3" />
+                  A-Z
+                </button>
               </div>
             </div>
 
@@ -1166,6 +1392,7 @@ function App() {
                   {t("filters.tags")}
                 </Label>
                 <Select
+                  id="tag-filter-select"
                   onChange={(e) => {
                     addFilter("tag", e.target.value);
                     e.target.value = "";
@@ -1179,6 +1406,20 @@ function App() {
                     </option>
                   ))}
                 </Select>
+                <button
+                  onClick={() => {
+                    const selectEl =
+                      document.getElementById("tag-filter-select");
+                    if (selectEl && selectEl.value) {
+                      addFilter("tag", selectEl.value);
+                      selectEl.value = "";
+                    }
+                  }}
+                  className="btn-add-filter"
+                  title="Add tag filter"
+                >
+                  +
+                </button>
               </div>
 
               {/* Category Filter */}
@@ -1187,6 +1428,7 @@ function App() {
                   {t("filters.category")}
                 </Label>
                 <Select
+                  id="category-filter-select"
                   onChange={(e) => {
                     addFilter("category", e.target.value);
                     e.target.value = "";
@@ -1200,6 +1442,21 @@ function App() {
                     </option>
                   ))}
                 </Select>
+                <button
+                  onClick={() => {
+                    const selectEl = document.getElementById(
+                      "category-filter-select",
+                    );
+                    if (selectEl && selectEl.value) {
+                      addFilter("category", selectEl.value);
+                      selectEl.value = "";
+                    }
+                  }}
+                  className="btn-add-filter"
+                  title="Add category filter"
+                >
+                  +
+                </button>
               </div>
 
               {/* User Filter */}
@@ -1208,6 +1465,7 @@ function App() {
                   {t("filters.user")}
                 </Label>
                 <Select
+                  id="user-filter-select"
                   onChange={(e) => {
                     addFilter("user", e.target.value);
                     e.target.value = "";
@@ -1221,6 +1479,20 @@ function App() {
                     </option>
                   ))}
                 </Select>
+                <button
+                  onClick={() => {
+                    const selectEl =
+                      document.getElementById("user-filter-select");
+                    if (selectEl && selectEl.value) {
+                      addFilter("user", selectEl.value);
+                      selectEl.value = "";
+                    }
+                  }}
+                  className="btn-add-filter"
+                  title="Add user filter"
+                >
+                  +
+                </button>
               </div>
 
               {/* Priority Filter */}
@@ -1229,6 +1501,7 @@ function App() {
                   {t("filters.priority")}
                 </Label>
                 <Select
+                  id="priority-filter-select"
                   onChange={(e) => {
                     addFilter("priority", e.target.value);
                     e.target.value = "";
@@ -1242,6 +1515,21 @@ function App() {
                     </option>
                   ))}
                 </Select>
+                <button
+                  onClick={() => {
+                    const selectEl = document.getElementById(
+                      "priority-filter-select",
+                    );
+                    if (selectEl && selectEl.value) {
+                      addFilter("priority", selectEl.value);
+                      selectEl.value = "";
+                    }
+                  }}
+                  className="btn-add-filter"
+                  title="Add priority filter"
+                >
+                  +
+                </button>
               </div>
 
               {/* Clear All Button */}
@@ -1327,140 +1615,168 @@ function App() {
       {/* Kanban Board */}
       {!showWelcome && hasActiveTasks && (
         <div className="max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {config.columns.map((column) => (
-              <div key={column.id} className="bg-gray-100 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-lg text-gray-900">
-                    {column.name}
-                  </h3>
-                  <span className="badge badge-category ml-2">
-                    {getColumnCount(column.id)}
-                  </span>
-                </div>
+          <div className="overflow-x-auto pb-4">
+            <div className="flex gap-6 min-w-min">
+              {config.columns.map((column) => (
                 <div
-                  className="space-y-3 min-h-[200px]"
-                  onDrop={(e) => handleDrop(e, column.id)}
-                  onDragOver={handleDragOver}
+                  key={column.id}
+                  className="bg-gray-100 rounded-lg p-4 flex-shrink-0 w-80"
                 >
-                  {getColumnTasks(column.id).map((task, taskIdx) => (
-                    <Card
-                      key={`${column.id}-${task.id}-${taskIdx}`}
-                      className="cursor-pointer hover:shadow-md transition-shadow"
-                      draggable="true"
-                      onDragStart={(e) => handleDragStart(e, task)}
-                      onDragEnd={handleDragEnd}
-                      onClick={() => showTaskDetail(task)}
-                    >
-                      <CardHeader className="p-4 pb-2">
-                        <div className="flex items-start justify-between">
-                          <span className="text-xs font-mono text-gray-500 font-medium">
-                            {task.id}
-                          </span>
-                          <button
-                            className="task-edit-btn"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openTaskForm(task);
-                            }}
-                            title="Edit task"
-                          >
-                            ✏️
-                          </button>
-                        </div>
-                        <CardTitle className="text-sm font-semibold mt-2 line-clamp-2">
-                          {task.title}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="p-4 pt-2">
-                        {/* Task metadata */}
-                        <div className="flex flex-wrap gap-2 mb-2">
-                          {task.priority && (
-                            <span
-                              className={`badge badge-priority ${task.priority}`}
-                            >
-                              {task.priority}
-                            </span>
-                          )}
-
-                          {task.category && (
-                            <span className="badge badge-category">
-                              {task.category}
-                            </span>
-                          )}
-
-                          {task.assignees.map((assignee) => (
-                            <span
-                              key={assignee}
-                              className="badge badge-assignee"
-                            >
-                              {assignee}
-                            </span>
-                          ))}
-
-                          {task.tags.slice(0, 2).map((tag) => (
-                            <span key={tag} className="tag">
-                              {tag}
-                            </span>
-                          ))}
-                          {task.tags.length > 2 && (
-                            <span className="tag">+{task.tags.length - 2}</span>
-                          )}
-                        </div>
-
-                        {/* Description preview */}
-                        {task.description && (
-                          <p className="text-xs text-gray-600 line-clamp-2 mb-2">
-                            {task.description}
-                          </p>
-                        )}
-
-                        {/* Subtasks progress */}
-                        {task.subtasks && task.subtasks.length > 0 && (
-                          <div className="mt-2">
-                            <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
-                              <span>
-                                {getSubtaskProgress(task.subtasks).completed}/
-                                {getSubtaskProgress(task.subtasks).total}{" "}
-                                subtasks
-                              </span>
-                              <span>
-                                {getSubtaskProgress(task.subtasks).percentage}%
-                              </span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div
-                                className="bg-blue-600 h-2 rounded-full transition-all"
-                                style={{
-                                  width: `${getSubtaskProgress(task.subtasks).percentage}%`,
-                                }}
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-
-                  {/* Empty state */}
-                  {getColumnCount(column.id) === 0 && (
-                    <div className="text-center py-8 text-gray-400 text-sm">
-                      {t("empty.noTasks")}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-lg text-gray-900">
+                        {column.name}
+                      </h3>
+                      <span className="badge badge-category">
+                        {getColumnCount(column.id)}
+                      </span>
                     </div>
-                  )}
+                    <button
+                      onClick={() => openTaskFormWithStatus(column.id)}
+                      className="text-gray-500 hover:text-gray-700 transition-colors"
+                      title="Add task"
+                    >
+                      <Plus className="h-5 w-5" />
+                    </button>
+                  </div>
+                  <div
+                    className="space-y-3 min-h-[200px]"
+                    onDrop={(e) => handleDrop(e, column.id)}
+                    onDragOver={handleDragOver}
+                  >
+                    {getColumnTasks(column.id).map((task, taskIdx) => (
+                      <Card
+                        key={`${column.id}-${task.id}-${taskIdx}`}
+                        className="cursor-pointer hover:shadow-md transition-shadow"
+                        draggable="true"
+                        onDragStart={(e) => handleDragStart(e, task)}
+                        onDragEnd={handleDragEnd}
+                        onClick={() => showTaskDetail(task)}
+                      >
+                        <CardHeader className="p-4 pb-2">
+                          <div className="flex items-start justify-between">
+                            <span className="text-xs font-mono text-gray-500 font-medium">
+                              {task.id}
+                            </span>
+                            <button
+                              className="task-edit-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openTaskForm(task);
+                              }}
+                              title="Edit task"
+                            >
+                              ✏️
+                            </button>
+                          </div>
+                          <CardTitle className="text-sm font-semibold mt-2 line-clamp-2">
+                            {task.title}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-4 pt-2">
+                          {/* Task metadata */}
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            {task.priority && (
+                              <span
+                                className={`badge badge-priority ${task.priority}`}
+                              >
+                                {task.priority}
+                              </span>
+                            )}
+
+                            {task.category && (
+                              <span className="badge badge-category">
+                                {task.category}
+                              </span>
+                            )}
+
+                            {task.assignees.map((assignee) => (
+                              <span
+                                key={assignee}
+                                className="badge badge-assignee"
+                              >
+                                {assignee}
+                              </span>
+                            ))}
+
+                            {task.tags.slice(0, 2).map((tag) => (
+                              <span key={tag} className="tag">
+                                {tag}
+                              </span>
+                            ))}
+                            {task.tags.length > 2 && (
+                              <span className="tag">
+                                +{task.tags.length - 2}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Description preview */}
+                          {task.description && (
+                            <p className="text-xs text-gray-600 line-clamp-2 mb-2">
+                              {task.description}
+                            </p>
+                          )}
+
+                          {/* Subtasks progress */}
+                          {task.subtasks && task.subtasks.length > 0 && (
+                            <div className="mt-2">
+                              <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                                <span>
+                                  {getSubtaskProgress(task.subtasks).completed}/
+                                  {getSubtaskProgress(task.subtasks).total}{" "}
+                                  subtasks
+                                </span>
+                                <span>
+                                  {getSubtaskProgress(task.subtasks).percentage}
+                                  %
+                                </span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div
+                                  className="bg-blue-600 h-2 rounded-full transition-all"
+                                  style={{
+                                    width: `${getSubtaskProgress(task.subtasks).percentage}%`,
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+
+                    {/* Empty state */}
+                    {getColumnCount(column.id) === 0 && (
+                      <div className="text-center py-8 text-gray-400 text-sm">
+                        {t("empty.noTasks")}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Add task button for this column */}
+                  <Button
+                    onClick={() => openTaskFormWithStatus(column.id)}
+                    variant="outline"
+                    className="w-full mt-3 border-dashed border-2 hover:bg-gray-200"
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Task
+                  </Button>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       )}
 
       {/* Task Detail Modal */}
       <Dialog open={showTaskModal} onOpenChange={setShowTaskModal}>
-        <DialogContent className="w-[80%] max-w-[900px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[80%] max-w-[900px] max-h-[90vh] overflow-hidden flex flex-col">
           {currentDetailTask && (
             <>
-              <DialogHeader className="border-b pb-4 mb-6">
+              <DialogHeader className="pb-4 mb-4 border-b flex-shrink-0">
                 <div className="flex items-start justify-between mb-4">
                   <h2 className="text-xl font-semibold">
                     {t("taskDetail.title")}
@@ -1472,23 +1788,20 @@ function App() {
                     ×
                   </button>
                 </div>
-                <div className="inline-block bg-blue-500 text-white px-3 py-1 rounded text-sm font-semibold mb-4">
-                  {currentDetailTask.id}
-                </div>
                 <h3 className="text-2xl font-normal mb-0">
                   {currentDetailTask.title}
                 </h3>
               </DialogHeader>
 
-              <div className="space-y-6">
+              <div className="space-y-6 overflow-y-auto flex-1 px-1">
                 {/* Metadata Grid */}
-                <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
                   {currentDetailTask.priority && (
                     <div>
-                      <Label className="text-xs text-gray-500">
+                      <Label className="text-sm text-gray-600 mb-2 block">
                         {t("meta.priority")}
                       </Label>
-                      <div className="mt-1">
+                      <div>
                         <span
                           className={`badge badge-priority ${currentDetailTask.priority}`}
                         >
@@ -1499,10 +1812,10 @@ function App() {
                   )}
 
                   <div>
-                    <Label className="text-xs text-gray-500">
+                    <Label className="text-sm text-gray-600 mb-2 block">
                       {t("meta.status")}
                     </Label>
-                    <p className="mt-1 font-medium">
+                    <p className="font-normal">
                       {config.columns.find(
                         (c) => c.id === currentDetailTask.status,
                       )?.name || currentDetailTask.status}
@@ -1511,10 +1824,10 @@ function App() {
 
                   {currentDetailTask.category && (
                     <div>
-                      <Label className="text-xs text-gray-500">
+                      <Label className="text-sm text-gray-600 mb-2 block">
                         {t("meta.category")}
                       </Label>
-                      <p className="mt-1 font-medium">
+                      <p className="font-normal">
                         {currentDetailTask.category}
                       </p>
                     </div>
@@ -1522,38 +1835,19 @@ function App() {
 
                   {currentDetailTask.created && (
                     <div>
-                      <Label className="text-xs text-gray-500">Created</Label>
-                      <p className="mt-1 font-medium">
-                        {currentDetailTask.created}
-                      </p>
+                      <Label className="text-sm text-gray-600 mb-2 block">
+                        Creation date
+                      </Label>
+                      <p className="font-normal">{currentDetailTask.created}</p>
                     </div>
                   )}
-
-                  {currentDetailTask.assignees &&
-                    currentDetailTask.assignees.length > 0 && (
-                      <div className="col-span-2">
-                        <Label className="text-xs text-gray-500">
-                          Assignees
-                        </Label>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {currentDetailTask.assignees.map((assignee) => (
-                            <span
-                              key={assignee}
-                              className="badge badge-assignee"
-                            >
-                              {assignee}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                 </div>
 
                 {/* Tags */}
                 {currentDetailTask.tags &&
                   currentDetailTask.tags.length > 0 && (
                     <div>
-                      <Label className="text-sm font-medium mb-2 block">
+                      <Label className="text-sm text-gray-600 mb-2 block">
                         Tags
                       </Label>
                       <div className="flex flex-wrap gap-2">
@@ -1580,7 +1874,7 @@ function App() {
 
                 {/* Subtasks */}
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">
+                  <Label className="text-sm text-gray-600 mb-3 block">
                     Subtasks (
                     {currentDetailTask.subtasks?.filter((st) => st.completed)
                       .length || 0}
@@ -1588,10 +1882,7 @@ function App() {
                   </Label>
                   <div className="space-y-2 mb-3">
                     {(currentDetailTask.subtasks || []).map((subtask, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg"
-                      >
+                      <div key={idx} className="flex items-center gap-3">
                         <input
                           type="checkbox"
                           checked={subtask.completed}
@@ -1599,15 +1890,15 @@ function App() {
                             toggleSubtask(currentDetailTask.id, idx)
                           }
                           style={{
-                            width: "18px",
-                            height: "18px",
+                            width: "16px",
+                            height: "16px",
                             cursor: "pointer",
                           }}
                         />
                         <span
                           className={`flex-1 ${
                             subtask.completed
-                              ? "line-through text-gray-500"
+                              ? "line-through text-gray-400"
                               : ""
                           }`}
                         >
@@ -1617,17 +1908,10 @@ function App() {
                           onClick={() =>
                             deleteSubtask(currentDetailTask.id, idx)
                           }
-                          style={{
-                            background: "none",
-                            border: "none",
-                            cursor: "pointer",
-                            color: "#e53e3e",
-                            fontSize: "1.1rem",
-                            padding: "0.25rem",
-                          }}
+                          className="text-gray-400 hover:text-gray-600"
                           title="Delete"
                         >
-                          🗑️
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     ))}
@@ -1647,10 +1931,16 @@ function App() {
                     />
                     <button
                       onClick={() => addSubtask(currentDetailTask.id)}
-                      className="btn btn-primary"
+                      className="btn-primary"
+                      style={{
+                        padding: "0.5rem 1rem",
+                        borderRadius: "4px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.25rem",
+                      }}
                     >
-                      <Plus className="h-4 w-4 mr-1 inline" />
-                      Add
+                      + Add
                     </button>
                   </div>
                 </div>
@@ -1658,11 +1948,15 @@ function App() {
                 {/* Notes */}
                 {currentDetailTask.notes && (
                   <div>
-                    <Label className="text-sm font-medium mb-2 block">
+                    <Label className="text-sm text-gray-600 mb-2 block">
                       Notes
                     </Label>
                     <div
-                      className="prose prose-sm max-w-none bg-gray-50 p-4 rounded-lg border-l-4 border-blue-500"
+                      className="prose prose-sm max-w-none text-gray-700"
+                      style={{
+                        fontSize: "0.875rem",
+                        lineHeight: "1.5",
+                      }}
                       dangerouslySetInnerHTML={{
                         __html: markdownParser.markdownToHtml(
                           currentDetailTask.notes,
@@ -1673,40 +1967,69 @@ function App() {
                 )}
               </div>
 
-              <DialogFooter className="flex gap-2 sm:justify-between pt-4 border-t sticky bottom-0 bg-white mt-6 -mx-6 px-6 pb-6">
-                <div className="flex gap-2">
-                  <button
-                    onClick={closeTaskDetail}
-                    className="btn btn-secondary"
-                  >
-                    {t("taskDetail.close")}
-                  </button>
-                  <button
-                    onClick={deleteCurrentTask}
-                    className="btn btn-secondary"
-                    style={{ background: "#ef4444", color: "white" }}
-                  >
-                    <Trash2 className="h-4 w-4 mr-2 inline" />
-                    {t("taskDetail.delete")}
-                  </button>
-                </div>
-                <div className="flex gap-2">
-                  {currentDetailTask &&
-                    currentDetailTask.status !== "archived" && (
-                      <button
-                        onClick={archiveCurrentTask}
-                        className="btn btn-secondary"
-                        style={{ background: "#f59e0b", color: "white" }}
-                      >
-                        <Archive className="h-4 w-4 mr-2 inline" />
-                        {t("taskDetail.archive")}
-                      </button>
-                    )}
-                  <button onClick={editCurrentTask} className="btn btn-primary">
-                    <Edit className="h-4 w-4 mr-2 inline" />
-                    {t("taskDetail.edit")}
-                  </button>
-                </div>
+              <DialogFooter className="flex gap-3 pt-4 mt-4 border-t flex-shrink-0 bg-white">
+                <button
+                  onClick={closeTaskDetail}
+                  className="btn-secondary"
+                  style={{
+                    padding: "0.5rem 1.25rem",
+                    borderRadius: "4px",
+                  }}
+                >
+                  Close
+                </button>
+                <button
+                  onClick={deleteCurrentTask}
+                  style={{
+                    background: "#ef4444",
+                    color: "white",
+                    padding: "0.5rem 1.25rem",
+                    borderRadius: "4px",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: "0.875rem",
+                    fontWeight: 500,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                  }}
+                >
+                  🗑️ Delete
+                </button>
+                {currentDetailTask &&
+                  currentDetailTask.status !== "archived" && (
+                    <button
+                      onClick={archiveCurrentTask}
+                      style={{
+                        background: "#f59e0b",
+                        color: "white",
+                        padding: "0.5rem 1.25rem",
+                        borderRadius: "4px",
+                        border: "none",
+                        cursor: "pointer",
+                        fontSize: "0.875rem",
+                        fontWeight: 500,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                      }}
+                    >
+                      📦 Archive
+                    </button>
+                  )}
+                <button
+                  onClick={editCurrentTask}
+                  className="btn-primary"
+                  style={{
+                    padding: "0.5rem 1.25rem",
+                    borderRadius: "4px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                  }}
+                >
+                  ✏️ Edit
+                </button>
               </DialogFooter>
             </>
           )}
@@ -2003,36 +2326,162 @@ function App() {
               />
             </div>
 
+            {/* Sort Controls */}
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-sm font-medium text-gray-700">Sort:</span>
+              <div
+                className="inline-flex rounded-lg border border-gray-300"
+                role="group"
+              >
+                <button
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      ...prev,
+                      archive: { field: "completed", direction: "desc" },
+                    }))
+                  }
+                  className={`px-3 py-1.5 text-sm font-medium flex items-center gap-1 ${
+                    sortConfig.archive.field === "completed" &&
+                    sortConfig.archive.direction === "desc"
+                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <ArrowDown className="h-3 w-3" />
+                  Recent
+                </button>
+                <button
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      ...prev,
+                      archive: { field: "completed", direction: "asc" },
+                    }))
+                  }
+                  className={`px-3 py-1.5 text-sm font-medium border-l flex items-center gap-1 ${
+                    sortConfig.archive.field === "completed" &&
+                    sortConfig.archive.direction === "asc"
+                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <ArrowUp className="h-3 w-3" />
+                  Oldest
+                </button>
+                <button
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      ...prev,
+                      archive: { field: "priority", direction: "desc" },
+                    }))
+                  }
+                  className={`px-3 py-1.5 text-sm font-medium border-l flex items-center gap-1 ${
+                    sortConfig.archive.field === "priority"
+                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <AlertCircle className="h-3 w-3" />
+                  Priority
+                </button>
+                <button
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      ...prev,
+                      archive: { field: "title", direction: "asc" },
+                    }))
+                  }
+                  className={`px-3 py-1.5 text-sm font-medium border-l flex items-center gap-1 ${
+                    sortConfig.archive.field === "title"
+                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <Type className="h-3 w-3" />
+                  A-Z
+                </button>
+              </div>
+            </div>
+
             <div className="max-h-[500px] overflow-y-auto space-y-3">
               {getFilteredArchivedTasks(archivedTasks).map((task, idx) => (
                 <Card
                   key={`archive-${task.id}-${idx}`}
-                  className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => showTaskDetail(task)}
+                  className="hover:shadow-md transition-shadow"
                 >
-                  <CardHeader className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <span className="text-xs font-mono text-gray-500 font-medium mb-2 block">
-                          {task.id}
-                        </span>
-                        <CardTitle className="text-base">
+                  <div className="p-4">
+                    <div className="flex items-start gap-4">
+                      {/* Task ID Badge */}
+                      <span className="px-3 py-1 text-xs font-mono bg-gray-600 text-white rounded flex-shrink-0">
+                        {task.id}
+                      </span>
+
+                      {/* Task Content */}
+                      <div className="flex-1 min-w-0">
+                        <h3
+                          className="text-base font-semibold mb-2 cursor-pointer hover:text-blue-600"
+                          onClick={() => showTaskDetail(task)}
+                        >
                           {task.title}
-                        </CardTitle>
+                        </h3>
+
+                        {task.description && (
+                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                            {task.description}
+                          </p>
+                        )}
+
+                        {/* Badges */}
+                        <div className="flex flex-wrap gap-2">
+                          {task.priority && (
+                            <span
+                              className={`badge badge-priority ${task.priority}`}
+                            >
+                              {task.priority}
+                            </span>
+                          )}
+
+                          {task.category && (
+                            <span className="badge badge-category">
+                              {task.category}
+                            </span>
+                          )}
+
+                          {task.tags &&
+                            task.tags.length > 0 &&
+                            task.tags.map((tag) => (
+                              <span key={tag} className="tag">
+                                #{tag}
+                              </span>
+                            ))}
+                        </div>
                       </div>
-                      <Button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          restoreArchivedTask(task.id);
-                        }}
-                        variant="outline"
-                        size="sm"
-                      >
-                        <RotateCcw className="h-3 w-3 mr-1" />
-                        {t("action.restore")}
-                      </Button>
+
+                      {/* Action Buttons */}
+                      <div className="flex flex-col gap-2">
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteArchivedTask(task.id);
+                          }}
+                          variant="destructive"
+                          size="sm"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            restoreArchivedTask(task.id);
+                          }}
+                          size="sm"
+                          className="bg-blue-500 hover:bg-blue-600 text-white"
+                        >
+                          <RotateCcw className="h-3 w-3 mr-1" />
+                          {t("action.restore")}
+                        </Button>
+                      </div>
                     </div>
-                  </CardHeader>
+                  </div>
                 </Card>
               ))}
 
@@ -2060,7 +2509,7 @@ function App() {
           </DialogHeader>
 
           <div className="space-y-3">
-            {config.columns.map((column, index) => (
+            {config.columns.map((column) => (
               <div
                 key={column.id}
                 className="flex items-center justify-between bg-gray-50 p-4 rounded-lg"

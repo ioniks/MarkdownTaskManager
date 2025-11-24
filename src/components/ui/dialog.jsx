@@ -7,6 +7,7 @@ const Dialog = ({
   children,
   disableOutsideClick = false,
 }) => {
+  // Handle Escape key
   React.useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape" && open) {
@@ -18,6 +19,31 @@ const Dialog = ({
     return () => document.removeEventListener("keydown", handleEscape);
   }, [open, onOpenChange]);
 
+  // Prevent body scroll when modal is open
+  React.useEffect(() => {
+    if (open) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+
+      // Prevent scrolling
+      document.body.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
+
+      return () => {
+        // Restore scrolling
+        document.body.style.overflow = "";
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+
+        // Restore scroll position
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [open]);
+
   if (!open) return null;
 
   const handleOverlayClick = () => {
@@ -27,9 +53,13 @@ const Dialog = ({
   };
 
   return (
-    <div className="relative z-50">
+    <div className="relative" style={{ zIndex: 1000 }}>
       <DialogOverlay onClick={handleOverlayClick} />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="fixed inset-0 flex items-center justify-center p-4"
+        style={{ zIndex: 1001 }}
+        onClick={handleOverlayClick}
+      >
         {children}
       </div>
     </div>
@@ -41,23 +71,24 @@ const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className,
     )}
-    style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+    style={{ backgroundColor: "rgba(0, 0, 0, 0.5)", zIndex: 1000 }}
     {...props}
   />
 ));
 DialogOverlay.displayName = "DialogOverlay";
 
 const DialogContent = React.forwardRef(
-  ({ className, children, onClose, ...props }, ref) => (
+  ({ className, children, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-lg max-h-[90vh] overflow-y-auto",
+        "fixed left-[50%] top-[50%] grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-white p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-lg max-h-[90vh] overflow-y-auto",
         className,
       )}
+      style={{ zIndex: 1001 }}
       onClick={(e) => e.stopPropagation()}
       {...props}
     >
