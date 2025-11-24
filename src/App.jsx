@@ -1253,10 +1253,9 @@ function App() {
             {/* Active Filters */}
             <div className="flex gap-2 flex-wrap justify-center mt-4 min-h-[32px]">
               {activeFilters.map((filter) => (
-                <Badge
+                <span
                   key={filter.type + filter.value}
-                  variant="info"
-                  className="flex items-center gap-2 px-3 py-1"
+                  className="tag flex items-center gap-2 px-3 py-1"
                 >
                   <span>{getFilterLabel(filter.type, filter.value)}</span>
                   <button
@@ -1265,7 +1264,7 @@ function App() {
                   >
                     <X className="h-3 w-3" />
                   </button>
-                </Badge>
+                </span>
               ))}
             </div>
           </div>
@@ -1331,9 +1330,9 @@ function App() {
                   <h3 className="font-semibold text-lg text-gray-900">
                     {column.name}
                   </h3>
-                  <Badge variant="secondary" className="ml-2">
+                  <span className="badge badge-category ml-2">
                     {getColumnCount(column.id)}
-                  </Badge>
+                  </span>
                 </div>
                 <div
                   className="space-y-3 min-h-[200px]"
@@ -1351,12 +1350,9 @@ function App() {
                     >
                       <CardHeader className="p-4 pb-2">
                         <div className="flex items-start justify-between">
-                          <Badge
-                            variant="outline"
-                            className="text-xs font-mono"
-                          >
+                          <span className="text-xs font-mono text-gray-500 font-medium">
                             {task.id}
-                          </Badge>
+                          </span>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -1377,39 +1373,35 @@ function App() {
                         {/* Task metadata */}
                         <div className="flex flex-wrap gap-2 mb-2">
                           {task.priority && (
-                            <Badge
-                              variant={getPriorityVariant(task.priority)}
-                              className="text-xs"
+                            <span
+                              className={`badge badge-priority ${task.priority}`}
                             >
                               {task.priority}
-                            </Badge>
+                            </span>
                           )}
 
                           {task.category && (
-                            <Badge variant="secondary" className="text-xs">
+                            <span className="badge badge-category">
                               {task.category}
-                            </Badge>
+                            </span>
                           )}
 
                           {task.assignees.map((assignee) => (
-                            <Badge
+                            <span
                               key={assignee}
-                              variant="outline"
-                              className="text-xs"
+                              className="badge badge-assignee"
                             >
                               {assignee}
-                            </Badge>
+                            </span>
                           ))}
 
                           {task.tags.slice(0, 2).map((tag) => (
-                            <Badge key={tag} variant="info" className="text-xs">
+                            <span key={tag} className="tag">
                               {tag}
-                            </Badge>
+                            </span>
                           ))}
                           {task.tags.length > 2 && (
-                            <Badge variant="info" className="text-xs">
-                              +{task.tags.length - 2}
-                            </Badge>
+                            <span className="tag">+{task.tags.length - 2}</span>
                           )}
                         </div>
 
@@ -1468,9 +1460,9 @@ function App() {
               <DialogHeader>
                 <div className="flex items-start justify-between">
                   <div>
-                    <Badge variant="default" className="mb-2">
+                    <span className="text-xs font-mono text-gray-500 font-medium mb-2 block">
                       {currentDetailTask.id}
-                    </Badge>
+                    </span>
                     <DialogTitle className="text-2xl">
                       {currentDetailTask.title}
                     </DialogTitle>
@@ -1493,13 +1485,11 @@ function App() {
                         {t("meta.priority")}
                       </Label>
                       <div className="mt-1">
-                        <Badge
-                          variant={getPriorityVariant(
-                            currentDetailTask.priority,
-                          )}
+                        <span
+                          className={`badge badge-priority ${currentDetailTask.priority}`}
                         >
                           {currentDetailTask.priority}
-                        </Badge>
+                        </span>
                       </div>
                     </div>
                   )}
@@ -1543,9 +1533,12 @@ function App() {
                         </Label>
                         <div className="flex flex-wrap gap-2 mt-1">
                           {currentDetailTask.assignees.map((assignee) => (
-                            <Badge key={assignee} variant="outline">
+                            <span
+                              key={assignee}
+                              className="badge badge-assignee"
+                            >
                               {assignee}
-                            </Badge>
+                            </span>
                           ))}
                         </div>
                       </div>
@@ -1561,9 +1554,9 @@ function App() {
                       </Label>
                       <div className="flex flex-wrap gap-2">
                         {currentDetailTask.tags.map((tag) => (
-                          <Badge key={tag} variant="info">
+                          <span key={tag} className="tag">
                             {tag}
-                          </Badge>
+                          </span>
                         ))}
                       </div>
                     </div>
@@ -1985,9 +1978,9 @@ function App() {
                   <CardHeader className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <Badge variant="outline" className="mb-2">
+                        <span className="text-xs font-mono text-gray-500 font-medium mb-2 block">
                           {task.id}
-                        </Badge>
+                        </span>
                         <CardTitle className="text-base">
                           {task.title}
                         </CardTitle>
