@@ -1589,11 +1589,17 @@ function App() {
                         key={idx}
                         className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg"
                       >
-                        <Checkbox
+                        <input
+                          type="checkbox"
                           checked={subtask.completed}
                           onChange={() =>
                             toggleSubtask(currentDetailTask.id, idx)
                           }
+                          style={{
+                            width: "18px",
+                            height: "18px",
+                            cursor: "pointer",
+                          }}
                         />
                         <span
                           className={`flex-1 ${
@@ -1604,21 +1610,27 @@ function App() {
                         >
                           {subtask.text}
                         </span>
-                        <Button
+                        <button
                           onClick={() =>
                             deleteSubtask(currentDetailTask.id, idx)
                           }
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-red-500 hover:text-red-700"
+                          style={{
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            color: "#e53e3e",
+                            fontSize: "1.1rem",
+                            padding: "0.25rem",
+                          }}
+                          title="Delete"
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                          🗑️
+                        </button>
                       </div>
                     ))}
                   </div>
                   <div className="flex gap-2">
-                    <Input
+                    <input
                       type="text"
                       value={newSubtaskInput}
                       onChange={(e) => setNewSubtaskInput(e.target.value)}
@@ -1628,11 +1640,15 @@ function App() {
                           addSubtask(currentDetailTask.id);
                         }
                       }}
+                      className="flex-1"
                     />
-                    <Button onClick={() => addSubtask(currentDetailTask.id)}>
-                      <Plus className="h-4 w-4 mr-1" />
+                    <button
+                      onClick={() => addSubtask(currentDetailTask.id)}
+                      className="btn btn-primary"
+                    >
+                      <Plus className="h-4 w-4 mr-1 inline" />
                       Add
-                    </Button>
+                    </button>
                   </div>
                 </div>
 
