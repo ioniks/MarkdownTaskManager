@@ -1,28 +1,35 @@
 // Main Alpine.js application component
 document.addEventListener("alpine:init", () => {
+  console.log("Registering taskManager component...");
+
   Alpine.data("taskManager", () => ({
     // Initialization
     async init() {
       console.log("Initializing Task Manager...");
 
-      // Initialize language
-      window.translationSystem.initLanguage();
+      try {
+        // Initialize language
+        window.translationSystem.initLanguage();
 
-      // Initialize stores
-      this.$store.tasks.init();
-      this.$store.ui.init();
-      this.$store.filters.init();
+        // Initialize stores
+        this.$store.tasks.init();
+        this.$store.ui.init();
+        this.$store.filters.init();
 
-      // Try to restore previous directory
-      await this.tryRestorePreviousDirectory();
+        // Try to restore previous directory
+        await this.tryRestorePreviousDirectory();
 
-      // Setup drag and drop
-      this.setupDragAndDrop();
+        // Setup drag and drop
+        this.setupDragAndDrop();
 
-      // Setup global event listeners
-      this.setupEventListeners();
+        // Setup global event listeners
+        this.setupEventListeners();
 
-      console.log("Task Manager initialized");
+        console.log("Task Manager initialized successfully");
+      } catch (error) {
+        console.error("Error during Task Manager initialization:", error);
+        throw error;
+      }
     },
 
     // Computed properties using stores
@@ -480,4 +487,6 @@ document.addEventListener("alpine:init", () => {
       return true;
     },
   }));
+
+  console.log("taskManager component registered successfully");
 });

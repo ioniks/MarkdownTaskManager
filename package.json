@@ -1,0 +1,34 @@
+{
+  "name": "markdowntaskmanager",
+  "version": "1.0.0",
+  "description": "> **[🇫🇷 Version française / French version](./readmeFR.md)**",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "example": "examples"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kepptic/MarkdownTaskManager.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/kepptic/MarkdownTaskManager/issues"
+  },
+  "homepage": "https://github.com/kepptic/MarkdownTaskManager#readme",
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.1.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "vite": "^7.2.4",
+    "vite-plugin-singlefile": "^2.3.0"
+  }
+}

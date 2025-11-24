@@ -8,27 +8,32 @@
         <!-- Styles -->
         <link rel="stylesheet" href="css/styles.css" />
 
-        <!-- Alpine.js -->
-        <script
-            defer
-            src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
-        ></script>
-
         <!-- Utilities (load before Alpine) -->
-        <script src="js/utils/translations.js"></script>
-        <script src="js/utils/fileSystem.js"></script>
-        <script src="js/utils/markdown.js"></script>
-        <script src="js/utils/fileWatcher.js"></script>
+        <script defer src="js/utils/translations.js"></script>
+        <script defer src="js/utils/fileSystem.js"></script>
+        <script defer src="js/utils/markdown.js"></script>
+        <script defer src="js/utils/fileWatcher.js"></script>
 
         <!-- Stores (load before app) -->
-        <script src="js/stores/taskStore.js"></script>
-        <script src="js/stores/uiStore.js"></script>
-        <script src="js/stores/filterStore.js"></script>
+        <script defer src="js/stores/taskStore.js"></script>
+        <script defer src="js/stores/uiStore.js"></script>
+        <script defer src="js/stores/filterStore.js"></script>
 
-        <!-- Main App -->
-        <script src="js/app.js"></script>
+        <!-- Main App (registers component BEFORE Alpine loads) -->
+        <script defer src="js/app.js"></script>
+
+        <!-- Alpine.js (load LAST so component is already registered) -->
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     </head>
-    <body x-data="taskManager()" x-init="init()">
+    <body
+        x-data="taskManager()"
+        @rename-project.window="renameCurrentProject()"
+        @delete-project.window="deleteCurrentProject()"
+        @select-folder.window="selectFolder()"
+        @create-task.window="createTask()"
+        @open-archive.window="$store.ui.openArchive()"
+        @open-columns.window="$store.ui.openColumns()"
+    >
         <!-- Header -->
         <header class="header">
             <div class="header-content">
@@ -86,59 +91,54 @@
                     </template>
 
                     <!-- Project Actions -->
-                    <template x-if="$store.tasks.directoryHandle">
-                        <button
-                            @click="renameCurrentProject()"
-                            class="btn btn-secondary"
-                            style="padding: 0.6rem"
-                            :title="t('header.renameProject')"
-                        >
-                            ✏️
-                        </button>
-                    </template>
+                    <button
+                        x-show="$store.tasks.directoryHandle"
+                        @click="$dispatch('rename-project')"
+                        class="btn btn-secondary"
+                        style="padding: 0.6rem"
+                        :title="t('header.renameProject')"
+                    >
+                        ✏️
+                    </button>
 
-                    <template x-if="$store.tasks.directoryHandle">
-                        <button
-                            @click="deleteCurrentProject()"
-                            class="btn btn-secondary"
-                            style="padding: 0.6rem"
-                            :title="t('header.deleteProject')"
-                        >
-                            🗑️
-                        </button>
-                    </template>
+                    <button
+                        x-show="$store.tasks.directoryHandle"
+                        @click="$dispatch('delete-project')"
+                        class="btn btn-secondary"
+                        style="padding: 0.6rem"
+                        :title="t('header.deleteProject')"
+                    >
+                        🗑️
+                    </button>
 
                     <!-- Folder Button -->
                     <button
-                        @click="selectFolder()"
+                        @click="$dispatch('select-folder')"
                         class="btn btn-primary"
                         x-text="t('header.folder')"
                     ></button>
 
                     <!-- Action Buttons (visible when project loaded) -->
-                    <template x-if="$store.tasks.directoryHandle">
-                        <button
-                            @click="createTask()"
-                            class="btn btn-secondary"
-                            x-text="t('header.newTask')"
-                        ></button>
-                    </template>
+                    <button
+                        x-show="$store.tasks.directoryHandle"
+                        @click="$dispatch('create-task')"
+                        class="btn btn-secondary"
+                        x-text="t('header.newTask')"
+                    ></button>
 
-                    <template x-if="$store.tasks.directoryHandle">
-                        <button
-                            @click="$store.ui.openArchive()"
-                            class="btn btn-secondary"
-                            x-text="t('header.archives')"
-                        ></button>
-                    </template>
+                    <button
+                        x-show="$store.tasks.directoryHandle"
+                        @click="$dispatch('open-archive')"
+                        class="btn btn-secondary"
+                        x-text="t('header.archives')"
+                    ></button>
 
-                    <template x-if="$store.tasks.directoryHandle">
-                        <button
-                            @click="$store.ui.openColumns()"
-                            class="btn btn-secondary"
-                            x-text="t('header.columns')"
-                        ></button>
-                    </template>
+                    <button
+                        x-show="$store.tasks.directoryHandle"
+                        @click="$dispatch('open-columns')"
+                        class="btn btn-secondary"
+                        x-text="t('header.columns')"
+                    ></button>
                 </div>
             </div>
         </header>

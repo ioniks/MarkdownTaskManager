@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Method Check</title>
+    <script defer src="js/utils/translations.js"></script>
+    <script defer src="js/utils/fileSystem.js"></script>
+    <script defer src="js/utils/markdown.js"></script>
+    <script defer src="js/utils/fileWatcher.js"></script>
+    <script defer src="js/stores/taskStore.js"></script>
+    <script defer src="js/stores/uiStore.js"></script>
+    <script defer src="js/stores/filterStore.js"></script>
+    <script defer src="js/app.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body x-data="taskManager()">
+    <h1>Method Existence Check</h1>
+
+    <div style="margin: 20px;">
+        <button @click="console.log('createTask type:', typeof createTask); console.log('createTask:', createTask);">
+            Check createTask
+        </button>
+
+        <button @click="console.log('renameCurrentProject type:', typeof renameCurrentProject); console.log('renameCurrentProject:', renameCurrentProject);">
+            Check renameCurrentProject
+        </button>
+
+        <button @click="console.log('$store.ui.openArchive type:', typeof $store.ui.openArchive); console.log('$store.ui.openArchive:', $store.ui.openArchive);">
+            Check $store.ui.openArchive
+        </button>
+
+        <button @click="console.log('this:', this); console.log('All keys:', Object.keys(this));">
+            Check 'this' scope
+        </button>
+
+        <hr>
+
+        <button x-show="true" @click="console.log('With x-show: createTask type:', typeof createTask);">
+            Check with x-show=true
+        </button>
+
+        <button x-show="false" @click="console.log('With x-show false: createTask type:', typeof createTask);">
+            Check with x-show=false (hidden)
+        </button>
+    </div>
+</body>
+</html>
