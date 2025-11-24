@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
+/* CSS Variables - Original Theme */
 :root {
-    /* Original color scheme from task-manager-old.html */
     --bg-primary: #f5f5f5;
     --bg-secondary: #ffffff;
     --border-color: #e0e0e0;
@@ -9,8 +9,10 @@
     --text-secondary: #757575;
     --accent: #2196f3;
     --accent-hover: #1976d2;
+    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 4px 8px rgba(0, 0, 0, 0.15);
 
-    /* Priority colors - original scheme */
+    /* Priority colors */
     --priority-default: #888888;
     --priority-red: #ef4444;
     --priority-orange: #f97316;
@@ -20,62 +22,79 @@
     --priority-purple: #a855f7;
     --priority-white: #e5e7eb;
     --priority-black: #1f2937;
+}
 
-    /* Shadows */
-    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    --shadow-hover: 0 4px 8px rgba(0, 0, 0, 0.15);
-
-    --radius: 6px;
+/* Global Styles */
+* {
+    box-sizing: border-box;
 }
 
 body {
     font-family:
         -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
         Arial, sans-serif;
-    background-color: var(--bg-primary);
+    background-color: var(--bg-primary) !important;
     color: var(--text-primary);
+    line-height: 1.6;
     margin: 0;
     padding: 0;
 }
 
-/* Override any transparent backgrounds */
 #root {
     background-color: var(--bg-primary);
     min-height: 100vh;
 }
 
 /* Header styling */
-.header,
-header {
+header,
+.header {
     background-color: var(--bg-secondary) !important;
-    border-bottom: 1px solid var(--border-color);
-    box-shadow: var(--shadow);
+    border-bottom: 1px solid var(--border-color) !important;
+    padding: 1rem 2rem !important;
+    box-shadow: var(--shadow) !important;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
-/* Button styling */
+h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Button Styles */
 button {
-    border-radius: var(--radius);
+    border-radius: 6px;
     font-weight: 500;
     transition: all 0.2s;
+    cursor: pointer;
 }
 
+/* Primary buttons - Blue */
 button[class*="bg-blue"],
-button[class*="primary"] {
+button[class*="primary"]:not([class*="secondary"]) {
     background-color: var(--accent) !important;
     color: white !important;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    font-size: 0.9rem;
 }
 
 button[class*="bg-blue"]:hover,
-button[class*="primary"]:hover {
+button[class*="primary"]:not([class*="secondary"]):hover {
     background-color: var(--accent-hover) !important;
     box-shadow: var(--shadow-hover);
 }
 
+/* Secondary buttons */
 button[class*="secondary"],
 button[class*="outline"] {
-    background-color: var(--bg-secondary) !important;
+    background-color: var(--bg-primary) !important;
     color: var(--text-primary) !important;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border-color) !important;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
 }
 
 button[class*="secondary"]:hover,
@@ -83,62 +102,161 @@ button[class*="outline"]:hover {
     background-color: #e8e8e8 !important;
 }
 
-/* Card styling */
-.task-card,
-[class*="card"],
-[class*="Card"] {
-    background-color: var(--bg-secondary) !important;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border-color);
+/* Ghost/Icon buttons */
+button[class*="ghost"] {
+    background: transparent !important;
+    border: none;
 }
 
-.task-card:hover {
-    box-shadow: var(--shadow-hover);
+button[class*="ghost"]:hover {
+    background-color: rgba(0, 0, 0, 0.05) !important;
 }
 
-.task-card.dragging {
-    opacity: 0.5;
+/* Search Input */
+input[type="search"],
+input[placeholder*="Search"] {
+    width: 100%;
+    padding: 0.75rem 3rem 0.75rem 1rem !important;
+    border: 2px solid #cbd5e0 !important;
+    border-radius: 8px !important;
+    font-size: 1rem;
+    background-color: white !important;
 }
 
-/* Kanban columns */
-.kanban-column {
-    background-color: var(--bg-secondary) !important;
-    border-radius: var(--radius);
-    border: 1px solid var(--border-color);
-    padding: 1rem;
-    min-width: 300px;
+input[type="search"]:focus,
+input[placeholder*="Search"]:focus {
+    outline: none;
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
 }
 
-/* Modal/Dialog styling */
-[class*="dialog"],
-[class*="Dialog"],
-[class*="modal"] {
-    background-color: var(--bg-secondary) !important;
-    border-radius: var(--radius);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-}
-
-/* Input styling */
-input,
-textarea,
+/* Select Dropdowns */
 select {
-    background-color: var(--bg-secondary) !important;
-    border: 1px solid var(--border-color) !important;
-    border-radius: var(--radius);
+    padding: 0.5rem !important;
+    border: 1px solid #cbd5e0 !important;
+    border-radius: 4px !important;
+    background-color: white !important;
+    font-size: 0.9rem;
     color: var(--text-primary) !important;
-    padding: 0.5rem;
 }
 
-input:focus,
-textarea:focus,
 select:focus {
     outline: none;
     border-color: var(--accent) !important;
     box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
 }
 
-/* Badge base styling */
+/* Input Fields (general) */
+input,
+textarea {
+    background-color: white !important;
+    border: 2px solid #cbd5e0 !important;
+    border-radius: 6px !important;
+    color: var(--text-primary) !important;
+    padding: 0.5rem !important;
+}
+
+input:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+}
+
+/* Labels */
+label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+/* Kanban Board & Columns */
+.kanban-board {
+    display: flex;
+    gap: 1.5rem;
+    padding: 2rem;
+    overflow-x: auto;
+}
+
+.kanban-column {
+    background-color: var(--bg-secondary) !important;
+    border-radius: 8px !important;
+    padding: 1rem !important;
+    box-shadow: var(--shadow) !important;
+    min-width: 280px;
+    flex: 1 1 0;
+}
+
+/* Task Cards */
+.task-card,
+[class*="Card"] {
+    background-color: white !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 6px !important;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: var(--shadow);
+}
+
+.task-card:hover,
+[class*="Card"]:hover {
+    box-shadow: var(--shadow-hover) !important;
+    transform: translateY(-2px);
+}
+
+.task-card.dragging {
+    opacity: 0.5;
+}
+
+/* Card Headers */
+[class*="CardHeader"] {
+    padding: 1rem !important;
+}
+
+[class*="CardContent"] {
+    padding: 1rem !important;
+}
+
+[class*="CardTitle"] {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+/* Modal/Dialog Styling */
+[class*="dialog"],
+[class*="Dialog"] {
+    background-color: white !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+[class*="DialogOverlay"],
+[class*="overlay"] {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+[class*="DialogContent"] {
+    background-color: white !important;
+    border-radius: 8px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+[class*="DialogTitle"] {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+[class*="DialogHeader"] {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Badge Styles */
 .badge {
     padding: 0.25rem 0.6rem;
     border-radius: 4px;
@@ -148,7 +266,7 @@ select:focus {
     align-items: center;
 }
 
-/* Priority badges - matching original colors exactly */
+/* Priority Badges */
 .badge-priority {
     color: white !important;
     background: var(--priority-default) !important;
@@ -161,41 +279,54 @@ select:focus {
 .badge-priority.Default {
     background-color: var(--priority-default) !important;
 }
-
 .badge-priority.Red {
     background-color: var(--priority-red) !important;
 }
-
 .badge-priority.Orange {
     background-color: var(--priority-orange) !important;
 }
-
 .badge-priority.Yellow {
     background-color: var(--priority-yellow) !important;
 }
-
 .badge-priority.Green {
     background-color: var(--priority-green) !important;
 }
-
 .badge-priority.Blue {
     background-color: var(--priority-blue) !important;
 }
-
 .badge-priority.Purple {
     background-color: var(--priority-purple) !important;
 }
-
 .badge-priority.White {
     background-color: var(--priority-white) !important;
     color: #1f2937 !important;
 }
-
 .badge-priority.Black {
     background-color: var(--priority-black) !important;
 }
 
-/* Category badges - light blue background */
+/* Specific priority names */
+.badge-priority.Medium,
+.badge-priority.Moyenne {
+    background-color: var(--priority-yellow) !important;
+}
+
+.badge-priority.High,
+.badge-priority.Haute {
+    background-color: var(--priority-orange) !important;
+}
+
+.badge-priority.Low,
+.badge-priority.Basse {
+    background-color: var(--priority-green) !important;
+}
+
+.badge-priority.Critical,
+.badge-priority.Critique {
+    background-color: var(--priority-red) !important;
+}
+
+/* Category Badges */
 .badge-category {
     background-color: #e3f2fd !important;
     color: #1565c0 !important;
@@ -205,7 +336,7 @@ select:focus {
     font-weight: 500 !important;
 }
 
-/* Assignee badges - light purple background */
+/* Assignee Badges */
 .badge-assignee {
     background-color: #f3e5f5 !important;
     color: #6a1b9a !important;
@@ -215,7 +346,7 @@ select:focus {
     font-weight: 500 !important;
 }
 
-/* Tags - orange background */
+/* Tags */
 .tag {
     background-color: #fff3e0 !important;
     color: #e65100 !important;
@@ -225,7 +356,7 @@ select:focus {
     font-weight: 500 !important;
 }
 
-/* Progress bar for subtasks */
+/* Progress Bar */
 .progress-bar {
     width: 100%;
     height: 4px;
@@ -242,7 +373,21 @@ select:focus {
     transition: width 0.3s ease;
 }
 
-/* Text colors */
+/* Checkboxes */
+input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid #cbd5e0 !important;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+input[type="checkbox"]:checked {
+    background-color: var(--accent) !important;
+    border-color: var(--accent) !important;
+}
+
+/* Text Colors */
 .text-primary {
     color: var(--text-primary) !important;
 }
@@ -251,13 +396,7 @@ select:focus {
     color: var(--text-secondary) !important;
 }
 
-/* Fix any remaining transparent or wrong backgrounds */
-div[class*="bg-"],
-section[class*="bg-"] {
-    background-color: var(--bg-secondary);
-}
-
-/* Scrollbar styling */
+/* Scrollbar Styling */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -274,4 +413,51 @@ section[class*="bg-"] {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--text-secondary);
+}
+
+/* Utility Overrides */
+.bg-gray-50 {
+    background-color: #fafafa !important;
+}
+
+.bg-white {
+    background-color: white !important;
+}
+
+.border-gray-200 {
+    border-color: var(--border-color) !important;
+}
+
+.text-gray-600 {
+    color: var(--text-secondary) !important;
+}
+
+.text-gray-900 {
+    color: var(--text-primary) !important;
+}
+
+/* Override Tailwind's default colors to match original */
+[class*="bg-"] {
+    background-color: var(--bg-secondary);
+}
+
+/* Ensure proper spacing */
+.gap-2 {
+    gap: 0.5rem;
+}
+
+.gap-4 {
+    gap: 1rem;
+}
+
+.p-4 {
+    padding: 1rem;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+.mt-4 {
+    margin-top: 1rem;
 }
