@@ -20,7 +20,8 @@ description: Use when managing tasks, the system is a Kanban task manager based 
 ```markdown
 ### TASK-XXX | Task title
 
-**Priority**: [Critical|High|Medium|Low] | **Category**: [Value] | **Assigned**: @user1, @user2
+**Priority**: [Critical|High|Medium|Low] | **Category**: [Value] | **Status**: [todo|in-progress|in-review|done]
+**Assigned**: @user1, @user2
 **Created**: YYYY-MM-DD | **Started**: YYYY-MM-DD | **Due**: YYYY-MM-DD | **Finished**: YYYY-MM-DD
 **Tags**: #tag1 #tag2 #tag3
 
@@ -40,6 +41,14 @@ What was done.
 - file.js (lines 42-58)
 ```
 
+**🆕 IMPORTANT: Status Field**
+
+The `**Status**:` field is now **highly recommended** for automatic task reorganization:
+- Must match one of your column IDs (e.g., `todo`, `in-progress`, `in-review`, `done`)
+- When the React app is open, changing this field automatically moves the task
+- Saves AI tokens by eliminating manual section moves
+- Column IDs are defined in the `**Columns**:` configuration (lowercase, hyphenated)
+
 ### ❌ FORBIDDEN
 
 - `## Title` or `### Title` inside a task
@@ -58,12 +67,12 @@ What was done.
 5. Increment counter in `<!-- Config: Last Task ID: XXX -->`
 
 ### 2. Start Work
-1. Move task → "🚀 In Progress" section
+1. Update `**Status**: in-progress` (app will auto-move if open) OR move task → "🚀 In Progress" section
 2. Add `**Started**: YYYY-MM-DD`
 3. Check off subtasks progressively
 
 ### 3. Finish Work
-1. Move → "✅ Done" section
+1. Update `**Status**: done` (app will auto-move if open) OR move → "✅ Done" section
 2. Add `**Finished**: YYYY-MM-DD`
 3. Document in `**Notes**:`:
    - `**Result**:` - What was done
@@ -141,6 +150,7 @@ What was done.
 5. Document result in `**Notes**:`
 6. Reference tasks in commits (`TASK-XXX`)
 7. Leave in "Done" (archive only on user request)
+8. **NEW**: Prefer updating `**Status**:` field instead of manually moving tasks (auto-reorganization!)
 
 ### ❌ NEVER
 
@@ -181,7 +191,8 @@ What was done.
 ```markdown
 ### TASK-001 | Fix login bug
 
-**Priority**: Critical | **Category**: Backend | **Assigned**: @bob
+**Priority**: Critical | **Category**: Backend | **Status**: todo
+**Assigned**: @bob
 **Created**: 2025-01-20 | **Due**: 2025-01-21
 **Tags**: #bug #urgent
 
@@ -196,7 +207,8 @@ Check Redis, related to yesterday's deployment.
 ```markdown
 ### TASK-042 | Notification system
 
-**Priority**: High | **Category**: Backend | **Assigned**: @alice
+**Priority**: High | **Category**: Backend | **Status**: done
+**Assigned**: @alice
 **Created**: 2025-01-15 | **Started**: 2025-01-18 | **Finished**: 2025-01-22
 **Tags**: #feature
 
@@ -303,11 +315,36 @@ Always start by reading `kanban.md` to:
 
 ### Moving Tasks Between Columns
 
-When moving a task:
+**🎉 NEW: Automatic Reorganization!**
+
+The React-based task manager now includes **automatic task reorganization**. This is a game-changer for AI workflows!
+
+**How it works:**
+- When you change the `**Status**:` field in a task, the app automatically moves it to the correct section
+- This happens when the HTML file is open in the browser
+- Uses the same drag-drop logic for consistency
+- Saves AI tokens and context by avoiding manual task moves
+
+**Two Ways to Move Tasks:**
+
+**Option 1: Update Status Field (Recommended - Automatic)**
+Simply change the `**Status**:` field value and let the app reorganize automatically:
+
+```markdown
+### TASK-042 | My task
+**Priority**: High | **Category**: Backend | **Status**: in-progress
+```
+
+The app will detect that `**Status**: in-progress` doesn't match the "📝 To Do" section and automatically move it to "🚀 In Progress".
+
+**Option 2: Manual Move (Traditional)**
+When moving a task manually:
 1. Copy entire task content (from `### TASK-XXX` to blank line before next task)
 2. Paste in target column section
 3. Delete from original location
 4. Update dates accordingly (`**Started**:` or `**Finished**:`)
+
+**⚡ Pro Tip for AI:** Just update the `**Status**:` field! If the user has the app open, it will reorganize automatically. This saves tokens and reduces the chance of formatting errors.
 
 ### Completing Tasks
 
@@ -327,6 +364,21 @@ Only when user explicitly requests archiving:
 2. Append task to "## ✅ Archives" section in `archive.md`
 3. Add separator `---` between archived tasks
 4. Remove task from `kanban.md`
+
+---
+
+## 🚀 React Migration Benefits
+
+The task manager has been migrated to React (December 2025) with significant improvements:
+
+- **Automatic Task Reorganization**: Tasks self-organize when `**Status**:` field changes
+- **Live File Watching**: Detects external edits and syncs automatically (2-second polling)
+- **Token Efficiency**: No need to manually move tasks - just update the Status field!
+- **Single File Output**: Still builds to a single HTML file (~380KB) for portability
+- **Better Security**: XSS protection with DOMPurify for markdown rendering
+- **Modern Architecture**: React hooks, Vite build system, Lucide icons
+
+**Key Advantage for AI**: You can now simply update the `**Status**:` field instead of manually copying and moving tasks between sections. The app handles reorganization automatically when it's open in the browser, saving tokens and reducing formatting errors.
 
 ---
 
