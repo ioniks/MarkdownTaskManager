@@ -1,29 +1,25 @@
-# Documentation files (project-specific, not for upstream)
-AUTO_REORGANIZE_SOLUTION.md
-CONTRIBUTION_PROPOSAL.md
-FINAL_CONTRIBUTION_PLAN.md
-FINAL_IMPLEMENTATION.md
-GITHUB_ISSUE_DRAFT.md
-IMPLEMENTATION_COMPLETE.md
-MERGE_COLUMN_STATUS.md
-MERGE_SUMMARY.md
-QUICK_START.md
-README_CONTRIBUTION.md
-STATUS_FIELD_IMPLEMENTATION.md
-TASK_MANAGER_HTML_CHANGES.md
-
-# Backup files
-*.backup
-*.bak
-*.bak1
-*.bak2
-*.bak3
-*.bak4
-*.bak5
-*.bak6
-*.fix
-
-# System files
-.DS_Store
-Thumbs.db
+# Dependencies
 node_modules/
+package-lock.json
+
+# Build output
+dist/
+
+# Development files
+.DS_Store
+*.log
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+
+# User data (don't commit user's actual task files)
+kanban.md
+archive.md
+
+# Environment
+.env
+.env.local
