@@ -1687,7 +1687,11 @@ function App() {
       </Dialog>
 
       {/* Task Form Modal */}
-      <Dialog open={showTaskFormModal} onOpenChange={setShowTaskFormModal}>
+      <Dialog
+        open={showTaskFormModal}
+        onOpenChange={setShowTaskFormModal}
+        disableOutsideClick={true}
+      >
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
