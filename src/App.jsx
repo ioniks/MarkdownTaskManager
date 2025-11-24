@@ -1654,32 +1654,39 @@ function App() {
                 )}
               </div>
 
-              <DialogFooter className="flex gap-2 sm:justify-between">
+              <DialogFooter className="flex gap-2 sm:justify-between pt-4 border-t">
                 <div className="flex gap-2">
-                  <Button variant="outline" onClick={closeTaskDetail}>
+                  <button
+                    onClick={closeTaskDetail}
+                    className="btn btn-secondary"
+                  >
                     {t("taskDetail.close")}
-                  </Button>
-                  <Button variant="destructive" onClick={deleteCurrentTask}>
-                    <Trash2 className="h-4 w-4 mr-2" />
+                  </button>
+                  <button
+                    onClick={deleteCurrentTask}
+                    className="btn btn-secondary"
+                    style={{ background: "#ef4444", color: "white" }}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2 inline" />
                     {t("taskDetail.delete")}
-                  </Button>
+                  </button>
                 </div>
                 <div className="flex gap-2">
                   {currentDetailTask &&
                     currentDetailTask.status !== "archived" && (
-                      <Button
-                        variant="outline"
+                      <button
                         onClick={archiveCurrentTask}
-                        className="bg-orange-50 hover:bg-orange-100 text-orange-700"
+                        className="btn btn-secondary"
+                        style={{ background: "#f59e0b", color: "white" }}
                       >
-                        <Archive className="h-4 w-4 mr-2" />
+                        <Archive className="h-4 w-4 mr-2 inline" />
                         {t("taskDetail.archive")}
-                      </Button>
+                      </button>
                     )}
-                  <Button variant="default" onClick={editCurrentTask}>
-                    <Edit className="h-4 w-4 mr-2" />
+                  <button onClick={editCurrentTask} className="btn btn-primary">
+                    <Edit className="h-4 w-4 mr-2 inline" />
                     {t("taskDetail.edit")}
-                  </Button>
+                  </button>
                 </div>
               </DialogFooter>
             </>
