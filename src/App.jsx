@@ -3,6 +3,32 @@ import { translationSystem } from "./utils/translations";
 import { fileSystem } from "./utils/fileSystem";
 import { markdownParser } from "./utils/markdown";
 import { fileWatcher } from "./utils/fileWatcher";
+import { Button } from "./components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "./components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "./components/ui/dialog";
+import { Input } from "./components/ui/input";
+import { Label } from "./components/ui/label";
+import { Badge } from "./components/ui/badge";
+import { Checkbox } from "./components/ui/checkbox";
+import { Select } from "./components/ui/select";
+import { Textarea } from "./components/ui/textarea";
+import {
+  Search,
+  X,
+  FolderOpen,
+  Plus,
+  Archive,
+  Settings,
+  Edit,
+  Trash2,
+  RotateCcw,
+} from "lucide-react";
 
 function App() {
   // Language state
@@ -808,11 +834,11 @@ function App() {
   const handleDragStart = (e, task) => {
     setDraggedTask(task);
     e.dataTransfer.effectAllowed = "move";
-    e.currentTarget.classList.add("dragging");
+    e.currentTarget.classList.add("opacity-50");
   };
 
   const handleDragEnd = (e) => {
-    e.currentTarget.classList.remove("dragging");
+    e.currentTarget.classList.remove("opacity-50");
     setDraggedTask(null);
   };
 
@@ -962,44 +988,34 @@ function App() {
       case "tag":
         return `#${value}`;
       case "category":
-        return `📁 ${value}`;
+        return `${value}`;
       case "user":
-        return `👤 ${value}`;
+        return `${value}`;
       case "priority":
-        return `⚡ ${value}`;
+        return `${value}`;
       default:
         return value;
     }
   };
 
-  // Get priority class
-  const getPriorityClass = (priority) => {
-    if (!priority) return "Default";
+  // Get priority badge variant
+  const getPriorityVariant = (priority) => {
+    if (!priority) return "default";
 
-    const iconClasses = translationSystem.priorityIconClasses;
-    const emoji = priority.match(/^(.)/)?.["1"] || "";
-    if (iconClasses[emoji]) {
-      return iconClasses[emoji];
-    }
+    const priorityLower = priority.toLowerCase();
+    if (
+      priorityLower.includes("critical") ||
+      priorityLower.includes("critique")
+    )
+      return "destructive";
+    if (priorityLower.includes("high") || priorityLower.includes("haute"))
+      return "warning";
+    if (priorityLower.includes("medium") || priorityLower.includes("moyenne"))
+      return "info";
+    if (priorityLower.includes("low") || priorityLower.includes("basse"))
+      return "success";
 
-    const textPriorityMap = {
-      Critical: "Red",
-      Critique: "Red",
-      High: "Orange",
-      Haute: "Orange",
-      Medium: "Yellow",
-      Moyenne: "Yellow",
-      Low: "Green",
-      Basse: "Green",
-    };
-
-    for (const [key, color] of Object.entries(textPriorityMap)) {
-      if (priority.toLowerCase().includes(key.toLowerCase())) {
-        return color;
-      }
-    }
-
-    return "Default";
+    return "default";
   };
 
   // Get subtask progress
@@ -1019,203 +1035,142 @@ function App() {
   const hasActiveTasks = tasks.length > 0;
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
-      <header className="header">
-        <div className="header-content">
-          <h1>{t("header.title")}</h1>
-          <div
-            style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}
-          >
-            {/* Language Selector */}
-            <select
-              onChange={(e) => {
-                translationSystem.setLanguage(e.target.value);
-                setCurrentLanguage(e.target.value);
-              }}
-              value={currentLanguage}
-              style={{
-                padding: "0.6rem 1rem",
-                border: "1px solid var(--border-color)",
-                borderRadius: "6px",
-                fontSize: "0.9rem",
-                background: "white",
-                cursor: "pointer",
-              }}
-            >
-              <option value="en">English</option>
-              <option value="fr">Français</option>
-            </select>
-
-            {/* Project Selector */}
-            {showProjectSelector && (
-              <select
-                onChange={(e) => switchProject(e.target.value)}
-                value={getCurrentProjectIndex()}
-                style={{
-                  padding: "0.6rem 1rem",
-                  border: "1px solid var(--border-color)",
-                  borderRadius: "6px",
-                  fontSize: "0.9rem",
-                  background: "white",
-                  cursor: "pointer",
-                  minWidth: "180px",
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-gray-900">
+              {t("header.title")}
+            </h1>
+            <div className="flex items-center gap-3">
+              {/* Language Selector */}
+              <Select
+                onChange={(e) => {
+                  translationSystem.setLanguage(e.target.value);
+                  setCurrentLanguage(e.target.value);
                 }}
+                value={currentLanguage}
+                className="w-32"
               >
-                <option value="">{t("projects.select")}</option>
-                {recentProjects.map((project, index) => (
-                  <option key={index} value={index}>
-                    {project.displayName || project.name}
-                  </option>
-                ))}
-              </select>
-            )}
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+              </Select>
 
-            {/* Project Actions */}
-            {directoryHandle && (
-              <>
-                <button
-                  onClick={renameCurrentProject}
-                  className="btn btn-secondary"
-                  style={{ padding: "0.6rem" }}
-                  title={t("header.renameProject")}
+              {/* Project Selector */}
+              {showProjectSelector && (
+                <Select
+                  onChange={(e) => switchProject(e.target.value)}
+                  value={getCurrentProjectIndex()}
+                  className="w-48"
                 >
-                  ✏️
-                </button>
+                  <option value="">{t("projects.select")}</option>
+                  {recentProjects.map((project, index) => (
+                    <option key={index} value={index}>
+                      {project.displayName || project.name}
+                    </option>
+                  ))}
+                </Select>
+              )}
 
-                <button
-                  onClick={deleteCurrentProject}
-                  className="btn btn-secondary"
-                  style={{ padding: "0.6rem" }}
-                  title={t("header.deleteProject")}
-                >
-                  🗑️
-                </button>
-              </>
-            )}
+              {/* Project Actions */}
+              {directoryHandle && (
+                <>
+                  <Button
+                    onClick={renameCurrentProject}
+                    variant="outline"
+                    size="icon"
+                    title={t("header.renameProject")}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
 
-            {/* Folder Button */}
-            <button onClick={selectFolder} className="btn btn-primary">
-              {t("header.folder")}
-            </button>
+                  <Button
+                    onClick={deleteCurrentProject}
+                    variant="outline"
+                    size="icon"
+                    title={t("header.deleteProject")}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
 
-            {/* Action Buttons */}
-            {directoryHandle && (
-              <>
-                <button onClick={createTask} className="btn btn-secondary">
-                  {t("header.newTask")}
-                </button>
+              {/* Folder Button */}
+              <Button onClick={selectFolder} variant="default">
+                <FolderOpen className="h-4 w-4 mr-2" />
+                {t("header.folder")}
+              </Button>
 
-                <button
-                  onClick={() => setShowArchiveModal(true)}
-                  className="btn btn-secondary"
-                >
-                  {t("header.archives")}
-                </button>
+              {/* Action Buttons */}
+              {directoryHandle && (
+                <>
+                  <Button onClick={createTask} variant="default">
+                    <Plus className="h-4 w-4 mr-2" />
+                    {t("header.newTask")}
+                  </Button>
 
-                <button
-                  onClick={() => setShowColumnsModal(true)}
-                  className="btn btn-secondary"
-                >
-                  {t("header.columns")}
-                </button>
-              </>
-            )}
+                  <Button
+                    onClick={() => setShowArchiveModal(true)}
+                    variant="outline"
+                  >
+                    <Archive className="h-4 w-4 mr-2" />
+                    {t("header.archives")}
+                  </Button>
+
+                  <Button
+                    onClick={() => setShowColumnsModal(true)}
+                    variant="outline"
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    {t("header.columns")}
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </header>
 
       {/* Filter Bar */}
       {directoryHandle && (
-        <div
-          style={{
-            background: "white",
-            borderBottom: "1px solid var(--border-color)",
-            padding: "1rem 0",
-          }}
-        >
-          <div
-            style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 2rem" }}
-          >
+        <div className="bg-white border-b border-gray-200 py-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Global Search */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                marginBottom: "1rem",
-              }}
-            >
-              <div
-                style={{
-                  position: "relative",
-                  maxWidth: "600px",
-                  width: "100%",
-                }}
-              >
-                <input
+            <div className="flex justify-center mb-4">
+              <div className="relative w-full max-w-2xl">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
                   type="text"
                   value={globalSearchTerm}
                   onChange={(e) => setGlobalSearchTerm(e.target.value)}
                   placeholder={t("filters.search")}
-                  style={{
-                    width: "100%",
-                    padding: "0.75rem 3rem 0.75rem 1rem",
-                    border: "2px solid #cbd5e0",
-                    borderRadius: "8px",
-                    fontSize: "1rem",
-                  }}
+                  className="pl-10 pr-10"
                 />
                 {globalSearchTerm && (
                   <button
                     onClick={() => setGlobalSearchTerm("")}
-                    style={{
-                      position: "absolute",
-                      right: "0.5rem",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      background: "none",
-                      border: "none",
-                      color: "#718096",
-                      cursor: "pointer",
-                      fontSize: "1.2rem",
-                      padding: "0.5rem",
-                    }}
-                    title={t("filters.searchClear")}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
-                    ✕
+                    <X className="h-5 w-5" />
                   </button>
                 )}
               </div>
             </div>
 
             {/* Filter Controls */}
-            <div
-              style={{
-                display: "flex",
-                gap: "1rem",
-                alignItems: "center",
-                flexWrap: "wrap",
-                justifyContent: "center",
-              }}
-            >
+            <div className="flex items-center gap-4 flex-wrap justify-center">
               {/* Tag Filter */}
-              <div
-                style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}
-              >
-                <label style={{ fontWeight: "500", fontSize: "0.9rem" }}>
+              <div className="flex items-center gap-2">
+                <Label className="text-sm font-medium">
                   {t("filters.tags")}
-                </label>
-                <select
+                </Label>
+                <Select
                   onChange={(e) => {
                     addFilter("tag", e.target.value);
                     e.target.value = "";
                   }}
-                  style={{
-                    padding: "0.5rem",
-                    border: "1px solid #cbd5e0",
-                    borderRadius: "4px",
-                    minWidth: "150px",
-                  }}
+                  className="w-40"
                 >
                   <option value="">{t("filters.select")}</option>
                   {availableTags.map((tag) => (
@@ -1223,27 +1178,20 @@ function App() {
                       #{tag}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
 
               {/* Category Filter */}
-              <div
-                style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}
-              >
-                <label style={{ fontWeight: "500", fontSize: "0.9rem" }}>
+              <div className="flex items-center gap-2">
+                <Label className="text-sm font-medium">
                   {t("filters.category")}
-                </label>
-                <select
+                </Label>
+                <Select
                   onChange={(e) => {
                     addFilter("category", e.target.value);
                     e.target.value = "";
                   }}
-                  style={{
-                    padding: "0.5rem",
-                    border: "1px solid #cbd5e0",
-                    borderRadius: "4px",
-                    minWidth: "150px",
-                  }}
+                  className="w-40"
                 >
                   <option value="">{t("filters.select")}</option>
                   {availableCategories.map((category) => (
@@ -1251,27 +1199,20 @@ function App() {
                       {category}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
 
               {/* User Filter */}
-              <div
-                style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}
-              >
-                <label style={{ fontWeight: "500", fontSize: "0.9rem" }}>
+              <div className="flex items-center gap-2">
+                <Label className="text-sm font-medium">
                   {t("filters.user")}
-                </label>
-                <select
+                </Label>
+                <Select
                   onChange={(e) => {
                     addFilter("user", e.target.value);
                     e.target.value = "";
                   }}
-                  style={{
-                    padding: "0.5rem",
-                    border: "1px solid #cbd5e0",
-                    borderRadius: "4px",
-                    minWidth: "150px",
-                  }}
+                  className="w-40"
                 >
                   <option value="">{t("filters.select")}</option>
                   {availableUsers.map((user) => (
@@ -1279,27 +1220,20 @@ function App() {
                       {user}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
 
               {/* Priority Filter */}
-              <div
-                style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}
-              >
-                <label style={{ fontWeight: "500", fontSize: "0.9rem" }}>
+              <div className="flex items-center gap-2">
+                <Label className="text-sm font-medium">
                   {t("filters.priority")}
-                </label>
-                <select
+                </Label>
+                <Select
                   onChange={(e) => {
                     addFilter("priority", e.target.value);
                     e.target.value = "";
                   }}
-                  style={{
-                    padding: "0.5rem",
-                    border: "1px solid #cbd5e0",
-                    borderRadius: "4px",
-                    minWidth: "150px",
-                  }}
+                  className="w-40"
                 >
                   <option value="">{t("filters.select")}</option>
                   {availablePriorities.map((priority) => (
@@ -1307,59 +1241,31 @@ function App() {
                       {priority}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
 
               {/* Clear All Button */}
-              <button
-                onClick={clearFilters}
-                className="btn btn-secondary"
-                style={{ padding: "0.5rem 1rem" }}
-              >
+              <Button onClick={clearFilters} variant="outline" size="sm">
                 {t("filters.clearAll")}
-              </button>
+              </Button>
             </div>
 
             {/* Active Filters */}
-            <div
-              style={{
-                display: "flex",
-                gap: "0.5rem",
-                flexWrap: "wrap",
-                minHeight: "32px",
-                justifyContent: "center",
-                marginTop: "1rem",
-              }}
-            >
+            <div className="flex gap-2 flex-wrap justify-center mt-4 min-h-[32px]">
               {activeFilters.map((filter) => (
-                <span
+                <Badge
                   key={filter.type + filter.value}
-                  className="badge"
-                  style={{
-                    background: "#ebf8ff",
-                    color: "#2b6cb0",
-                    padding: "0.25rem 0.75rem",
-                    borderRadius: "12px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                  }}
+                  variant="info"
+                  className="flex items-center gap-2 px-3 py-1"
                 >
                   <span>{getFilterLabel(filter.type, filter.value)}</span>
                   <button
                     onClick={() => removeFilter(filter.type, filter.value)}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: "#2b6cb0",
-                      cursor: "pointer",
-                      padding: "0",
-                      fontWeight: "bold",
-                    }}
+                    className="hover:text-blue-900"
                   >
-                    ✕
+                    <X className="h-3 w-3" />
                   </button>
-                </span>
+                </Badge>
               ))}
             </div>
           </div>
@@ -1368,158 +1274,183 @@ function App() {
 
       {/* Welcome Screen */}
       {showWelcome && (
-        <div className="welcome">
-          <h2>{t("welcome.title")}</h2>
-          <p>{t("welcome.description")}</p>
-          <button
-            onClick={selectFolder}
-            className="btn btn-primary"
-            style={{ fontSize: "1.1rem", padding: "0.8rem 2rem" }}
-          >
-            {t("welcome.start")}
-          </button>
-
-          <div
-            style={{
-              marginTop: "3rem",
-              textAlign: "left",
-              maxWidth: "600px",
-              marginLeft: "auto",
-              marginRight: "auto",
-            }}
-          >
-            <h3>{t("welcome.howItWorks")}</h3>
-            <ol style={{ lineHeight: "1.8", color: "var(--text-secondary)" }}>
-              <li>{t("welcome.step1")}</li>
-              <li>{t("welcome.step2")}</li>
-              <li>{t("welcome.step3")}</li>
-              <li>{t("welcome.step4")}</li>
-              <li>{t("welcome.step5")}</li>
-            </ol>
-            <p style={{ marginTop: "1rem", color: "#e53e3e" }}>
-              {t("welcome.browserWarning")}
+        <div className="flex items-center justify-center min-h-[calc(100vh-200px)] px-4">
+          <div className="text-center max-w-2xl">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              {t("welcome.title")}
+            </h2>
+            <p className="text-xl text-gray-600 mb-8">
+              {t("welcome.description")}
             </p>
+            <Button onClick={selectFolder} size="lg">
+              <FolderOpen className="h-5 w-5 mr-2" />
+              {t("welcome.start")}
+            </Button>
+
+            <div className="mt-12 text-left bg-white rounded-lg p-8 shadow-sm">
+              <h3 className="text-xl font-semibold mb-4">
+                {t("welcome.howItWorks")}
+              </h3>
+              <ol className="space-y-3 text-gray-600">
+                <li className="flex gap-3">
+                  <span className="font-semibold text-gray-900">1.</span>
+                  <span>{t("welcome.step1")}</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="font-semibold text-gray-900">2.</span>
+                  <span>{t("welcome.step2")}</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="font-semibold text-gray-900">3.</span>
+                  <span>{t("welcome.step3")}</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="font-semibold text-gray-900">4.</span>
+                  <span>{t("welcome.step4")}</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="font-semibold text-gray-900">5.</span>
+                  <span>{t("welcome.step5")}</span>
+                </li>
+              </ol>
+              <p className="mt-6 text-red-600 font-medium">
+                {t("welcome.browserWarning")}
+              </p>
+            </div>
           </div>
         </div>
       )}
 
       {/* Kanban Board */}
       {!showWelcome && hasActiveTasks && (
-        <div id="kanbanView">
-          <div className="kanban-board">
+        <div className="max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {config.columns.map((column) => (
-              <div
-                key={column.id}
-                className="kanban-column"
-                data-column-id={column.id}
-              >
-                <div className="column-header">
-                  <div className="column-title">
-                    <span>{column.name}</span>
-                    <span className="column-count">
-                      {getColumnCount(column.id)}
-                    </span>
-                  </div>
+              <div key={column.id} className="bg-gray-100 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-lg text-gray-900">
+                    {column.name}
+                  </h3>
+                  <Badge variant="secondary" className="ml-2">
+                    {getColumnCount(column.id)}
+                  </Badge>
                 </div>
                 <div
-                  className="task-list"
+                  className="space-y-3 min-h-[200px]"
                   onDrop={(e) => handleDrop(e, column.id)}
                   onDragOver={handleDragOver}
                 >
                   {getColumnTasks(column.id).map((task, taskIdx) => (
-                    <div
+                    <Card
                       key={`${column.id}-${task.id}-${taskIdx}`}
-                      className="task-card"
-                      data-task-id={task.id}
+                      className="cursor-pointer hover:shadow-md transition-shadow"
                       draggable="true"
                       onDragStart={(e) => handleDragStart(e, task)}
                       onDragEnd={handleDragEnd}
                       onClick={() => showTaskDetail(task)}
                     >
-                      <div className="task-header">
-                        <span className="task-id">{task.id}</span>
-                        <button
-                          className="task-edit-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openTaskForm(task);
-                          }}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            cursor: "pointer",
-                            fontSize: "1.1rem",
-                            padding: "0.25rem",
-                          }}
-                          title="Edit task"
-                        >
-                          ✏️
-                        </button>
-                      </div>
-                      <div className="task-title">{task.title}</div>
-
-                      {/* Task metadata */}
-                      <div className="task-meta">
-                        {task.priority && (
-                          <span
-                            className={`badge badge-priority ${getPriorityClass(task.priority)}`}
+                      <CardHeader className="p-4 pb-2">
+                        <div className="flex items-start justify-between">
+                          <Badge
+                            variant="outline"
+                            className="text-xs font-mono"
                           >
-                            {task.priority}
-                          </span>
-                        )}
-
-                        {task.category && (
-                          <span className="badge badge-category">
-                            {task.category}
-                          </span>
-                        )}
-
-                        {task.assignees.map((assignee) => (
-                          <span key={assignee} className="badge badge-assignee">
-                            {assignee}
-                          </span>
-                        ))}
-
-                        {task.tags.slice(0, 3).map((tag) => (
-                          <span key={tag} className="tag">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* Description preview */}
-                      {task.description && (
-                        <div className="task-description">
-                          {task.description}
+                            {task.id}
+                          </Badge>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 -mr-2 -mt-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openTaskForm(task);
+                            }}
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
                         </div>
-                      )}
+                        <CardTitle className="text-sm font-semibold mt-2 line-clamp-2">
+                          {task.title}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-2">
+                        {/* Task metadata */}
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {task.priority && (
+                            <Badge
+                              variant={getPriorityVariant(task.priority)}
+                              className="text-xs"
+                            >
+                              {task.priority}
+                            </Badge>
+                          )}
 
-                      {/* Subtasks progress */}
-                      {task.subtasks && task.subtasks.length > 0 && (
-                        <div className="task-subtasks">
-                          <div className="subtask-progress">
-                            <span>
-                              {getSubtaskProgress(task.subtasks).completed}/
-                              {getSubtaskProgress(task.subtasks).total}
-                            </span>
-                            <div className="progress-bar">
+                          {task.category && (
+                            <Badge variant="secondary" className="text-xs">
+                              {task.category}
+                            </Badge>
+                          )}
+
+                          {task.assignees.map((assignee) => (
+                            <Badge
+                              key={assignee}
+                              variant="outline"
+                              className="text-xs"
+                            >
+                              {assignee}
+                            </Badge>
+                          ))}
+
+                          {task.tags.slice(0, 2).map((tag) => (
+                            <Badge key={tag} variant="info" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                          {task.tags.length > 2 && (
+                            <Badge variant="info" className="text-xs">
+                              +{task.tags.length - 2}
+                            </Badge>
+                          )}
+                        </div>
+
+                        {/* Description preview */}
+                        {task.description && (
+                          <p className="text-xs text-gray-600 line-clamp-2 mb-2">
+                            {task.description}
+                          </p>
+                        )}
+
+                        {/* Subtasks progress */}
+                        {task.subtasks && task.subtasks.length > 0 && (
+                          <div className="mt-2">
+                            <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                              <span>
+                                {getSubtaskProgress(task.subtasks).completed}/
+                                {getSubtaskProgress(task.subtasks).total}{" "}
+                                subtasks
+                              </span>
+                              <span>
+                                {getSubtaskProgress(task.subtasks).percentage}%
+                              </span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
                               <div
-                                className="progress-fill"
+                                className="bg-blue-600 h-2 rounded-full transition-all"
                                 style={{
                                   width: `${getSubtaskProgress(task.subtasks).percentage}%`,
                                 }}
                               />
                             </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
+                        )}
+                      </CardContent>
+                    </Card>
                   ))}
 
                   {/* Empty state */}
                   {getColumnCount(column.id) === 0 && (
-                    <div className="empty-state">
-                      <span>{t("empty.noTasks")}</span>
+                    <div className="text-center py-8 text-gray-400 text-sm">
+                      {t("empty.noTasks")}
                     </div>
                   )}
                 </div>
@@ -1530,358 +1461,258 @@ function App() {
       )}
 
       {/* Task Detail Modal */}
-      <div
-        className={`modal ${showTaskModal ? "active" : ""}`}
-        onClick={closeTaskDetail}
-      >
-        {currentDetailTask && (
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>{t("taskDetail.title")}</h2>
-              <button className="close-btn" onClick={closeTaskDetail}>
-                &times;
-              </button>
-            </div>
-
-            <div className="task-detail" style={{ padding: "1.5rem" }}>
-              {/* Task ID Badge */}
-              <div
-                style={{
-                  display: "inline-block",
-                  background: "var(--primary)",
-                  color: "white",
-                  padding: "0.25rem 0.75rem",
-                  borderRadius: "4px",
-                  fontSize: "0.85rem",
-                  fontWeight: "600",
-                  marginBottom: "1rem",
-                }}
-              >
-                <span>{currentDetailTask.id}</span>
-              </div>
-
-              {/* Title */}
-              <h3
-                style={{
-                  margin: "0 0 1.5rem 0",
-                  fontSize: "1.5rem",
-                  color: "var(--text)",
-                }}
-              >
-                {currentDetailTask.title}
-              </h3>
-
-              {/* Metadata Grid */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, 1fr)",
-                  gap: "1rem",
-                  marginBottom: "1.5rem",
-                  padding: "1rem",
-                  background: "var(--bg)",
-                  borderRadius: "8px",
-                }}
-              >
-                {currentDetailTask.priority && (
+      <Dialog open={showTaskModal} onOpenChange={setShowTaskModal}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          {currentDetailTask && (
+            <>
+              <DialogHeader>
+                <div className="flex items-start justify-between">
                   <div>
-                    <div
-                      style={{
-                        fontSize: "0.85rem",
-                        color: "var(--text-secondary)",
-                        marginBottom: "0.25rem",
-                      }}
-                    >
-                      {t("meta.priority")}
+                    <Badge variant="default" className="mb-2">
+                      {currentDetailTask.id}
+                    </Badge>
+                    <DialogTitle className="text-2xl">
+                      {currentDetailTask.title}
+                    </DialogTitle>
+                  </div>
+                  <button
+                    onClick={closeTaskDetail}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
+              </DialogHeader>
+
+              <div className="space-y-6">
+                {/* Metadata Grid */}
+                <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+                  {currentDetailTask.priority && (
+                    <div>
+                      <Label className="text-xs text-gray-500">
+                        {t("meta.priority")}
+                      </Label>
+                      <div className="mt-1">
+                        <Badge
+                          variant={getPriorityVariant(
+                            currentDetailTask.priority,
+                          )}
+                        >
+                          {currentDetailTask.priority}
+                        </Badge>
+                      </div>
                     </div>
-                    <div style={{ fontWeight: "500" }}>
-                      {config.priorities?.find((p) =>
-                        p
-                          .toLowerCase()
-                          .includes(currentDetailTask.priority.toLowerCase()),
-                      ) || currentDetailTask.priority}
+                  )}
+
+                  <div>
+                    <Label className="text-xs text-gray-500">
+                      {t("meta.status")}
+                    </Label>
+                    <p className="mt-1 font-medium">
+                      {config.columns.find(
+                        (c) => c.id === currentDetailTask.status,
+                      )?.name || currentDetailTask.status}
+                    </p>
+                  </div>
+
+                  {currentDetailTask.category && (
+                    <div>
+                      <Label className="text-xs text-gray-500">
+                        {t("meta.category")}
+                      </Label>
+                      <p className="mt-1 font-medium">
+                        {currentDetailTask.category}
+                      </p>
                     </div>
+                  )}
+
+                  {currentDetailTask.created && (
+                    <div>
+                      <Label className="text-xs text-gray-500">Created</Label>
+                      <p className="mt-1 font-medium">
+                        {currentDetailTask.created}
+                      </p>
+                    </div>
+                  )}
+
+                  {currentDetailTask.assignees &&
+                    currentDetailTask.assignees.length > 0 && (
+                      <div className="col-span-2">
+                        <Label className="text-xs text-gray-500">
+                          Assignees
+                        </Label>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {currentDetailTask.assignees.map((assignee) => (
+                            <Badge key={assignee} variant="outline">
+                              {assignee}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                </div>
+
+                {/* Tags */}
+                {currentDetailTask.tags &&
+                  currentDetailTask.tags.length > 0 && (
+                    <div>
+                      <Label className="text-sm font-medium mb-2 block">
+                        Tags
+                      </Label>
+                      <div className="flex flex-wrap gap-2">
+                        {currentDetailTask.tags.map((tag) => (
+                          <Badge key={tag} variant="info">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                {/* Description */}
+                {currentDetailTask.description && (
+                  <div>
+                    <Label className="text-sm font-medium mb-2 block">
+                      Description
+                    </Label>
+                    <p className="text-gray-700 bg-gray-50 p-4 rounded-lg">
+                      {currentDetailTask.description}
+                    </p>
                   </div>
                 )}
 
+                {/* Subtasks */}
                 <div>
-                  <div
-                    style={{
-                      fontSize: "0.85rem",
-                      color: "var(--text-secondary)",
-                      marginBottom: "0.25rem",
-                    }}
-                  >
-                    {t("meta.status")}
-                  </div>
-                  <div style={{ fontWeight: "500" }}>
-                    {config.columns.find(
-                      (c) => c.id === currentDetailTask.status,
-                    )?.name || currentDetailTask.status}
-                  </div>
-                </div>
-
-                {currentDetailTask.category && (
-                  <div>
-                    <div
-                      style={{
-                        fontSize: "0.85rem",
-                        color: "var(--text-secondary)",
-                        marginBottom: "0.25rem",
-                      }}
-                    >
-                      {t("meta.category")}
-                    </div>
-                    <div style={{ fontWeight: "500" }}>
-                      {currentDetailTask.category}
-                    </div>
-                  </div>
-                )}
-
-                {currentDetailTask.created && (
-                  <div>
-                    <div
-                      style={{
-                        fontSize: "0.85rem",
-                        color: "var(--text-secondary)",
-                        marginBottom: "0.25rem",
-                      }}
-                    >
-                      Creation date
-                    </div>
-                    <div style={{ fontWeight: "500" }}>
-                      {currentDetailTask.created}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Tags */}
-              {currentDetailTask.tags && currentDetailTask.tags.length > 0 && (
-                <div style={{ marginBottom: "1.5rem" }}>
-                  <div
-                    style={{
-                      fontSize: "0.85rem",
-                      color: "var(--text-secondary)",
-                      marginBottom: "0.5rem",
-                    }}
-                  >
-                    Tags
-                  </div>
-                  <div
-                    style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}
-                  >
-                    {currentDetailTask.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        style={{
-                          background: "var(--bg)",
-                          color: "var(--text)",
-                          padding: "0.25rem 0.75rem",
-                          borderRadius: "12px",
-                          fontSize: "0.85rem",
-                        }}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Subtasks */}
-              <div style={{ marginBottom: "1.5rem" }}>
-                <div
-                  style={{
-                    fontSize: "0.85rem",
-                    color: "var(--text-secondary)",
-                    marginBottom: "0.5rem",
-                    fontWeight: "600",
-                  }}
-                >
-                  <span>
+                  <Label className="text-sm font-medium mb-2 block">
                     Subtasks (
                     {currentDetailTask.subtasks?.filter((st) => st.completed)
                       .length || 0}
                     /{currentDetailTask.subtasks?.length || 0})
-                  </span>
-                </div>
-                <ul
-                  style={{
-                    listStyle: "none",
-                    padding: "0",
-                    margin: "0 0 1rem 0",
-                  }}
-                >
-                  {(currentDetailTask.subtasks || []).map((subtask, idx) => (
-                    <li
-                      key={idx}
-                      style={{
-                        padding: "0.5rem",
-                        marginBottom: "0.25rem",
-                        background: "var(--bg)",
-                        borderRadius: "4px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.5rem",
+                  </Label>
+                  <div className="space-y-2 mb-3">
+                    {(currentDetailTask.subtasks || []).map((subtask, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg"
+                      >
+                        <Checkbox
+                          checked={subtask.completed}
+                          onChange={() =>
+                            toggleSubtask(currentDetailTask.id, idx)
+                          }
+                        />
+                        <span
+                          className={`flex-1 ${
+                            subtask.completed
+                              ? "line-through text-gray-500"
+                              : ""
+                          }`}
+                        >
+                          {subtask.text}
+                        </span>
+                        <Button
+                          onClick={() =>
+                            deleteSubtask(currentDetailTask.id, idx)
+                          }
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      type="text"
+                      value={newSubtaskInput}
+                      onChange={(e) => setNewSubtaskInput(e.target.value)}
+                      placeholder="New subtask..."
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          addSubtask(currentDetailTask.id);
+                        }
                       }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={subtask.completed}
-                        onChange={() =>
-                          toggleSubtask(currentDetailTask.id, idx)
-                        }
-                        style={{
-                          width: "18px",
-                          height: "18px",
-                          cursor: "pointer",
-                        }}
-                      />
-                      <span
-                        style={
-                          subtask.completed
-                            ? {
-                                textDecoration: "line-through",
-                                color: "var(--text-secondary)",
-                                flex: "1",
-                              }
-                            : { flex: "1" }
-                        }
-                      >
-                        {subtask.text}
-                      </span>
-                      <button
-                        onClick={() => deleteSubtask(currentDetailTask.id, idx)}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          color: "#e53e3e",
-                          fontSize: "1.1rem",
-                          padding: "0.25rem",
-                        }}
-                        title="Delete subtask"
-                      >
-                        🗑️
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-                <div style={{ display: "flex", gap: "0.5rem" }}>
-                  <input
-                    type="text"
-                    value={newSubtaskInput}
-                    onChange={(e) => setNewSubtaskInput(e.target.value)}
-                    placeholder="New subtask..."
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        addSubtask(currentDetailTask.id);
-                      }
-                    }}
-                    style={{
-                      flex: "1",
-                      padding: "0.5rem",
-                      border: "2px solid #cbd5e0",
-                      borderRadius: "4px",
-                      fontSize: "0.9rem",
-                    }}
-                  />
-                  <button
-                    onClick={() => addSubtask(currentDetailTask.id)}
-                    className="btn btn-primary"
-                    style={{ padding: "0.5rem 1rem" }}
-                  >
-                    + Add
-                  </button>
+                    />
+                    <Button onClick={() => addSubtask(currentDetailTask.id)}>
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add
+                    </Button>
+                  </div>
                 </div>
+
+                {/* Notes */}
+                {currentDetailTask.notes && (
+                  <div>
+                    <Label className="text-sm font-medium mb-2 block">
+                      Notes
+                    </Label>
+                    <div
+                      className="prose prose-sm max-w-none bg-gray-50 p-4 rounded-lg border-l-4 border-blue-500"
+                      dangerouslySetInnerHTML={{
+                        __html: markdownParser.markdownToHtml(
+                          currentDetailTask.notes,
+                        ),
+                      }}
+                    />
+                  </div>
+                )}
               </div>
 
-              {/* Notes */}
-              {currentDetailTask.notes && (
-                <div
-                  style={{
-                    marginTop: "1.5rem",
-                    paddingTop: "1.5rem",
-                    borderTop: "1px solid #e2e8f0",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "0.85rem",
-                      color: "var(--text-secondary)",
-                      marginBottom: "0.75rem",
-                      fontWeight: "600",
-                    }}
-                  >
-                    Notes
-                  </div>
-                  <div
-                    style={{
-                      lineHeight: "1.7",
-                      color: "var(--text)",
-                      background: "var(--bg)",
-                      padding: "1rem",
-                      borderRadius: "8px",
-                      borderLeft: "4px solid var(--primary)",
-                    }}
-                    dangerouslySetInnerHTML={{
-                      __html: markdownParser.markdownToHtml(
-                        currentDetailTask.notes,
-                      ),
-                    }}
-                  />
+              <DialogFooter className="flex gap-2 sm:justify-between">
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={closeTaskDetail}>
+                    {t("taskDetail.close")}
+                  </Button>
+                  <Button variant="destructive" onClick={deleteCurrentTask}>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    {t("taskDetail.delete")}
+                  </Button>
                 </div>
-              )}
-            </div>
-
-            <div className="actions">
-              <button className="btn btn-secondary" onClick={closeTaskDetail}>
-                {t("taskDetail.close")}
-              </button>
-              <button
-                className="btn btn-secondary"
-                onClick={deleteCurrentTask}
-                style={{ background: "#ef4444", color: "white" }}
-              >
-                {t("taskDetail.delete")}
-              </button>
-              {currentDetailTask && currentDetailTask.status !== "archived" && (
-                <button
-                  className="btn btn-secondary"
-                  onClick={archiveCurrentTask}
-                  style={{ background: "#f59e0b", color: "white" }}
-                >
-                  {t("taskDetail.archive")}
-                </button>
-              )}
-              <button className="btn btn-primary" onClick={editCurrentTask}>
-                {t("taskDetail.edit")}
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+                <div className="flex gap-2">
+                  {currentDetailTask &&
+                    currentDetailTask.status !== "archived" && (
+                      <Button
+                        variant="outline"
+                        onClick={archiveCurrentTask}
+                        className="bg-orange-50 hover:bg-orange-100 text-orange-700"
+                      >
+                        <Archive className="h-4 w-4 mr-2" />
+                        {t("taskDetail.archive")}
+                      </Button>
+                    )}
+                  <Button variant="default" onClick={editCurrentTask}>
+                    <Edit className="h-4 w-4 mr-2" />
+                    {t("taskDetail.edit")}
+                  </Button>
+                </div>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Task Form Modal */}
-      <div
-        className={`modal ${showTaskFormModal ? "active" : ""}`}
-        onClick={closeTaskForm}
-      >
-        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-header">
-            <h2>
+      <Dialog open={showTaskFormModal} onOpenChange={setShowTaskFormModal}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
               {isEditMode ? t("taskForm.editTask") : t("taskForm.newTask")}
-            </h2>
-            <button className="close-btn" onClick={closeTaskForm}>
-              &times;
+            </DialogTitle>
+            <button
+              onClick={closeTaskForm}
+              className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+            >
+              <X className="h-6 w-6" />
             </button>
-          </div>
+          </DialogHeader>
 
-          <form onSubmit={submitTaskForm}>
-            <div className="form-group">
-              <label>{t("taskForm.titleLabel")}</label>
-              <input
+          <form onSubmit={submitTaskForm} className="space-y-4">
+            <div>
+              <Label htmlFor="title">{t("taskForm.titleLabel")}</Label>
+              <Input
+                id="title"
                 type="text"
                 value={taskForm.title}
                 onChange={(e) =>
@@ -1891,9 +1722,10 @@ function App() {
               />
             </div>
 
-            <div className="form-group">
-              <label>{t("taskForm.columnLabel")}</label>
-              <select
+            <div>
+              <Label htmlFor="status">{t("taskForm.columnLabel")}</Label>
+              <Select
+                id="status"
                 value={taskForm.status}
                 onChange={(e) =>
                   setTaskForm({ ...taskForm, status: e.target.value })
@@ -1905,71 +1737,67 @@ function App() {
                     {column.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
 
-            {/* Priority */}
-            <div className="form-group">
-              <label>{t("taskForm.priorityLabel")}</label>
-              <select
-                value={taskForm.priority}
-                onChange={(e) =>
-                  setTaskForm({ ...taskForm, priority: e.target.value })
-                }
-              >
-                <option value="">{t("taskForm.priorityNone")}</option>
-                {config.priorities.map((priority) => (
-                  <option key={priority} value={priority}>
-                    {priority}
-                  </option>
-                ))}
-              </select>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="priority">{t("taskForm.priorityLabel")}</Label>
+                <Select
+                  id="priority"
+                  value={taskForm.priority}
+                  onChange={(e) =>
+                    setTaskForm({ ...taskForm, priority: e.target.value })
+                  }
+                >
+                  <option value="">{t("taskForm.priorityNone")}</option>
+                  {config.priorities.map((priority) => (
+                    <option key={priority} value={priority}>
+                      {priority}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="category">{t("taskForm.categoryLabel")}</Label>
+                <Select
+                  id="category"
+                  value={taskForm.category}
+                  onChange={(e) =>
+                    setTaskForm({ ...taskForm, category: e.target.value })
+                  }
+                >
+                  <option value="">--</option>
+                  {config.categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </Select>
+              </div>
             </div>
 
-            {/* Category */}
-            <div className="form-group">
-              <label>{t("taskForm.categoryLabel")}</label>
-              <select
-                value={taskForm.category}
-                onChange={(e) =>
-                  setTaskForm({ ...taskForm, category: e.target.value })
-                }
-              >
-                <option value="">--</option>
-                {config.categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Assignees */}
-            <div className="form-group">
-              <label>{t("taskForm.assignedLabel")}</label>
-              <input
+            <div>
+              <Label htmlFor="assignees">{t("taskForm.assignedLabel")}</Label>
+              <Input
+                id="assignees"
                 type="text"
                 value={taskFormAssigneesInput}
                 onChange={(e) => setTaskFormAssigneesInput(e.target.value)}
                 onBlur={updateTaskFormAssignees}
                 placeholder={t("taskForm.assignedPlaceholder")}
               />
-              <small style={{ color: "#666", fontSize: "0.85rem" }}>
+              <p className="text-xs text-gray-500 mt-1">
                 Separate with commas (e.g., @alice, @bob)
-              </small>
+              </p>
             </div>
 
-            {/* Dates */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "1rem",
-              }}
-            >
-              <div className="form-group">
-                <label>{t("taskForm.createdLabel")}</label>
-                <input
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="created">{t("taskForm.createdLabel")}</Label>
+                <Input
+                  id="created"
                   type="date"
                   value={taskForm.created}
                   onChange={(e) =>
@@ -1978,9 +1806,10 @@ function App() {
                 />
               </div>
 
-              <div className="form-group">
-                <label>{t("taskForm.startedLabel")}</label>
-                <input
+              <div>
+                <Label htmlFor="started">{t("taskForm.startedLabel")}</Label>
+                <Input
+                  id="started"
                   type="date"
                   value={taskForm.started}
                   onChange={(e) =>
@@ -1989,9 +1818,10 @@ function App() {
                 />
               </div>
 
-              <div className="form-group">
-                <label>{t("taskForm.dueLabel")}</label>
-                <input
+              <div>
+                <Label htmlFor="due">{t("taskForm.dueLabel")}</Label>
+                <Input
+                  id="due"
                   type="date"
                   value={taskForm.due}
                   onChange={(e) =>
@@ -2000,9 +1830,12 @@ function App() {
                 />
               </div>
 
-              <div className="form-group">
-                <label>{t("taskForm.completedLabel")}</label>
-                <input
+              <div>
+                <Label htmlFor="completed">
+                  {t("taskForm.completedLabel")}
+                </Label>
+                <Input
+                  id="completed"
                   type="date"
                   value={taskForm.completed}
                   onChange={(e) =>
@@ -2012,73 +1845,62 @@ function App() {
               </div>
             </div>
 
-            {/* Tags */}
-            <div className="form-group">
-              <label>{t("taskForm.tagsLabel")}</label>
-              <input
+            <div>
+              <Label htmlFor="tags">{t("taskForm.tagsLabel")}</Label>
+              <Input
+                id="tags"
                 type="text"
                 value={taskFormTagsInput}
                 onChange={(e) => setTaskFormTagsInput(e.target.value)}
                 onBlur={updateTaskFormTags}
                 placeholder={t("taskForm.tagsPlaceholder")}
               />
-              <small style={{ color: "#666", fontSize: "0.85rem" }}>
+              <p className="text-xs text-gray-500 mt-1">
                 {t("taskForm.tagsHelp")}
-              </small>
+              </p>
             </div>
 
-            <div className="form-group">
-              <label>{t("taskForm.descriptionLabel")}</label>
-              <textarea
+            <div>
+              <Label htmlFor="description">
+                {t("taskForm.descriptionLabel")}
+              </Label>
+              <Textarea
+                id="description"
                 value={taskForm.description}
                 onChange={(e) =>
                   setTaskForm({ ...taskForm, description: e.target.value })
                 }
-                rows="4"
+                rows={4}
               />
             </div>
 
-            {/* Subtasks */}
-            <div className="form-group">
-              <label>{t("taskForm.subtasksLabel")}</label>
-              <div style={{ marginBottom: "0.5rem" }}>
+            <div>
+              <Label>{t("taskForm.subtasksLabel")}</Label>
+              <div className="space-y-2 mb-3">
                 {formSubtasks.map((subtask, index) => (
                   <div
                     key={index}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      marginBottom: "0.5rem",
-                      padding: "0.5rem",
-                      background: "#f7f7f7",
-                      borderRadius: "4px",
-                    }}
+                    className="flex items-center gap-2 bg-gray-50 p-2 rounded"
                   >
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={subtask.completed}
                       onChange={() => toggleFormSubtask(index)}
-                      style={{ marginRight: "0.5rem" }}
                     />
-                    <span style={{ flex: "1" }}>{subtask.text}</span>
-                    <button
+                    <span className="flex-1">{subtask.text}</span>
+                    <Button
                       type="button"
                       onClick={() => removeFormSubtask(index)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: "#e53e3e",
-                        cursor: "pointer",
-                        padding: "0.25rem 0.5rem",
-                      }}
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-red-500"
                     >
-                      &times;
-                    </button>
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
                 ))}
               </div>
-              <div style={{ display: "flex", gap: "0.5rem" }}>
-                <input
+              <div className="flex gap-2">
+                <Input
                   type="text"
                   value={newSubtaskText}
                   onChange={(e) => setNewSubtaskText(e.target.value)}
@@ -2089,185 +1911,172 @@ function App() {
                       addFormSubtask();
                     }
                   }}
-                  style={{ flex: "1" }}
                 />
-                <button
+                <Button
                   type="button"
                   onClick={addFormSubtask}
-                  className="btn btn-secondary"
+                  variant="secondary"
                 >
                   {t("taskForm.subtaskAdd")}
-                </button>
+                </Button>
               </div>
             </div>
 
-            <div className="form-group">
-              <label>{t("taskForm.notesLabel")}</label>
-              <textarea
+            <div>
+              <Label htmlFor="notes">{t("taskForm.notesLabel")}</Label>
+              <Textarea
+                id="notes"
                 value={taskForm.notes}
                 onChange={(e) =>
                   setTaskForm({ ...taskForm, notes: e.target.value })
                 }
-                rows="6"
+                rows={6}
                 placeholder={t("taskForm.notesPlaceholder")}
               />
-              <small style={{ color: "#666", fontSize: "0.85rem" }}>
+              <p className="text-xs text-gray-500 mt-1">
                 {t("taskForm.notesHelp")}
-              </small>
+              </p>
             </div>
 
-            <div className="actions">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={closeTaskForm}
-              >
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={closeTaskForm}>
                 {t("taskForm.cancel")}
-              </button>
-              <button type="submit" className="btn btn-primary">
+              </Button>
+              <Button type="submit" variant="default">
                 {isEditMode ? t("taskForm.save") : t("taskForm.create")}
-              </button>
-            </div>
+              </Button>
+            </DialogFooter>
           </form>
-        </div>
-      </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Archive Modal */}
-      <div
-        className={`modal ${showArchiveModal ? "active" : ""}`}
-        onClick={() => setShowArchiveModal(false)}
-      >
-        <div
-          className="modal-content"
-          style={{ maxWidth: "900px" }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="modal-header">
-            <h2>{t("archives.title")}</h2>
+      <Dialog open={showArchiveModal} onOpenChange={setShowArchiveModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle>{t("archives.title")}</DialogTitle>
             <button
-              className="close-btn"
               onClick={() => setShowArchiveModal(false)}
+              className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
             >
-              &times;
+              <X className="h-6 w-6" />
             </button>
-          </div>
+          </DialogHeader>
 
-          <div style={{ padding: "1.5rem" }}>
-            <div style={{ marginBottom: "1rem" }}>
-              <input
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Input
                 type="text"
                 value={archiveSearchTerm}
                 onChange={(e) => setArchiveSearchTerm(e.target.value)}
                 placeholder={t("archives.search")}
-                style={{
-                  width: "100%",
-                  padding: "0.75rem",
-                  border: "2px solid #cbd5e0",
-                  borderRadius: "6px",
-                  fontSize: "0.95rem",
-                }}
+                className="pl-10"
               />
             </div>
 
-            <div style={{ maxHeight: "500px", overflowY: "auto" }}>
+            <div className="max-h-[500px] overflow-y-auto space-y-3">
               {getFilteredArchivedTasks(archivedTasks).map((task, idx) => (
-                <div
+                <Card
                   key={`archive-${task.id}-${idx}`}
-                  className="task-card"
-                  style={{ marginBottom: "1rem", cursor: "pointer" }}
+                  className="cursor-pointer hover:shadow-md transition-shadow"
                   onClick={() => showTaskDetail(task)}
                 >
-                  <div className="task-header">
-                    <span className="task-id">{task.id}</span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        restoreArchivedTask(task.id);
-                      }}
-                      className="btn btn-secondary"
-                      style={{ padding: "0.25rem 0.5rem", fontSize: "0.8rem" }}
-                    >
-                      {t("action.restore")}
-                    </button>
-                  </div>
-                  <div className="task-title">{task.title}</div>
-                </div>
+                  <CardHeader className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <Badge variant="outline" className="mb-2">
+                          {task.id}
+                        </Badge>
+                        <CardTitle className="text-base">
+                          {task.title}
+                        </CardTitle>
+                      </div>
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          restoreArchivedTask(task.id);
+                        }}
+                        variant="outline"
+                        size="sm"
+                      >
+                        <RotateCcw className="h-3 w-3 mr-1" />
+                        {t("action.restore")}
+                      </Button>
+                    </div>
+                  </CardHeader>
+                </Card>
               ))}
 
               {archivedTasks.length === 0 && (
-                <div className="empty-state">
-                  <span>{t("archives.empty")}</span>
+                <div className="text-center py-12 text-gray-400">
+                  {t("archives.empty")}
                 </div>
               )}
             </div>
           </div>
-        </div>
-      </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Columns Modal */}
-      <div
-        className={`modal ${showColumnsModal ? "active" : ""}`}
-        onClick={() => setShowColumnsModal(false)}
-      >
-        <div
-          className="modal-content"
-          style={{ maxWidth: "500px" }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="modal-header">
-            <h2>{t("columns.title")}</h2>
+      <Dialog open={showColumnsModal} onOpenChange={setShowColumnsModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{t("columns.title")}</DialogTitle>
             <button
-              className="close-btn"
               onClick={() => setShowColumnsModal(false)}
+              className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
             >
-              &times;
+              <X className="h-6 w-6" />
             </button>
-          </div>
+          </DialogHeader>
 
-          <div style={{ padding: "1.5rem" }}>
-            <div>
-              {config.columns.map((column, index) => (
-                <div
-                  key={column.id}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    marginBottom: "1rem",
-                    padding: "0.75rem",
-                    background: "#f7f7f7",
-                    borderRadius: "6px",
-                  }}
-                >
-                  <span style={{ flex: "1" }}>
-                    {column.name} ({column.id})
+          <div className="space-y-3">
+            {config.columns.map((column, index) => (
+              <div
+                key={column.id}
+                className="flex items-center justify-between bg-gray-50 p-4 rounded-lg"
+              >
+                <div>
+                  <span className="font-medium">{column.name}</span>
+                  <span className="text-gray-500 text-sm ml-2">
+                    ({column.id})
                   </span>
-                  <button
-                    onClick={() => removeColumn(column.id)}
-                    className="btn btn-secondary"
-                    style={{ padding: "0.25rem 0.5rem", background: "#fee" }}
-                  >
-                    {t("action.delete")}
-                  </button>
                 </div>
-              ))}
-            </div>
-            <button
-              onClick={addColumn}
-              className="btn btn-primary"
-              style={{ marginTop: "1rem", width: "100%" }}
-            >
+                <Button
+                  onClick={() => removeColumn(column.id)}
+                  variant="destructive"
+                  size="sm"
+                >
+                  <Trash2 className="h-3 w-3 mr-1" />
+                  {t("action.delete")}
+                </Button>
+              </div>
+            ))}
+            <Button onClick={addColumn} variant="default" className="w-full">
+              <Plus className="h-4 w-4 mr-2" />
               {t("columns.add")}
-            </button>
+            </Button>
           </div>
-        </div>
-      </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Notification */}
-      <div
-        className={`notification ${notification.show ? "show" : ""} ${notification.type}`}
-      >
-        <span>{notification.message}</span>
-      </div>
+      {notification.show && (
+        <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-5">
+          <div
+            className={`px-6 py-4 rounded-lg shadow-lg ${
+              notification.type === "success"
+                ? "bg-green-600 text-white"
+                : notification.type === "error"
+                  ? "bg-red-600 text-white"
+                  : "bg-blue-600 text-white"
+            }`}
+          >
+            {notification.message}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
