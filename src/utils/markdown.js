@@ -1,5 +1,6 @@
 // Markdown parsing and generation module
 // Handles conversion between markdown format and task objects
+import DOMPurify from "dompurify";
 
 // Parse markdown content into tasks and config
 function parseMarkdown(content) {
@@ -124,6 +125,46 @@ function parseMarkdown(content) {
     ];
   }
 
+  // First, detect all section headers in the file (## Header) that are NOT config or special sections
+  const sectionHeaderRegex = /^##\s+(?!⚙️\s*Configuration)(.+)$/gm;
+  const detectedSections = [];
+  let match;
+
+  while ((match = sectionHeaderRegex.exec(content)) !== null) {
+    const sectionName = match[1].trim();
+    // Skip the separator line
+    if (sectionName === "---") continue;
+
+    // Convert section name to ID (lowercase, replace spaces with hyphens)
+    // Remove emojis and special chars, then clean up any leading/trailing dashes
+    const sectionId = sectionName
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "") // Remove emojis and special chars
+      .replace(/\s+/g, "-") // Replace spaces with dashes
+      .replace(/^-+|-+$/g, "") // Remove leading/trailing dashes
+      .replace(/-+/g, "-"); // Collapse multiple dashes into one
+
+    detectedSections.push({ name: sectionName, id: sectionId });
+  }
+
+  // Merge detected sections with config columns, preserving file order
+  console.log(
+    `📋 Detected ${detectedSections.length} sections in file:`,
+    detectedSections,
+  );
+  detectedSections.forEach((section) => {
+    const exists = config.columns.some(
+      (col) => col.id === section.id || col.name === section.name,
+    );
+    if (!exists) {
+      console.log(
+        `➕ Adding new column from file: ${section.name} (${section.id})`,
+      );
+      config.columns.push(section);
+    }
+  });
+  console.log(`📊 Final columns config:`, config.columns);
+
   // Parse tasks by sections using the unified parser
   config.columns.forEach((column) => {
     const columnTasks = parseTasksFromSection(content, column.name, column.id);
@@ -233,17 +274,25 @@ function parseTask(id, title, content, status) {
   const completedMatch = content.match(/\*\*Finished\*\*:\s*([\d-]+)/);
   if (completedMatch) task.completed = completedMatch[1];
 
-  // Parse Status field (authoritative if present and valid)
-  const validStatuses = ["todo", "in-progress", "in-review", "done"];
+  // Parse Status field - if present, it's authoritative (overrides section)
   const statusMatch = content.match(/\*\*Status\*\*:\s*(\S+)/i);
   if (statusMatch) {
-    const statusValue = statusMatch[1].toLowerCase();
-    if (validStatuses.includes(statusValue)) {
-      task.status = statusValue;
-    } else {
-      console.warn(
-        `Task ${id}: Ignoring invalid Status value "${statusMatch[1]}", using section position`,
+    // Accept any status value - it will be used to move the task to the correct section
+    const parsedStatus = statusMatch[1].toLowerCase().trim();
+
+    console.log(
+      `🔍 Task ${id}: current section='${status}', parsed Status field='${parsedStatus}'`,
+    );
+
+    // If the status doesn't match the section we're in, mark it for reorganization
+    if (parsedStatus !== status) {
+      console.log(
+        `✨ Task ${id} marked for reorganization: will move from '${status}' to '${parsedStatus}'`,
       );
+      task._needsReorganization = true;
+      task.status = parsedStatus; // Use the parsed status
+    } else {
+      console.log(`✓ Task ${id} already in correct section '${status}'`);
     }
   }
 
@@ -396,7 +445,7 @@ function generateMarkdown(tasks, config) {
   md += `---\n\n`;
 
   // Add tasks by column
-  config.columns.forEach((column) => {
+  config.columns.forEach((column, index) => {
     md += `## ${column.name}\n\n`;
 
     const columnTasks = tasks.filter((t) => t.status === column.id);
@@ -443,6 +492,7 @@ function generateMarkdown(tasks, config) {
 
       md += `\n`; // Just one blank line between tasks
     });
+    // No separator between sections - only one separator after config section
   });
 
   return md;
@@ -565,7 +615,24 @@ function markdownToHtml(markdown) {
     html = html.replace(`__CODE_BLOCK_${i}__`, block);
   });
 
-  return html;
+  // Sanitize HTML to prevent XSS attacks
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: [
+      "h1",
+      "h2",
+      "h3",
+      "p",
+      "strong",
+      "em",
+      "code",
+      "pre",
+      "ul",
+      "li",
+      "a",
+      "br",
+    ],
+    ALLOWED_ATTR: ["href", "target", "class"],
+  });
 }
 
 // Status field reorganization timer

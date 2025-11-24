@@ -34,6 +34,7 @@ export default [
         navigator: "readonly",
         alert: "readonly",
         confirm: "readonly",
+        prompt: "readonly",
         fetch: "readonly",
         FormData: "readonly",
         Blob: "readonly",

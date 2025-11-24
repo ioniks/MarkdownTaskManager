@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { translationSystem } from "./utils/translations";
 import { fileSystem } from "./utils/fileSystem";
 import { markdownParser } from "./utils/markdown";
@@ -25,6 +25,7 @@ import {
   Archive,
   Settings,
   Edit,
+  Edit2,
   Trash2,
   RotateCcw,
   ArrowDown,
@@ -69,11 +70,15 @@ function App() {
   // Project management
   const [showProjectSelector, setShowProjectSelector] = useState(false);
   const [recentProjects, setRecentProjects] = useState([]);
+  const isLoadingFromFile = useRef(false);
 
   // Filter state
   const [activeFilters, setActiveFilters] = useState([]);
   const [globalSearchTerm, setGlobalSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [archiveSearchTerm, setArchiveSearchTerm] = useState("");
+  const [debouncedArchiveSearchTerm, setDebouncedArchiveSearchTerm] =
+    useState("");
 
   // Sort state
   const [sortConfig, setSortConfig] = useState({
@@ -141,25 +146,12 @@ function App() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Auto-save when tasks or config changes
+  // Cleanup file watcher on unmount or when switching projects
   useEffect(() => {
-    if (kanbanFileHandle && tasks.length >= 0) {
-      const timer = setTimeout(() => {
-        saveFile();
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [tasks, config, kanbanFileHandle, saveFile]);
-
-  // Auto-save archive when archivedTasks changes
-  useEffect(() => {
-    if (archiveFileHandle && archivedTasks.length >= 0) {
-      const timer = setTimeout(() => {
-        saveArchive();
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [archivedTasks, archiveFileHandle, saveArchive]);
+    return () => {
+      fileWatcher.stopFileWatcher();
+    };
+  }, [kanbanFileHandle]);
 
   // Load recent projects
   const loadRecentProjects = async () => {
@@ -231,8 +223,37 @@ function App() {
       setKanbanFileHandle(kanbanResult.fileHandle);
 
       // Parse content
+      isLoadingFromFile.current = true;
       const parsed = markdownParser.parseMarkdown(kanbanResult.content);
-      setTasks(parsed.tasks);
+
+      // Deep clone to ensure React detects all changes including subtasks
+      const clonedTasks = parsed.tasks.map((task) => ({
+        ...task,
+        subtasks: task.subtasks.map((st) => ({ ...st })),
+        tags: [...task.tags],
+        assignees: [...task.assignees],
+      }));
+
+      // Check if any tasks need reorganization (status doesn't match section)
+      console.log(
+        `🔍 Checking ${clonedTasks.length} tasks for reorganization on initial load...`,
+      );
+      const tasksNeedingReorganization = clonedTasks.filter((task) => {
+        if (task._needsReorganization) {
+          console.log(
+            `📝 Task ${task.id} in wrong section: has status '${task.status}', will be reorganized`,
+          );
+          return true;
+        }
+        return false;
+      });
+
+      // Clean up the flags
+      tasksNeedingReorganization.forEach((task) => {
+        delete task._needsReorganization;
+      });
+
+      setTasks(clonedTasks);
       setConfig(parsed.config);
 
       // Set current content for file watcher
@@ -242,6 +263,38 @@ function App() {
       const archiveResult = await fileSystem.loadArchiveFile(dirHandle);
       setArchiveFileHandle(archiveResult.fileHandle);
       setArchivedTasks(markdownParser.parseArchive(archiveResult.content));
+
+      // If any tasks need reorganization, save file to reorganize (like old version)
+      if (tasksNeedingReorganization.length > 0) {
+        console.log(
+          `🔄 ${tasksNeedingReorganization.length} tasks will be reorganized to correct sections`,
+        );
+
+        // Tasks already have correct status from parsing, now save the file to reorganize
+        setTimeout(async () => {
+          try {
+            const reorganizedMarkdown = markdownParser.generateMarkdown(
+              clonedTasks,
+              parsed.config,
+            );
+            const writable = await kanbanResult.fileHandle.createWritable();
+            await writable.write(reorganizedMarkdown);
+            await writable.close();
+            // Update file watcher's content to prevent detecting our own save as an external change
+            fileWatcher.setCurrentContent(reorganizedMarkdown);
+            console.log("✅ Tasks reorganized and file saved");
+          } catch (error) {
+            console.error("❌ Error saving reorganized file:", error);
+          } finally {
+            isLoadingFromFile.current = false;
+          }
+        }, 500);
+      } else {
+        // Reset flag after loading completes
+        setTimeout(() => {
+          isLoadingFromFile.current = false;
+        }, 1000);
+      }
 
       // Start file watcher
       startWatching(kanbanResult.fileHandle);
@@ -256,11 +309,76 @@ function App() {
   // Start file watching
   const startWatching = (fileHandle) => {
     fileWatcher.startFileWatcher(fileHandle, {
-      onExternalChange: (newContent) => {
+      onExternalChange: async (newContent) => {
+        isLoadingFromFile.current = true;
         const parsed = markdownParser.parseMarkdown(newContent);
-        setTasks(parsed.tasks);
-        setConfig(parsed.config);
+
+        // Deep clone to ensure React detects all changes including subtasks
+        const clonedTasks = parsed.tasks.map((task) => ({
+          ...task,
+          subtasks: task.subtasks.map((st) => ({ ...st })),
+          tags: [...task.tags],
+          assignees: [...task.assignees],
+        }));
+
+        // Check if any tasks need reorganization (status doesn't match section)
+        console.log(
+          `🔍 Checking ${clonedTasks.length} tasks for reorganization...`,
+        );
+        const tasksNeedingReorganization = clonedTasks.filter((task) => {
+          if (task._needsReorganization) {
+            console.log(
+              `📝 Task ${task.id} in wrong section: has status '${task.status}', will be reorganized`,
+            );
+            return true;
+          }
+          return false;
+        });
+
+        // Clean up the flags
+        tasksNeedingReorganization.forEach((task) => {
+          delete task._needsReorganization;
+        });
+
+        setTasks(clonedTasks);
+        setConfig({ ...parsed.config, columns: [...parsed.config.columns] });
         showNotification("File updated from external source", "info");
+
+        console.log(
+          `📥 Loaded ${parsed.tasks.length} tasks from external file`,
+        );
+
+        // If any tasks need reorganization, save file to reorganize (like old version)
+        if (tasksNeedingReorganization.length > 0) {
+          console.log(
+            `🔄 ${tasksNeedingReorganization.length} tasks will be reorganized to correct sections`,
+          );
+
+          // Tasks already have correct status from parsing, now save the file to reorganize
+          setTimeout(async () => {
+            try {
+              const reorganizedMarkdown = markdownParser.generateMarkdown(
+                clonedTasks,
+                parsed.config,
+              );
+              const writable = await fileHandle.createWritable();
+              await writable.write(reorganizedMarkdown);
+              await writable.close();
+              // Update file watcher's content to prevent detecting our own save as an external change
+              fileWatcher.setCurrentContent(reorganizedMarkdown);
+              console.log("✅ Tasks reorganized and file saved");
+            } catch (error) {
+              console.error("❌ Error saving reorganized file:", error);
+            } finally {
+              isLoadingFromFile.current = false;
+            }
+          }, 500);
+        } else {
+          // Reset flag after state updates have settled
+          setTimeout(() => {
+            isLoadingFromFile.current = false;
+          }, 1000);
+        }
       },
     });
   };
@@ -283,6 +401,51 @@ function App() {
     fileWatcher.performSave(archiveFileHandle, content);
     return true;
   }, [archiveFileHandle, archivedTasks]);
+
+  // Debounce search terms
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(globalSearchTerm);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [globalSearchTerm]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedArchiveSearchTerm(archiveSearchTerm);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [archiveSearchTerm]);
+
+  // Auto-save when tasks or config changes
+  useEffect(() => {
+    if (kanbanFileHandle && tasks.length >= 0 && !isLoadingFromFile.current) {
+      const timer = setTimeout(() => {
+        saveFile();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [tasks, config, kanbanFileHandle, saveFile]);
+
+  // Auto-save archive when archivedTasks changes
+  useEffect(() => {
+    if (archiveFileHandle && archivedTasks.length >= 0) {
+      const timer = setTimeout(() => {
+        saveArchive();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [archivedTasks, archiveFileHandle, saveArchive]);
+
+  // Update currentDetailTask when tasks change (for live updates in modal)
+  useEffect(() => {
+    if (currentDetailTask && showTaskModal) {
+      const updatedTask = tasks.find((t) => t.id === currentDetailTask.id);
+      if (updatedTask) {
+        setCurrentDetailTask(updatedTask);
+      }
+    }
+  }, [tasks, currentDetailTask, showTaskModal]);
 
   // Show notification
   const showNotification = (message, type = "success") => {
@@ -322,8 +485,7 @@ function App() {
     setTasks((prev) => [...prev, newTask]);
     setConfig(newConfig);
 
-    // Save will happen in useEffect
-    setTimeout(() => saveFile(), 0);
+    // Auto-save will trigger via useEffect when tasks/config changes
 
     return newTask;
   };
@@ -338,16 +500,14 @@ function App() {
       const newTasks = [...prev];
       newTasks[taskIndex] = { ...newTasks[taskIndex], ...updates };
 
-      // Save will happen after state update
-      setTimeout(() => {
-        if (oldStatus !== updates.status && updates.status) {
-          markdownParser.scheduleStatusReorganization(newTasks, config, () =>
-            saveFile(),
-          );
-        } else {
-          saveFile();
-        }
-      }, 0);
+      // Auto-save will trigger via useEffect when tasks changes
+      if (oldStatus !== updates.status && updates.status) {
+        setTimeout(() => {
+          markdownParser.scheduleStatusReorganization(newTasks, config, () => {
+            // Reorganization callback - no-op since useEffect handles save
+          });
+        }, 0);
+      }
 
       return newTasks;
     });
@@ -355,11 +515,8 @@ function App() {
 
   // Delete task
   const deleteTask = (taskId) => {
-    setTasks((prev) => {
-      const newTasks = prev.filter((t) => t.id !== taskId);
-      setTimeout(() => saveFile(), 0);
-      return newTasks;
-    });
+    setTasks((prev) => prev.filter((t) => t.id !== taskId));
+    // Auto-save will trigger via useEffect when tasks changes
   };
 
   // Archive task
@@ -370,10 +527,7 @@ function App() {
     setArchivedTasks((prev) => [...prev, { ...task, status: "archived" }]);
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
 
-    setTimeout(() => {
-      saveFile();
-      saveArchive();
-    }, 0);
+    // Auto-save will trigger via useEffect for both files
 
     return true;
   };
@@ -386,10 +540,7 @@ function App() {
     setTasks((prev) => [...prev, { ...task, status: targetStatus }]);
     setArchivedTasks((prev) => prev.filter((t) => t.id !== taskId));
 
-    setTimeout(() => {
-      saveFile();
-      saveArchive();
-    }, 0);
+    // Auto-save will trigger via useEffect for both files
 
     return true;
   };
@@ -844,7 +995,7 @@ function App() {
       columns: [...prev.columns, { name: name.trim(), id: id.trim() }],
     }));
 
-    setTimeout(() => saveFile(), 0);
+    // Auto-save will trigger via useEffect when config changes
   };
 
   // Remove column
@@ -865,7 +1016,7 @@ function App() {
       columns: prev.columns.filter((c) => c.id !== columnId),
     }));
 
-    setTimeout(() => saveFile(), 0);
+    // Auto-save will trigger via useEffect when config changes
   };
 
   // Drag handlers
@@ -921,9 +1072,57 @@ function App() {
     setGlobalSearchTerm("");
   };
 
-  // Get filtered tasks
-  const getFilteredTasks = (taskList) => {
-    let filtered = [...taskList];
+  // Sort tasks utility
+  const sortTasks = (taskList, config) => {
+    if (!config || !config.field) return taskList;
+
+    const sorted = [...taskList].sort((a, b) => {
+      let aVal, bVal;
+
+      switch (config.field) {
+        case "created":
+          aVal = new Date(a.created || 0);
+          bVal = new Date(b.created || 0);
+          break;
+        case "completed":
+          aVal = new Date(a.completed || 0);
+          bVal = new Date(b.completed || 0);
+          break;
+        case "due":
+          aVal = new Date(a.due || "9999-12-31");
+          bVal = new Date(b.due || "9999-12-31");
+          break;
+        case "priority": {
+          const priorityOrder = {
+            critical: 4,
+            high: 3,
+            medium: 2,
+            low: 1,
+            "": 0,
+          };
+          aVal = priorityOrder[a.priority?.toLowerCase()] || 0;
+          bVal = priorityOrder[b.priority?.toLowerCase()] || 0;
+          break;
+        }
+        case "title":
+          aVal = a.title.toLowerCase();
+          bVal = b.title.toLowerCase();
+          break;
+        default:
+          return 0;
+      }
+
+      if (aVal < bVal) return config.direction === "asc" ? -1 : 1;
+      if (aVal > bVal) return config.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    return sorted;
+  };
+
+  // Get filtered tasks - memoized for performance
+  const filteredTasks = useMemo(() => {
+    let filtered = [...tasks];
 
     // Apply active filters
     activeFilters.forEach((filter) => {
@@ -945,9 +1144,9 @@ function App() {
       });
     });
 
-    // Apply global search
-    if (globalSearchTerm) {
-      const searchLower = globalSearchTerm.toLowerCase();
+    // Apply global search (using debounced term)
+    if (debouncedSearchTerm) {
+      const searchLower = debouncedSearchTerm.toLowerCase();
       filtered = filtered.filter((task) => {
         return (
           task.title.toLowerCase().includes(searchLower) ||
@@ -967,61 +1166,14 @@ function App() {
     filtered = sortTasks(filtered, sortConfig.mainBoard);
 
     return filtered;
-  };
+  }, [tasks, activeFilters, debouncedSearchTerm, sortConfig.mainBoard]);
 
-  // Get filtered archived tasks
-  // Sort tasks utility
-  const sortTasks = (taskList, config) => {
-    if (!config || !config.field) return taskList;
+  // Get filtered archived tasks - memoized for performance
+  const filteredArchivedTasks = useMemo(() => {
+    let filtered = [...archivedTasks];
 
-    const sorted = [...taskList].sort((a, b) => {
-      let aVal, bVal;
-
-      switch (config.field) {
-        case "created":
-          aVal = new Date(a.created || 0);
-          bVal = new Date(b.created || 0);
-          break;
-        case "completed":
-          aVal = new Date(a.completed || 0);
-          bVal = new Date(b.completed || 0);
-          break;
-        case "due":
-          aVal = new Date(a.due || "9999-12-31");
-          bVal = new Date(b.due || "9999-12-31");
-          break;
-        case "priority":
-          const priorityOrder = {
-            critical: 4,
-            high: 3,
-            medium: 2,
-            low: 1,
-            "": 0,
-          };
-          aVal = priorityOrder[a.priority?.toLowerCase()] || 0;
-          bVal = priorityOrder[b.priority?.toLowerCase()] || 0;
-          break;
-        case "title":
-          aVal = a.title.toLowerCase();
-          bVal = b.title.toLowerCase();
-          break;
-        default:
-          return 0;
-      }
-
-      if (aVal < bVal) return config.direction === "asc" ? -1 : 1;
-      if (aVal > bVal) return config.direction === "asc" ? 1 : -1;
-      return 0;
-    });
-
-    return sorted;
-  };
-
-  const getFilteredArchivedTasks = (taskList) => {
-    let filtered = taskList;
-
-    if (archiveSearchTerm) {
-      const searchLower = archiveSearchTerm.toLowerCase();
+    if (debouncedArchiveSearchTerm) {
+      const searchLower = debouncedArchiveSearchTerm.toLowerCase();
       filtered = filtered.filter((task) => {
         return (
           task.title.toLowerCase().includes(searchLower) ||
@@ -1041,18 +1193,23 @@ function App() {
     filtered = sortTasks(filtered, sortConfig.archive);
 
     return filtered;
-  };
+  }, [archivedTasks, debouncedArchiveSearchTerm, sortConfig.archive]);
 
-  // Get column tasks
-  const getColumnTasks = (columnId) => {
-    const columnTasks = tasks.filter((t) => t.status === columnId);
-    return getFilteredTasks(columnTasks);
-  };
+  // Get column tasks - memoized by column
+  const getColumnTasks = useCallback(
+    (columnId) => {
+      return filteredTasks.filter((t) => t.status === columnId);
+    },
+    [filteredTasks],
+  );
 
   // Get column count
-  const getColumnCount = (columnId) => {
-    return getColumnTasks(columnId).length;
-  };
+  const getColumnCount = useCallback(
+    (columnId) => {
+      return filteredTasks.filter((t) => t.status === columnId).length;
+    },
+    [filteredTasks],
+  );
 
   // Get available filter values
   const availableTags = [
@@ -1115,10 +1272,10 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-full mx-auto px-6 py-4">
-          <div className="flex items-center justify-between gap-6">
+        <div className="max-w-full mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-6">
             {/* Left Section: Branding & Context */}
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto">
               <h1 className="text-xl font-bold text-gray-900">
                 {t("header.title")}
               </h1>
@@ -1130,10 +1287,10 @@ function App() {
                   setCurrentLanguage(e.target.value);
                 }}
                 value={currentLanguage}
-                className="w-32"
+                className="w-24 sm:w-32 text-sm"
               >
-                <option value="en">English</option>
-                <option value="fr">Français</option>
+                <option value="en">EN</option>
+                <option value="fr">FR</option>
               </Select>
 
               {/* Project Selector */}
@@ -1141,7 +1298,7 @@ function App() {
                 <Select
                   onChange={(e) => switchProject(e.target.value)}
                   value={getCurrentProjectIndex()}
-                  className="w-48"
+                  className="w-32 sm:w-48 text-sm"
                 >
                   <option value="">{t("projects.select")}</option>
                   {recentProjects.map((project, index) => (
@@ -1201,14 +1358,7 @@ function App() {
                     onClick={createTask}
                     variant="default"
                     size="default"
-                    className="text-white font-medium px-4"
-                    style={{ backgroundColor: "#2196F3" }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.backgroundColor = "#1976D2")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.backgroundColor = "#2196F3")
-                    }
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-medium px-4"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     {t("header.newTask")}
@@ -1285,25 +1435,21 @@ function App() {
             {/* Global Search */}
             <div className="flex justify-center mb-4">
               <div className="relative w-full max-w-2xl">
-                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                  <Search className="h-5 w-5 text-gray-400" />
-                </div>
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  type="search"
+                  type="text"
                   value={globalSearchTerm}
                   onChange={(e) => setGlobalSearchTerm(e.target.value)}
                   placeholder={t("filters.search")}
-                  className="pl-10 pr-10 w-full"
+                  className="pl-9 pr-9"
                 />
                 {globalSearchTerm && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    <button
-                      onClick={() => setGlobalSearchTerm("")}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                      <X className="h-5 w-5" />
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => setGlobalSearchTerm("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
                 )}
               </div>
             </div>
@@ -1666,7 +1812,7 @@ function App() {
                               }}
                               title="Edit task"
                             >
-                              ✏️
+                              <Edit2 className="h-3 w-3" />
                             </button>
                           </div>
                           <CardTitle className="text-sm font-semibold mt-2 line-clamp-2">
@@ -1994,7 +2140,8 @@ function App() {
                     gap: "0.5rem",
                   }}
                 >
-                  🗑️ Delete
+                  <Trash2 className="h-4 w-4" />
+                  Delete
                 </button>
                 {currentDetailTask &&
                   currentDetailTask.status !== "archived" && (
@@ -2014,7 +2161,8 @@ function App() {
                         gap: "0.5rem",
                       }}
                     >
-                      📦 Archive
+                      <Archive className="h-4 w-4" />
+                      Archive
                     </button>
                   )}
                 <button
@@ -2028,7 +2176,8 @@ function App() {
                     gap: "0.5rem",
                   }}
                 >
-                  ✏️ Edit
+                  <Edit className="h-4 w-4" />
+                  Edit
                 </button>
               </DialogFooter>
             </>
@@ -2316,13 +2465,13 @@ function App() {
 
           <div className="space-y-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
                 value={archiveSearchTerm}
                 onChange={(e) => setArchiveSearchTerm(e.target.value)}
                 placeholder={t("archives.search")}
-                className="pl-10"
+                className="pl-9"
               />
             </div>
 
@@ -2403,7 +2552,7 @@ function App() {
             </div>
 
             <div className="max-h-[500px] overflow-y-auto space-y-3">
-              {getFilteredArchivedTasks(archivedTasks).map((task, idx) => (
+              {filteredArchivedTasks.map((task, idx) => (
                 <Card
                   key={`archive-${task.id}-${idx}`}
                   className="hover:shadow-md transition-shadow"
@@ -2466,7 +2615,8 @@ function App() {
                           variant="destructive"
                           size="sm"
                         >
-                          <Trash2 className="h-3 w-3" />
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          {t("action.delete")}
                         </Button>
                         <Button
                           onClick={(e) => {
@@ -2507,6 +2657,11 @@ function App() {
               <X className="h-6 w-6" />
             </button>
           </DialogHeader>
+
+          <p className="text-sm text-gray-500 mb-4">
+            Manage your kanban board columns. Add, remove, or organize the
+            status columns for your tasks.
+          </p>
 
           <div className="space-y-3">
             {config.columns.map((column) => (

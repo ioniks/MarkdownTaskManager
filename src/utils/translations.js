@@ -43,9 +43,9 @@ const translations = {
     // Task detail modal
     "taskDetail.title": "Task Details",
     "taskDetail.close": "Close",
-    "taskDetail.delete": "🗑️ Delete",
-    "taskDetail.archive": "📦 Archive",
-    "taskDetail.edit": "✏️ Edit",
+    "taskDetail.delete": "Delete",
+    "taskDetail.archive": "Archive",
+    "taskDetail.edit": "Edit",
 
     // Task form modal
     "taskForm.newTask": "New Task",
@@ -111,9 +111,9 @@ const translations = {
     "empty.noTasks": "No tasks",
 
     // Buttons and actions
-    "action.restore": "↩️ Restore",
-    "action.delete": "🗑️",
-    "action.edit": "✏️",
+    "action.restore": "Restore",
+    "action.delete": "Delete",
+    "action.edit": "Edit",
     "action.moveUp": "Move up",
     "action.moveDown": "Move down",
 
@@ -227,9 +227,9 @@ const translations = {
     // Task detail modal
     "taskDetail.title": "Détails de la tâche",
     "taskDetail.close": "Fermer",
-    "taskDetail.delete": "🗑️ Supprimer",
-    "taskDetail.archive": "📦 Archiver",
-    "taskDetail.edit": "✏️ Modifier",
+    "taskDetail.delete": "Supprimer",
+    "taskDetail.archive": "Archiver",
+    "taskDetail.edit": "Modifier",
 
     // Task form modal
     "taskForm.newTask": "Nouvelle tâche",
@@ -296,9 +296,9 @@ const translations = {
     "empty.noTasks": "Aucune tâche",
 
     // Buttons and actions
-    "action.restore": "↩️ Restaurer",
-    "action.delete": "🗑️",
-    "action.edit": "✏️",
+    "action.restore": "Restaurer",
+    "action.delete": "Supprimer",
+    "action.edit": "Modifier",
     "action.moveUp": "Déplacer vers le haut",
     "action.moveDown": "Déplacer vers le bas",
 
