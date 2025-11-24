@@ -1357,17 +1357,16 @@ function App() {
                           <span className="text-xs font-mono text-gray-500 font-medium">
                             {task.id}
                           </span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 -mr-2 -mt-1"
+                          <button
+                            className="task-edit-btn"
                             onClick={(e) => {
                               e.stopPropagation();
                               openTaskForm(task);
                             }}
+                            title="Edit task"
                           >
-                            <Edit className="h-3 w-3" />
-                          </Button>
+                            ✏️
+                          </button>
                         </div>
                         <CardTitle className="text-sm font-semibold mt-2 line-clamp-2">
                           {task.title}
