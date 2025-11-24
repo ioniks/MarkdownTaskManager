@@ -1097,34 +1097,34 @@ function App() {
               )}
 
               {/* Folder Button */}
-              <Button onClick={selectFolder} variant="default">
-                <FolderOpen className="h-4 w-4 mr-2" />
+              <button onClick={selectFolder} className="btn btn-primary">
+                <FolderOpen className="h-4 w-4 mr-2 inline" />
                 {t("header.folder")}
-              </Button>
+              </button>
 
               {/* Action Buttons */}
               {directoryHandle && (
                 <>
-                  <Button onClick={createTask} variant="default">
-                    <Plus className="h-4 w-4 mr-2" />
+                  <button onClick={createTask} className="btn btn-primary">
+                    <Plus className="h-4 w-4 mr-2 inline" />
                     {t("header.newTask")}
-                  </Button>
+                  </button>
 
-                  <Button
+                  <button
                     onClick={() => setShowArchiveModal(true)}
-                    variant="outline"
+                    className="btn btn-secondary"
                   >
-                    <Archive className="h-4 w-4 mr-2" />
+                    <Archive className="h-4 w-4 mr-2 inline" />
                     {t("header.archives")}
-                  </Button>
+                  </button>
 
-                  <Button
+                  <button
                     onClick={() => setShowColumnsModal(true)}
-                    variant="outline"
+                    className="btn btn-secondary"
                   >
-                    <Settings className="h-4 w-4 mr-2" />
+                    <Settings className="h-4 w-4 mr-2 inline" />
                     {t("header.columns")}
-                  </Button>
+                  </button>
                 </>
               )}
             </div>
@@ -1245,9 +1245,13 @@ function App() {
               </div>
 
               {/* Clear All Button */}
-              <Button onClick={clearFilters} variant="outline" size="sm">
+              <button
+                onClick={clearFilters}
+                className="btn btn-secondary text-sm"
+              >
+                <X className="h-3 w-3 mr-1 inline" />
                 {t("filters.clearAll")}
-              </Button>
+              </button>
             </div>
 
             {/* Active Filters */}
@@ -1670,7 +1674,7 @@ function App() {
                 )}
               </div>
 
-              <DialogFooter className="flex gap-2 sm:justify-between pt-4 border-t">
+              <DialogFooter className="flex gap-2 sm:justify-between pt-4 border-t sticky bottom-0 bg-white mt-6 -mx-6 px-6 pb-6">
                 <div className="flex gap-2">
                   <button
                     onClick={closeTaskDetail}
@@ -1959,13 +1963,17 @@ function App() {
               </p>
             </div>
 
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={closeTaskForm}>
+            <DialogFooter className="sticky bottom-0 bg-white mt-6 -mx-6 px-6 pb-6 pt-4 border-t flex gap-2 justify-end">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={closeTaskForm}
+              >
                 {t("taskForm.cancel")}
-              </Button>
-              <Button type="submit" variant="default">
+              </button>
+              <button type="submit" className="btn btn-primary">
                 {isEditMode ? t("taskForm.save") : t("taskForm.create")}
-              </Button>
+              </button>
             </DialogFooter>
           </form>
         </DialogContent>
