@@ -1,54 +1,100 @@
 @import "tailwindcss";
 
-@theme {
+:root {
     /* Original color scheme from task-manager-old.html */
-    --color-bg-primary: #f5f5f5;
-    --color-bg-secondary: #ffffff;
-    --color-border: #e0e0e0;
-    --color-text-primary: #212121;
-    --color-text-secondary: #757575;
-    --color-accent: #2196f3;
-    --color-accent-hover: #1976d2;
+    --bg-primary: #f5f5f5;
+    --bg-secondary: #ffffff;
+    --border-color: #e0e0e0;
+    --text-primary: #212121;
+    --text-secondary: #757575;
+    --accent: #2196f3;
+    --accent-hover: #1976d2;
 
     /* Priority colors - original scheme */
-    --color-priority-default: #888888;
-    --color-priority-red: #ef4444;
-    --color-priority-orange: #f97316;
-    --color-priority-yellow: #eab308;
-    --color-priority-green: #22c55e;
-    --color-priority-blue: #3b82f6;
-    --color-priority-purple: #a855f7;
-    --color-priority-white: #e5e7eb;
-    --color-priority-black: #1f2937;
+    --priority-default: #888888;
+    --priority-red: #ef4444;
+    --priority-orange: #f97316;
+    --priority-yellow: #eab308;
+    --priority-green: #22c55e;
+    --priority-blue: #3b82f6;
+    --priority-purple: #a855f7;
+    --priority-white: #e5e7eb;
+    --priority-black: #1f2937;
 
     /* Shadows */
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
+    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 4px 8px rgba(0, 0, 0, 0.15);
 
-    --radius: 0.375rem;
+    --radius: 6px;
 }
 
 body {
     font-family:
         -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
         Arial, sans-serif;
-    background-color: var(--color-bg-primary);
-    color: var(--color-text-primary);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 0;
 }
 
-/* Custom task card styling - matching original */
-.task-card {
-    background-color: var(--color-bg-secondary);
+/* Override any transparent backgrounds */
+#root {
+    background-color: var(--bg-primary);
+    min-height: 100vh;
+}
+
+/* Header styling */
+.header,
+header {
+    background-color: var(--bg-secondary) !important;
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
+/* Button styling */
+button {
     border-radius: var(--radius);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--color-border);
-    padding: 1rem;
-    cursor: pointer;
-    transition: box-shadow 0.2s;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+button[class*="bg-blue"],
+button[class*="primary"] {
+    background-color: var(--accent) !important;
+    color: white !important;
+}
+
+button[class*="bg-blue"]:hover,
+button[class*="primary"]:hover {
+    background-color: var(--accent-hover) !important;
+    box-shadow: var(--shadow-hover);
+}
+
+button[class*="secondary"],
+button[class*="outline"] {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color);
+}
+
+button[class*="secondary"]:hover,
+button[class*="outline"]:hover {
+    background-color: #e8e8e8 !important;
+}
+
+/* Card styling */
+.task-card,
+[class*="card"],
+[class*="Card"] {
+    background-color: var(--bg-secondary) !important;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
 }
 
 .task-card:hover {
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-hover);
 }
 
 .task-card.dragging {
@@ -57,11 +103,39 @@ body {
 
 /* Kanban columns */
 .kanban-column {
-    background-color: var(--color-bg-secondary);
+    background-color: var(--bg-secondary) !important;
     border-radius: var(--radius);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border-color);
     padding: 1rem;
     min-width: 300px;
+}
+
+/* Modal/Dialog styling */
+[class*="dialog"],
+[class*="Dialog"],
+[class*="modal"] {
+    background-color: var(--bg-secondary) !important;
+    border-radius: var(--radius);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Input styling */
+input,
+textarea,
+select {
+    background-color: var(--bg-secondary) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius);
+    color: var(--text-primary) !important;
+    padding: 0.5rem;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
 }
 
 /* Priority badges - matching original colors exactly */
@@ -76,38 +150,90 @@ body {
 }
 
 .badge-priority.Red {
-    background-color: var(--color-priority-red);
+    background-color: var(--priority-red) !important;
+    color: white !important;
 }
 
 .badge-priority.Orange {
-    background-color: var(--color-priority-orange);
+    background-color: var(--priority-orange) !important;
+    color: white !important;
 }
 
 .badge-priority.Yellow {
-    background-color: var(--color-priority-yellow);
+    background-color: var(--priority-yellow) !important;
+    color: white !important;
 }
 
 .badge-priority.Green {
-    background-color: var(--color-priority-green);
+    background-color: var(--priority-green) !important;
+    color: white !important;
 }
 
 .badge-priority.Blue {
-    background-color: var(--color-priority-blue);
+    background-color: var(--priority-blue) !important;
+    color: white !important;
 }
 
 .badge-priority.Purple {
-    background-color: var(--color-priority-purple);
+    background-color: var(--priority-purple) !important;
+    color: white !important;
 }
 
 .badge-priority.White {
-    background-color: var(--color-priority-white);
-    color: var(--color-text-primary);
+    background-color: var(--priority-white) !important;
+    color: var(--text-primary) !important;
 }
 
 .badge-priority.Black {
-    background-color: var(--color-priority-black);
+    background-color: var(--priority-black) !important;
+    color: white !important;
 }
 
 .badge-priority.Default {
-    background-color: var(--color-priority-default);
+    background-color: var(--priority-default) !important;
+    color: white !important;
+}
+
+/* General badge styling */
+[class*="badge"],
+[class*="Badge"] {
+    background-color: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+    border-radius: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+/* Text colors */
+.text-primary {
+    color: var(--text-primary) !important;
+}
+
+.text-secondary {
+    color: var(--text-secondary) !important;
+}
+
+/* Fix any remaining transparent or wrong backgrounds */
+div[class*="bg-"],
+section[class*="bg-"] {
+    background-color: var(--bg-secondary);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
 }
