@@ -2,88 +2,155 @@
 
 > **[🇫🇷 Version française / French version](./readmeFR.md)**
 
-**Kanban task manager based on local Markdown files**
+**Privacy-first Kanban task manager that runs entirely in your browser**
 
-A complete task management system that transforms your Markdown files into an interactive Kanban board, without database or server. Perfect for developers, distributed teams and integration with AI assistants.
+A complete task management system contained in a single HTML file. No cloud, no tracking, no accounts. Your tasks live in plain Markdown files that you control.
 
 ![Application Overview](docs/images/app-overview.jpg)
-*Overview of the Markdown Task Manager interface with Kanban board, filters, and task management*
+*Interactive Kanban board with drag & drop, filters, and rich task management*
 
 ---
 
-## 🎯 What is it?
+## 🎯 Why Use This?
 
-Markdown Task Manager is a **standalone web application** contained in a single HTML file (`task-manager.html`). It uses the browser's File System Access API to read and write directly to your local Markdown files.
+**Complete Privacy & Control**
+- ✅ **100% local** - Your data never leaves your machine
+- ✅ **No tracking** - Zero telemetry, analytics, or accounts
+- ✅ **No vendor lock-in** - Plain text files you can edit anywhere
+- ✅ **Works offline** - No internet connection required
 
-### How it works
+**Developer-Friendly Workflow**
+- ✅ **Git-native** - Version control built in (commit, branch, merge)
+- ✅ **Plain Markdown** - Readable and editable in any text editor
+- ✅ **Portable** - Single HTML file, copy anywhere
+- ✅ **Fast** - Loads in < 100ms, handles 1000+ tasks
 
-```
-┌─────────────────────┐
-│  task-manager.html  │  ← Single HTML file
-└──────────┬──────────┘
-           │
-           ▼
-    ┌──────────────┐
-    │   Browser    │  ← Chrome, Edge, Opera
-    └──────┬───────┘
-           │
-           ▼
-    ┌──────────────┐
-    │  Your files  │  ← kanban.md + archive.md
-    │   Markdown   │     (on your disk)
-    └──────────────┘
-```
+**Free Forever**
+- ✅ **MIT License** - Use commercially, modify, distribute freely
+- ✅ **No subscriptions** - No paywalls, no feature limits
+- ✅ **Open Source** - All code readable and auditable
 
-**Advantages:**
-- ✅ **Single file**: Easy to copy, share and maintain
-- ✅ **100% local**: Your data stays on your machine
-- ✅ **Git compatible**: Versionable, syncable, diffable
-- ✅ **Plain text readable**: Editable with any editor
-- ✅ **No server**: Works entirely in the browser
-- ✅ **Multi-project**: Manage multiple projects with history
+![Task Management](docs/images/task-modal.jpg)
 
 ---
 
 ## ⚡ Quick Start
 
-### Prerequisites
-
-- **Compatible browser**: Chrome 86+, Edge 86+ or Opera 72+
-- File System Access API is not available on Firefox or Safari
-
-### Installation in 3 steps
+### 3 Steps to Get Running
 
 1. **Download** `task-manager.html` from this repository
-2. **Open it** in your browser (double-click)
-3. **Select** a folder to store your tasks
+2. **Open it** in Chrome, Edge, or Opera (double-click)
+3. **Select a folder** where you want to store your tasks
 
-That's all! 🎉
+That's it! The app creates `kanban.md` and `archive.md` automatically.
 
-### First use
+### Compatible Browsers
 
-On first launch:
-1. The application requests access to a folder
-2. If the folder is empty, it automatically creates:
-   - `kanban.md` - Your active tasks
-   - `archive.md` - Your archived tasks
-3. You can give a name to the project
-4. The project is remembered for next sessions
+- ✅ Chrome 86+
+- ✅ Edge 86+
+- ✅ Opera 72+
+- ✅ Brave 1.17+
+- ❌ Firefox (File System API not available)
+- ❌ Safari (File System API not available)
+
+**Why these browsers?** The app uses the File System Access API to read/write your local files directly.
 
 ---
 
-## 📦 Project Installation
+## ✨ Core Features
 
-### Option 1: Root installation (recommended)
+### 1. Interactive Kanban Board
 
-Simply copy 2 files to your project root:
+![Kanban Board](docs/images/kanban-board.jpg)
+
+- **Drag & Drop** - Move tasks between columns instantly
+- **Customizable columns** - Default: To Do → In Progress → Review → Done
+- **Smart counters** - See task counts per column
+- **Responsive layout** - Adapts to your screen size
+
+### 2. Rich Task Management
+
+![Task Creation](docs/images/task-modal.jpg)
+
+**Complete metadata:**
+- Priority levels (Critical, High, Medium, Low)
+- Categories (Frontend, Backend, Design, etc.)
+- Multi-user assignment (@alice, @bob)
+- Multiple tags (#bug, #feature, #urgent)
+- Dates (created, start, due, end)
+- Full descriptions with Markdown support
+
+**Subtasks:**
+- Create nested checklist items
+- Visual progress bar (3/5 completed)
+- Check/uncheck in real-time
+- Auto-save all changes
+
+### 3. Advanced Filtering
+
+![Filters](docs/images/filters.jpg)
+
+**4 filter types (combinable):**
+- 🔴 Priority - Critical, High, Medium, Low
+- 🔵 Tags - #bug, #urgent, #backend
+- 🟣 Categories - Frontend, Backend, Design
+- 🟢 Users - @alice, @bob
+
+**Smart autocomplete** - Remembers history, even from archived tasks
+
+### 4. Archive System
+
+![Archives](docs/images/archives.jpg)
+
+- Move completed tasks to `archive.md`
+- Search through archives
+- Restore tasks to Kanban
+- Organize by sections (sprints, months, etc.)
+
+### 5. Multi-Project Support
+
+![Multi-Project](docs/images/multi-project.jpg)
+
+- Manage up to 10 recent projects
+- Quick switcher in header
+- Custom project names
+- Auto-restore last project
+
+### 6. Global Search
+
+- Search across all tasks and archives
+- Real-time filtering as you type
+- Find by ID, keywords, or metadata
+- Filter results by column
+
+### 7. Live File Sync
+
+- Auto-save every change instantly
+- External edits detected (2-second polling)
+- Compatible with text editors, IDEs
+- Git-friendly workflow
+
+### 8. Multi-Language
+
+- English and French languages
+- Seamless language switching
+- Complete UI translation
+- Markdown files remain in your language
+
+---
+
+## 📦 Installation Guide
+
+### Option 1: Root Installation (Recommended)
+
+Copy 2 files to your project root:
 
 ```bash
 my-project/
-├── kanban.md          # ← Create this file (see template below)
-├── archive.md         # ← Create this file (see template below)
+├── kanban.md          # Your active tasks
+├── archive.md         # Your completed tasks
 ├── src/
-├── package.json
-└── README.md
+└── package.json
 ```
 
 **Minimal kanban.md template:**
@@ -98,10 +165,10 @@ my-project/
 **Tags**: #bug, #feature, #docs
 
 ## 📝 To Do
-
 ## 🚀 In Progress
-
 ## ✅ Done
+
+<!-- Config: Last Task ID: 000 -->
 ```
 
 **Minimal archive.md template:**
@@ -118,69 +185,28 @@ Then:
 2. Select the `my-project/` folder
 3. Start creating tasks!
 
-### Option 2: Subdirectory installation
+### Option 2: Subdirectory Installation
 
-If you prefer to isolate task files:
+Isolate task files in a subfolder:
 
 ```bash
 my-project/
-├── .tasks/            # ← or docs/tasks/, .kanban/, etc.
+├── .tasks/            # or docs/tasks/, .kanban/, etc.
 │   ├── kanban.md
 │   └── archive.md
 ├── src/
 └── package.json
 ```
 
-Then, select the `.tasks/` folder when opening the application.
+Select the `.tasks/` folder when opening the app.
 
-### Option 3: Add to .gitignore (optional)
+### Option 3: Centralized HTML (Recommended)
 
-If you don't want to version your tasks:
-
-```bash
-# .gitignore
-kanban.md
-archive.md
-# or
-.tasks/
-```
-
-**Note:** It is generally recommended to **version** task files to keep history and sync with the team.
-
----
-
-## 🗂️ HTML File Management
-
-You have 2 options to manage `task-manager.html`:
-
-### Option A: One copy per project
-
-```bash
-project-1/
-├── task-manager.html  # ← Local copy
-├── kanban.md
-└── archive.md
-
-project-2/
-├── task-manager.html  # ← Local copy
-├── kanban.md
-└── archive.md
-```
-
-**Advantages:**
-- ✅ Complete autonomy for each project
-- ✅ Works even if central file is modified
-- ✅ Can be versioned with the project
-
-**Disadvantages:**
-- ❌ HTML file duplication
-- ❌ Manual update in each project
-
-### Option B: Single centralized file (recommended)
+Keep one copy of `task-manager.html` for all projects:
 
 ```bash
 ~/tools/
-└── task-manager.html  # ← Single copy
+└── task-manager.html  # Single copy
 
 ~/projects/
 ├── project-1/
@@ -195,21 +221,11 @@ project-2/
 ```
 
 **Advantages:**
-- ✅ Single file to maintain
-- ✅ Automatic updates for all projects
-- ✅ Disk space savings
+- One file to maintain
+- Automatic updates for all projects
+- Disk space savings
 
-**Disadvantages:**
-- ❌ Dependency on external file
-
-**How to use it:**
-1. Keep `task-manager.html` in an accessible folder (e.g., `~/tools/`)
-2. Create a shortcut/bookmark in your browser
-3. Open it and select the desired project folder
-4. The application remembers the last 10 projects
-
-**Tip:** Create an alias to open it quickly:
-
+**Quick access alias:**
 ```bash
 # ~/.bashrc or ~/.zshrc
 alias tasks='open ~/tools/task-manager.html'  # macOS
@@ -219,752 +235,128 @@ alias tasks='start ~/tools/task-manager.html'  # Windows
 
 ---
 
-## 🤖 AI Assistants Integration
+## 🚀 Advanced Features
 
-This system is designed to work with AI assistants to achieve **complete traceability** of work done.
+### Auto-Reorganization
 
-### 🎯 Claude Code Integration (NEW!)
+**Feature:** Tasks automatically move to the correct column when you edit `**Status**` field in the markdown file.
 
-**Manus 2-Action Rule** - Automated research preservation for visual operations:
-
-```bash
-# Install the integration
-cp -r integrations/claude-code/ .claude/
-chmod +x .claude/hooks/pre-tool-use-2-action-reminder.py
-```
-
-**What you get:**
-- ✅ Automatic logging of WebFetch/WebSearch operations to task Notes
-- ✅ Reminder after every 2 operations to create findings file
-- ✅ Archive-safe logs that survive task lifecycle
-- ✅ Zero separate log files - everything inline in kanban.md
-
-**Learn more:** See [integrations/claude-code/README.md](integrations/claude-code/README.md)
-
----
-
-### Principle
-
-AI assistants (Claude, ChatGPT, Copilot, Gemini, etc.) can:
-1. ✅ Create tasks with strict format in `kanban.md`
-2. ✅ Break down complex tasks into subtasks
-3. ✅ Update progress in real time
-4. ✅ Document complete result in `**Notes**:`
-5. ✅ Reference tasks in Git commits (`TASK-XXX`)
-6. ✅ Archive on demand only (not automatically)
-7. ✅ **[Claude Code]** Auto-log visual research operations (Manus Rule)
-
-### Configuration
-
-Each AI has its own configuration file that should reference `AI_WORKFLOW.md`:
-
-| AI Assistant | Configuration File | Location |
-|--------------|-------------------|----------|
-| **Claude** (Anthropic) | `CLAUDE.md` | Project root |
-| **GitHub Copilot** (Microsoft) | `copilot-instructions.md` | `.github/` |
-| **OpenAI CLI** (GPT-4, GPT-3.5) | `OPENAI_CLI.md` | Project root |
-| **ChatGPT** (OpenAI Web/Desktop) | `CHATGPT.md` or Custom GPT | Root or Web |
-| **Gemini** (Google) | `GEMINI.md` or `instructions.md` | Root or `.gemini/` |
-| **Qwen** (Alibaba) | `QWEN.md` or `.qwenrc` | Project root |
-| **Codeium / Windsurf** | `instructions.md` | `.windsurf/` or `.codeium/` |
-
-**Available templates:**
-- `CLAUDE.md.exemple`
-- `COPILOT.md.exemple`
-- `CHATGPT.md.exemple`
-- `GEMINI.md.exemple`
-- `QWEN.md.exemple`
-- `CODEIUM.md.exemple`
-- `OPENAI_CLI.md.exemple`
-
-### Quick Installation
-
-**Step 1: Copy base files**
-
-```bash
-# Required files
-cp AI_WORKFLOW.md your-project/
-cp kanban.md your-project/
-cp archive.md your-project/
-```
-
-**Step 2: Configure your preferred AI**
-
-For **Claude**:
-```bash
-cp CLAUDE.md.exemple your-project/CLAUDE.md
-```
-
-**For Claude Code (CLI)**: A dedicated skill is available!
-```bash
-# Copy the skill directory (metadata lives in SKILL.md)
-cp -R .claude/skills/markdown-task-manager ~/.claude/skills/
-# Restart Claude Code to activate the skill
-```
-
-Claude Code reads the `SKILL.md` metadata inside this directory, which is why the whole folder must be copied. The `markdown-task-manager` skill enables Claude Code to automatically manage your tasks with the required strict format. Once installed globally, it's available across all your projects.
-
-**Using the Claude Code skill:**
-Once the skill is installed and Claude Code is restarted, the skill will automatically detect projects containing `kanban.md` and `archive.md`. You can simply ask:
-- "Create a task to implement authentication"
-- "Update TASK-007 with results"
-- "List all tasks in progress"
-- "Archive completed tasks"
-
-Claude Code will automatically follow the strict format and manage your tasks correctly.
-
-For **GitHub Copilot**:
-```bash
-mkdir -p your-project/.github
-cp COPILOT.md.exemple your-project/.github/copilot-instructions.md
-```
-
-For **ChatGPT**:
-```bash
-cp CHATGPT.md.exemple your-project/CHATGPT.md
-```
-
-For **Gemini**:
-```bash
-mkdir -p your-project/.gemini
-cp GEMINI.md.exemple your-project/.gemini/instructions.md
-```
-
-For **Windsurf / Codeium**:
-```bash
-mkdir -p your-project/.windsurf
-cp CODEIUM.md.exemple your-project/.windsurf/instructions.md
-```
-
-For **OpenAI CLI**:
-```bash
-cp OPENAI_CLI.md.exemple your-project/OPENAI_CLI.md
-```
-
-For **Qwen**:
-```bash
-cp QWEN.md.exemple your-project/QWEN.md
-```
-
-**Step 3: Final structure**
-
-```bash
-your-project/
-├── AI_WORKFLOW.md              # ← General guidelines for all AIs
-├── CLAUDE.md                   # ← Claude configuration (optional)
-├── .github/
-│   └── copilot-instructions.md # ← Copilot configuration (optional)
-├── .gemini/
-│   └── instructions.md         # ← Gemini configuration (optional)
-├── .windsurf/
-│   └── instructions.md         # ← Windsurf configuration (optional)
-├── kanban.md                   # ← Active tasks
-├── archive.md                  # ← Archived tasks
-└── src/
-```
-
-### First Use
-
-**For Claude:**
-```
-"Read CLAUDE.md and use the task system"
-```
-
-**For GitHub Copilot:**
-```
-@workspace Read AI_WORKFLOW.md and create a task for [feature]
-```
-
-**For ChatGPT:**
-1. Upload `CHATGPT.md` and `AI_WORKFLOW.md`
-2. Say: `"Read these files and use the task system"`
-
-**For Gemini:**
-```
-@workspace Read AI_WORKFLOW.md and plan [feature]
-```
-
-**For Windsurf / Codeium:**
-```
-Read AI_WORKFLOW.md and create TASK-001 for [feature]
-```
-
-**For OpenAI CLI:**
-```bash
-openai --system-file OPENAI_CLI.md "Read AI_WORKFLOW.md and create a task for [feature]"
-```
-
-**For Qwen:**
-```bash
-qwen --system-file QWEN.md "Read AI_WORKFLOW.md and plan [feature]"
-```
-
-### What AI does automatically
-
-The AI will:
-1. ✅ Read `AI_WORKFLOW.md` to understand format and workflow
-2. ✅ Create tasks in `kanban.md` with strict format
-3. ✅ Move tasks between columns according to progress
-4. ✅ Check off subtasks as they are completed
-5. ✅ Document complete result in `**Notes**:`
-6. ✅ Reference tasks in Git commits
-7. ✅ Leave completed tasks in "✅ Done" (archiving on request only)
-
-### Traceability and transparency
-
-With this system, you have:
-
-- 📝 **Complete history**: Every AI action is documented
-- 🔍 **Easy search**: Grep in Markdown files
-- 📊 **Statistics**: Velocity, time spent, progress
-- 🔗 **Git links**: Commits reference tasks
-- 👥 **Collaboration**: Entire team sees what AI does
-- 📦 **Archives**: Nothing is lost, everything is archived
-
-### User Commands
-
-```bash
-# Planning
-"Plan [feature]"
-"Create roadmap for 3 months"
-
-# Execution
-"Do TASK-XXX"
-"Continue TASK-XXX"
-
-# Tracking
-"Where are we?"
-"Weekly status"
-
-# Modifications
-"Break down TASK-XXX"
-"Add subtask to TASK-XXX"
-
-# Search
-"Search in archives: [keyword]"
-
-# Maintenance
-"Archive completed tasks"
-```
-
----
-
-## ✨ Application Features
-
-### 1. Interactive Kanban View
-
-![Kanban Board](docs/images/kanban-board.jpg)
-*Interactive Kanban board with drag & drop, customizable columns, and task counters*
-
-- **Customizable columns**: Create and organize your own columns
-  - Default: 📝 To Do, 🚀 In Progress, 👀 Review, ✅ Done
-  - Modifiable via "⚙️ Columns" button
-- **Drag & Drop**: Move tasks between columns by dragging
-- **Adaptive layout**: Centered columns using full screen width
-- **Counters**: Number of tasks displayed in each column
-
-### 2. Complete Task Management
-
-![Task Creation Modal](docs/images/task-modal.jpg)
-*Complete task creation and editing modal with all metadata fields and subtasks*
-
-**Creation:**
-- Complete form with all fields
-- Auto-generated ID (TASK-XXX)
-- Required field validation
-
-**Rich metadata:**
-- **Title**: Unique identifier and short description
-- **Priority**: Critical, High, Medium, Low (color coded)
-- **Category**: Customizable (Frontend, Backend, etc.)
-- **Assignment**: Multiple users possible (@user1, @user2)
-- **Tags**: Multiple tags (#bug, #feature, etc.)
-- **Dates**: Creation, start, due, end
-- **Description**: Free text with Markdown support
-
-**Subtasks:**
-- Create, edit, delete subtasks
-- Check/uncheck in real time
-- Visual progress bar
-- Counter (e.g., "3/5 subtasks completed")
-
-**Editing:**
-- Detailed editing modal for each task
-- Modification of all fields
-- Instant preview
-- Auto-save
-
-### 3. Advanced Filters
-
-![Advanced Filters](docs/images/filters.jpg)
-*Advanced filtering system with priority, tags, categories, and users filters*
-
-**4 types of cumulative filters:**
-
-1. **Priority** 🔴🟡🟢 (color-coded badges)
-   - Filter by task priority level
-   - Options: Critical, High, Medium, Low
-   - Quickly identify urgent tasks
-
-2. **Tags** 🔵 (blue bubbles)
-   - Filter by one or more tags
-   - Example: #bug, #urgent, #backend
-
-3. **Categories** 🟣 (purple bubbles)
-   - Filter by task category
-   - Example: Frontend, Backend, Design
-
-4. **Users** 🟢 (green bubbles)
-   - Filter by assignment
-   - Example: @alice, @bob
-
-**How it works:**
-- Select a filter via dropdowns
-- Click on a badge in a task to filter instantly
-- Combine multiple filters (AND logic)
-- Remove a filter individually (✕ on bubble)
-- Clear all filters at once
-
-**Smart autocomplete:**
-- Filters remember history
-- Even archived values remain available
-- Contextual suggestions during input
-
-### 4. Archive System
-
-![Archive View](docs/images/archives.jpg)
-*Archive view showing completed tasks with search and restoration capabilities*
-
-**Archiving:**
-- Move completed tasks to `archive.md`
-- Manual archiving (button in task)
-- Organization by sections (e.g., by month, by sprint)
-
-**Consultation:**
-- Dedicated archive view ("📦 Archives" button)
-- Search in archives
-- Detailed display of each archived task
-
-**Restoration:**
-- Restore a task to kanban
-- Task returns to its original column
-- Metadata preserved
-
-**Persistent history:**
-- Tags/categories/users from archived tasks remain in autocomplete
-- Allows maintaining consistency between projects
-
-### 5. Global Search
-
-**Powerful search functionality:**
-- Search across all active tasks
-- Search through archived tasks
-- Real-time filtering as you type
-- Search in task titles, descriptions, and metadata
-
-**Search features:**
-- Find tasks by ID (e.g., "TASK-042")
-- Search by keywords in title or description
-- Filter results by column
-- View archived tasks matching your search
-
-**Accessibility:**
-- Quick access via search button in header
-- Dedicated search modal
-- Clear results presentation
-
-### 6. Interface Translation
-
-**Multi-language support:**
-- English and French languages available
-- Language selector in application settings
-- Complete interface translation
-- Seamless language switching
-
-**Translated elements:**
-- All UI buttons and labels
-- Form fields and placeholders
-- Column names and status messages
-- Help text and instructions
-- Error messages and notifications
-
-**Note:** The markdown files (kanban.md, archive.md) content remains in your chosen language.
-
-### 7. Multi-Project
-
-![Multi-Project Selector](docs/images/multi-project.jpg)
-*Quick project switcher showing recent projects with custom names*
-
-**Project management:**
-- Memorization of last 10 projects used
-- Quick selector in header (dropdown)
-- Custom names for each project
-- Memorized file paths
-
-**Navigation:**
-- Instant project change
-- Auto-restore last project on launch
-- "✏️" button to rename current project
-
-**Storage:**
-- Uses IndexedDB to store directory handles
-- No need to re-select folder each time
-- Persistent browser permissions
-
-### 8. Auto-Save
-
-- **Immediate save**: Each modification is written instantly
-- **No "Save" button**: Everything is automatic
-- **Synchronization**: Markdown files always stay up to date
-- **External editing compatible**: You can edit files manually
-
-### 9. Other Features
-
-- **Export**: Your Markdown files are already exported!
-- **Theme**: Modern and clean interface
-- **Responsive**: Works on different screen sizes
-- **Keyboard shortcuts**: Quick navigation (coming soon)
-- **Dark mode**: Light/dark toggle (coming soon)
-
----
-
-## 📁 File Structure
-
-### Main files
-
-```
-your-project/
-├── kanban.md          # Active tasks (required)
-├── archive.md         # Archived tasks (required)
-├── AI_WORKFLOW.md     # Guidelines for AI (optional)
-└── [AI file].md       # Specific AI configuration (optional)
-```
-
-### Content of kanban.md
-
+**Example:**
 ```markdown
-# Kanban Board
+### TASK-042 | My Task
+**Status**: in-progress  # Change this in your text editor
+```
 
-<!-- Config: Last Task ID: 42 -->
+The app detects the change and moves the task to "🚀 In Progress" column automatically.
 
-## ⚙️ Configuration
+**Benefits:**
+- Works with external editors (VS Code, Vim, Emacs)
+- Saves time on manual dragging
+- Consistent with markdown-first workflow
 
-**Columns**: 📝 To Do (todo) | 🚀 In Progress (in-progress) | ✅ Done (done)
-**Categories**: Frontend, Backend, Design
-**Users**: @alice (Alice Martin), @bob (Bob Smith)
-**Tags**: #bug, #feature, #docs, #refactor
+### XSS Protection
+
+All markdown descriptions are sanitized with DOMPurify before rendering:
+
+```javascript
+// Sanitize user content
+DOMPurify.sanitize(html, {
+  ALLOWED_TAGS: ['h1', 'h2', 'h3', 'p', 'strong', 'em', 'code', 'pre', 'ul', 'li', 'a', 'br'],
+  ALLOWED_ATTR: ['href', 'target', 'class']
+});
+```
+
+Safe to use with any content, including externally-sourced tasks.
 
 ---
 
-## 📝 To Do
-
-### TASK-001 | My first task
-**Priority**: High | **Category**: Frontend | **Assigned**: @alice
-**Created**: 2025-01-20 | **Due**: 2025-02-01
-**Tags**: #feature #ui
-
-Task description...
-
-**Subtasks**:
-- [ ] First subtask
-- [x] Completed subtask
-- [ ] Last subtask
-
-## 🚀 In Progress
-
-### TASK-002 | Other task
-...
-
-## ✅ Done
-
-### TASK-003 | Completed task
-...
-```
-
-### Content of archive.md
-
-```markdown
-# Task Archive
-
-> Archived tasks from project My Project
-
-## ✅ January 2025
-
-### TASK-042 | Implement notification system
-**Priority**: High | **Category**: Backend | **Assigned**: @alice
-**Created**: 2025-01-15 | **Started**: 2025-01-18 | **Finished**: 2025-01-22
-**Tags**: #feature #notifications
-
-Real-time notification system with WebSockets.
-
-**Subtasks**:
-- [x] Setup WebSocket server
-- [x] Create REST API
-- [x] Implement email sending
-- [x] Notifications UI
-- [x] End-to-end tests
-
-**Notes**:
-
-**Result**:
-✅ Functional notification system with WebSocket, REST API and emails.
-
-**Modified files**:
-- src/websocket/server.js (lines 1-150)
-- src/api/notifications.js (lines 20-85)
-- src/ui/NotificationPanel.jsx (lines 1-200)
-
-**Technical decisions**:
-- Socket.io for WebSockets (simpler than native ws)
-- SendGrid for emails (100/day free quota)
-- 30-day history in MongoDB
-
-**Tests performed**:
-- ✅ 100 simultaneous connections OK
-- ✅ Automatic reconnection after disconnect
-- ✅ Emails sent in < 2s
-
----
-
-## ✅ December 2024
-
-### TASK-001 | Old archived task
-...
-```
-
----
-
-## 🎨 User Interface
-
-### Header
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│ 📋 Task Manager  [Project ▼] [✏️] [📁] [➕] [📦] [⚙️]         │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-Buttons:
-- **[Project ▼]**: Recent project selector
-- **[✏️]**: Rename current project
-- **[📁 Open folder]**: Select/change folder
-- **[➕ New task]**: Create a task
-- **[📦 Archives]**: View archived tasks
-- **[⚙️ Columns]**: Manage Kanban columns
-
-### Filter bar
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  Tags: [Select ▼] [+]   Category: [Select ▼] [+]   User: [▼]   │
-│                                                                   │
-│  🔵 #bug ✕    🔵 #urgent ✕    🟣 Frontend ✕    🟢 @alice ✕     │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### Kanban
-
-```
-┌──────────────┬──────────────┬──────────────┬──────────────┐
-│ 📝 To Do     │ 🚀 Progress  │ 👀 Review    │ ✅ Done      │
-│    (3)       │    (2)       │    (1)       │    (5)       │
-├──────────────┼──────────────┼──────────────┼──────────────┤
-│ ┌──────────┐ │ ┌──────────┐ │ ┌──────────┐ │ ┌──────────┐ │
-│ │ TASK-001 │ │ │ TASK-004 │ │ │ TASK-007 │ │ │ TASK-008 │ │
-│ │ Title... │ │ │ Title... │ │ │ Title... │ │ │ Title... │ │
-│ │          │ │ │          │ │ │          │ │ │          │ │
-│ │ 🔴 Crit. │ │ │ 🟡 Med.  │ │ │ 🟢 Low   │ │ │ ✅ Done  │ │
-│ │ 🟣 Front │ │ │ 🟣 Back  │ │ │ 🟣 Front │ │ │ 🟣 Back  │ │
-│ │ 🟢 @alice│ │ │ 🟢 @bob  │ │ │ 🟢 @alice│ │ │ 🟢 @alice│ │
-│ │          │ │ │          │ │ │          │ │ │          │ │
-│ │ ▓▓▓░░ 3/5│ │ │ ▓▓▓▓░ 4/5│ │ │ ▓▓▓▓▓ 5/5│ │ │          │ │
-│ │   [✏️]   │ │ │   [✏️]   │ │ │   [✏️]   │ │ │   [✏️]   │ │
-│ └──────────┘ │ └──────────┘ │ └──────────┘ │ └──────────┘ │
-│              │              │              │              │
-│ ┌──────────┐ │              │              │              │
-│ │ TASK-002 │ │              │              │              │
-│ │ ...      │ │              │              │              │
-│ └──────────┘ │              │              │              │
-└──────────────┴──────────────┴──────────────┴──────────────┘
-```
-
-### Task card (details)
-
-```
-┌──────────────────────────────────────────────┐
-│ TASK-042 | Implement notification system     │
-├──────────────────────────────────────────────┤
-│ Priority: 🟡 High                            │
-│ Category: 🟣 Backend                         │
-│ Assigned: 🟢 @alice, @bob                    │
-│ Created: 2025-01-15                          │
-│ Due: 2025-02-01                              │
-│ Tags: 🔵 #feature #notifications             │
-├──────────────────────────────────────────────┤
-│ Detailed task description...                 │
-│                                              │
-│ Subtasks (3/5):                             │
-│ ☑ Setup WebSocket server                    │
-│ ☑ Create REST API                           │
-│ ☑ Implement email sending                   │
-│ ☐ Notifications UI                          │
-│ ☐ End-to-end tests                          │
-├──────────────────────────────────────────────┤
-│ [Edit] [Archive] [Delete] [Close]           │
-└──────────────────────────────────────────────┘
-```
-
----
-
-## 🔧 Configuration and Customization
+## 🎨 Customization
 
 ### Kanban Columns
 
-Customize your columns in `kanban.md`:
+Edit `kanban.md`:
 
 ```markdown
-**Columns**: 📝 Backlog (backlog) | 🔍 Analysis (analysis) | 🚀 Dev (dev) | 👀 Review (review) | ✅ Done (done)
+**Columns**: 📝 Backlog | 🔍 Analysis | 🚀 Dev | 👀 Review | ✅ Done
 ```
 
-Format: `Emoji Name (id) | ...`
-
-Examples:
-- Simple development: `To Do | In Progress | Done`
+**Examples:**
+- Simple: `To Do | In Progress | Done`
 - Scrum: `Backlog | Sprint | In Progress | Review | Done`
-- Extended Kanban: `Icebox | Backlog | Analysis | Dev | QA | Deploy | Done`
+- Extended: `Icebox | Backlog | Analysis | Dev | QA | Deploy | Done`
 
 ### Categories
 
-Define your project categories:
+Adapt to your project type:
 
 ```markdown
-**Categories**: Frontend, Backend, Database, DevOps, Design, Tests, Documentation
+# Web development
+**Categories**: Frontend, Backend, Database, DevOps
+
+# Mobile development
+**Categories**: iOS, Android, Backend, Design
+
+# Data science
+**Categories**: ETL, Analysis, ML, Visualization
 ```
-
-Adapt to your context:
-- Web: `UI, API, Database, DevOps`
-- Mobile: `iOS, Android, Backend, Design`
-- Data: `ETL, Analysis, ML, Visualization`
-
-### Users
-
-List team members:
-
-```markdown
-**Users**: @alice (Alice Martin), @bob (Bob Smith), @charlie (Charlie Brown)
-```
-
-Format: `@username (Full Name)`
 
 ### Priorities
 
-Define priority levels with emojis for visual identification:
+Use any emoji system:
 
 ```markdown
-**Priorities**: 🔴 Critical | 🟠 High | 🟡 Medium | 🟢 Low
-```
-
-**Valid emoji icons:**
-Priorities support a wide range of emojis that automatically map to colors. You can use any of these:
-
-- **Circles**: 🔴 🟠 🟡 🟢 🔵 🟣 ⚪ ⚫
-- **Squares**: 🟥 🟧 🟨 🟩 🟦 🟪
-- **Hearts**: ❤️ 🧡 💛 💚 💙 💜 🤍 🖤
-- **Diamonds**: 🔶 🔷 🔸 🔹
-- **Stars**: ⭐ 🌟
-- **Flags**: 🚩 🏴 🏳️
-- **Alerts**: ⚠️ 🔥 💥 ⚡
-- **Arrows**: ⬆️ ➡️ ⬇️
-- **Symbols**: ❗ ❓ ❕ ❔
-
-**Examples of priority systems:**
-```markdown
-# Traditional severity levels
+# Traditional
 **Priorities**: 🔴 Critical | 🟠 High | 🟡 Medium | 🟢 Low
 
-# Urgency indicators
+# Urgency-based
 **Priorities**: 🔥 Urgent | ⚡ Important | ⭐ Normal | ⬇️ Low
 
 # Custom workflow
 **Priorities**: 🚩 Blocker | ⚠️ Must Have | 💡 Nice to Have | 💤 Someday
 ```
 
-**Note:** The emoji determines the badge color in the UI. For example, 🔴 displays as red, 🟢 as green, etc.
-
 ### Tags
 
 Create an adapted tag system:
 
 ```markdown
-**Tags**: #bug, #feature, #refactor, #docs, #urgent, #blocked, #tech-debt
-```
+# By type
+**Tags**: #bug, #feature, #refactor, #docs
 
-Examples of tag systems:
-- By type: `#bug`, `#feature`, `#refactor`, `#docs`
-- By priority: `#urgent`, `#important`, `#nice-to-have`
-- By status: `#blocked`, `#waiting`, `#in-review`
-- By domain: `#security`, `#performance`, `#ux`, `#a11y`
+# By status
+**Tags**: #blocked, #waiting, #in-review
+
+# By domain
+**Tags**: #security, #performance, #ux, #a11y
+```
 
 ---
 
 ## 🎯 Use Cases
 
-### 1. Software Development
+### Software Development
 
-**Backlog management:**
-- Create tasks from GitHub issues
-- Plan sprints
-- Track team velocity
+- **Backlog management** - Plan sprints, track velocity
+- **Bug tracking** - Priority + category + assignment
+- **Code reviews** - Dedicated review column with checklists
 
-**Bug tracking:**
-- Tag `#bug` + critical priority
-- Assignment to developers
-- Resolution documentation
+### Project Management
 
-**Code reviews:**
-- Dedicated column "👀 Review"
-- Review checklist in subtasks
-- Archiving with technical decisions
+- **Product roadmap** - Features with milestones
+- **Team collaboration** - Multi-user, git sync
+- **Retrospectives** - Search archives, analyze velocity
 
-### 2. Project Management
+### Personal Productivity
 
-**Product roadmap:**
-- Create tasks for each feature
-- Deadlines and milestones
-- Progress tracking
+- **Advanced Todo lists** - Organize by project, deadlines
+- **Side projects** - Track multiple projects
+- **Journaling** - Tasks as entries, tags to categorize
 
-**Team collaboration:**
-- Multi-user assignment
-- Filter by person
-- Real-time visibility via Git
-
-**Retrospectives:**
-- Search in archives
-- Statistics on completed tasks
-- Velocity analysis
-
-### 3. Personal Use
-
-**Advanced ToDo lists:**
-- Organize tasks by project
-- Subtasks to break down
-- Archives for history
-
-**Personal projects:**
-- Track side-projects
-- Notes and learnings
-- Goals with deadlines
-
-**Journaling:**
-- Task = journal entry
-- Tags to categorize
-- Archives = complete journal
-
-### 4. Distributed Teams
+### Distributed Teams
 
 **Git synchronization:**
 ```bash
-git pull origin main          # Get updates
+git pull origin main          # Get team updates
 # Work in the application
 git add kanban.md archive.md
 git commit -m "Update tasks"
@@ -973,544 +365,111 @@ git push origin main          # Share with team
 
 **Conflict resolution:**
 ```bash
-# In case of conflict on kanban.md
+# Simple Markdown format makes conflicts easy to resolve
 git checkout --theirs kanban.md  # Take remote version
-# or
-git checkout --ours kanban.md    # Keep local version
-# or resolve manually (simple Markdown format)
-```
-
-**Branch workflow:**
-```bash
-# Create a branch per feature
-git checkout -b feature/TASK-042-notifications
-
-# Reference task in commits
-git commit -m "feat: Add WebSocket server (TASK-042 - 1/5)"
-git commit -m "feat: Add notification API (TASK-042 - 2/5)"
-
-# Merge and archive
-git checkout main
-git merge feature/TASK-042-notifications
-# Move TASK-042 to "✅ Done" then archive
+# or resolve manually
 ```
 
 ---
 
-## 🌐 Compatibility
+## 🔒 Security & Privacy
 
-### Supported Browsers
+- ✅ **Zero network requests** - Nothing sent to internet
+- ✅ **No telemetry** - No analytics or tracking
+- ✅ **No accounts** - No authentication required
+- ✅ **Explicit permissions** - You control file access
+- ✅ **Open source** - All code readable in HTML file
+- ✅ **No CDN** - No external resources loaded
+- ✅ **Works offline** - No internet dependency
 
-| Browser | Minimum version | Support | Notes |
-|---------|----------------|---------|-------|
-| Chrome  | 86+            | ✅ Full | Recommended |
-| Edge    | 86+            | ✅ Full | Recommended |
-| Opera   | 72+            | ✅ Full | OK |
-| Brave   | 1.17+          | ✅ Full | OK |
-| Firefox | -              | ❌ Not supported | API not available |
-| Safari  | -              | ❌ Not supported | API not available |
+**Required permissions:**
+- File Read/Write (to access your markdown files)
+- IndexedDB (to remember recent projects, local to browser)
 
-**Note:** File System Access API is required. It is not available on Firefox and Safari.
-
-### Operating Systems
-
-- ✅ **Windows** 10/11
-- ✅ **macOS** 10.15+ (with Chrome/Edge)
-- ✅ **Linux** (all distributions with Chrome/Edge/Opera)
-- ✅ **Chrome OS**
-- ❌ iOS/iPadOS (Safari only)
-- ❌ Android (limited support)
-
-### Performance
-
-- **HTML file**: ~144 KB (everything included, no dependencies)
-- **Loading**: Instant (< 100ms)
-- **Parsing**: < 50ms for 1000 tasks
-- **Memory**: ~10 MB (for 500 tasks)
+**No other permissions required.**
 
 ---
 
-## 📚 Additional Documentation
+## 🧑‍💻 Developer Documentation
 
-### In this repository
+### Architecture
 
-- **`AI_WORKFLOW.md`**: Complete guidelines for AI assistants
-- **`/examples/`**: Examples of kanban.md and archive.md files
-- **`/examples/README.md`**: Detailed Markdown format
+**Modern React stack, single-file output:**
+- React 18 (UI framework)
+- Vite (build tool)
+- Lucide React (icons)
+- Tailwind CSS (styling)
+- DOMPurify (XSS protection)
 
-### Templates
-
-Download blank templates:
-- [`kanban.md`](/examples/kanban.md) - Base template
-- [`archive.md`](/examples/archive.md) - Archive template
-- [`AI_WORKFLOW.md`](/AI_WORKFLOW.md) - Guidelines for AIs
-- AI configuration templates: `CLAUDE.md.exemple`, `COPILOT.md.exemple`, etc.
-
-### Markdown Format
-
-Detailed format documentation in [`/examples/README.md`](/examples/README.md):
-- Task structure
-- Required/optional metadata
-- Subtasks and notes
-- Kanban configuration
-- Complete examples
-
----
-
-## 🔒 Security and Privacy
-
-- ✅ **100% local data**: Nothing is sent to the Internet
-- ✅ **No tracking**: No telemetry, no analytics
-- ✅ **No account**: No authentication required
-- ✅ **Explicit permissions**: User controls file access
-- ✅ **Open code**: All JavaScript code is readable in HTML file
-- ✅ **No CDN**: No external resources loaded
-- ✅ **Offline**: Works without Internet connection
-
-### Required permissions
-
-The application only requests:
-- **File Read/Write**: To access your Markdown files
-- **IndexedDB**: To remember recent projects (local to browser)
-
-No network, webcam, microphone or other permissions are required.
-
----
-
-## 🚀 Advanced Getting Started
-
-### With Git
-
-```bash
-# Clone repository
-git clone https://github.com/your-username/markdown-task-manager.git
-cd markdown-task-manager
-
-# Open application
-open task-manager.html  # macOS
-xdg-open task-manager.html  # Linux
-start task-manager.html  # Windows
-
-# Or host locally (optional)
-python -m http.server 8000
-# Then open http://localhost:8000/task-manager.html
-```
-
-### Installation on a new project
-
-```bash
-# Create a new project with task system
-mkdir my-project
-cd my-project
-git init
-
-# Copy necessary files
-cp /path/to/kanban.md .
-cp /path/to/archive.md .
-cp /path/to/AI_WORKFLOW.md .        # Optional (for AI)
-cp /path/to/CLAUDE.md.exemple CLAUDE.md   # Optional (for Claude)
-
-# First commit
-git add .
-git commit -m "chore: Initialize task management system"
-
-# Open application
-open /path/to/task-manager.html
-# Select my-project/ folder
-```
-
-### Migration from existing system
-
-**From Trello/Jira/Linear:**
-1. Export your tasks to CSV
-2. Use a script to convert to Markdown format
-3. Import into `kanban.md`
-
-**From GitHub Issues:**
-```bash
-# Use GitHub CLI
-gh issue list --state all --json number,title,body,labels
-# Convert to Markdown Task Manager format
-```
-
-**From Notion/Obsidian:**
-1. Export to Markdown
-2. Adjust format to match template
-3. Import into application
-
----
-
-## 🤝 Contribution
-
-Contributions welcome! Here's how to help:
-
-### Report a bug
-
-1. Check that bug doesn't already exist in issues
-2. Create an issue with:
-   - Bug description
-   - Steps to reproduce
-   - Browser and version
-   - Screenshots if applicable
-
-### Propose a feature
-
-1. Create an issue with `enhancement` tag
-2. Describe feature and its usefulness
-3. Wait for feedback before implementing
-
-### Contribute code
-
-1. Fork the repository
-2. Create a branch (`git checkout -b feature/my-feature`)
-3. Modify `task-manager.html` (everything is in this file)
-4. Test in Chrome, Edge and Opera
-5. Commit (`git commit -m "feat: Add feature"`)
-6. Push (`git push origin feature/my-feature`)
-7. Create a Pull Request
-
-### Guidelines
-
-- **Readability**: Commented and structured code
-- **Performance**: Optimize for 1000+ tasks
-- **Compatibility**: Test on Chrome, Edge, Opera
-- **Accessibility**: Follow ARIA standards
-- **Documentation**: Update README if necessary
-
----
-
-## 📝 Roadmap
-
-### Current version: 1.0
-
-- ✅ Interactive Kanban
-- ✅ Complete task management
-- ✅ Advanced filters
-- ✅ Archive system
-- ✅ Multi-project
-- ✅ Auto-save
-- ✅ AI integration
-
-### Next versions
-
-**v1.1 (Short term)**
-- [ ] Dark mode
-- [ ] Keyboard shortcuts
-- [ ] PDF/HTML export
-- [ ] Visual statistics (charts)
-
-**v1.2 (Medium term)**
-- [ ] File drag & drop (attachments)
-- [ ] Mentions in comments (@user)
-- [ ] Reminder notifications (deadlines)
-- [ ] Task templates
-
-**v2.0 (Long term)**
-- [ ] Complete offline mode (Service Worker)
-- [ ] Cross-device synchronization (via automatic Git)
-- [ ] System plugin (IDE integration)
-- [ ] Optional REST API (local server)
-
----
-
-## 📄 License
-
-Mozilla Public License 2.0 (MPL-2.0)
-
-This project is distributed under MPL-2.0 license. You are free to:
-- Use code in commercial and private projects
-- Modify source code
-- Distribute modified or unmodified code
-
-Under condition of:
-- Publishing modifications to files under MPL-2.0 license
-- Including a copy of MPL-2.0 license
-- Preserving copyright notices
-
-See `LICENSE` file for more details.
-
----
-
-## 🙏 Acknowledgments
-
-Thanks to open-source community for:
-- File System Access API (Google Chrome team)
-- Markdown standards (CommonMark)
-- User feedback and suggestions
-
----
-
-## 📞 Support
-
-**Questions?** Open an issue on GitHub
-
-**Bugs?** Create an issue with `bug` tag
-
-**Suggestions?** Create an issue with `enhancement` tag
-
----
-
-**Created with ❤️ for those who love simplicity, control of their data, and transparency**
-
----
-
-## 🎓 Getting Started Guide: Complete Scenarios
-
-### Scenario 1: Solo developer on personal project
-
-```bash
-# 1. Download task-manager.html to ~/tools/
-cd ~/tools
-# [Download task-manager.html]
-
-# 2. Create a new project
-cd ~/projects
-mkdir my-app
-cd my-app
-git init
-
-# 3. Create task files
-cat > kanban.md << 'EOF'
-# Kanban Board
-
-## ⚙️ Configuration
-
-**Columns**: 📝 To Do | 🚀 In Progress | ✅ Done
-**Categories**: Frontend, Backend, Database
-**Users**: @me
-**Tags**: #feature, #bug, #refactor
-
-## 📝 To Do
-## 🚀 In Progress
-## ✅ Done
-
-<!-- Config: Last Task ID: 000 -->
-EOF
-
-cat > archive.md << 'EOF'
-# Task Archive
-## ✅ Archives
-EOF
-
-# 4. Open application
-open ~/tools/task-manager.html
-
-# 5. Select my-app/ folder
-
-# 6. Create your first task!
-```
-
-### Scenario 2: Team migrating from Trello
-
-```bash
-# 1. Install for team
-git clone https://github.com/team/project.git
-cd project
-
-# 2. Add task system
-cp ~/downloads/kanban.md .
-cp ~/downloads/archive.md .
-git add kanban.md archive.md
-git commit -m "chore: Add task management system"
-git push
-
-# 3. Each team member:
-# - Downloads task-manager.html
-# - Clone/pull project
-# - Opens task-manager.html
-# - Selects project/ folder
-
-# 4. Daily workflow:
-git pull                    # Get updates
-# [Work in app]
-git add kanban.md
-git commit -m "Update tasks"
-git push                    # Share with team
-```
-
-### Scenario 3: Integration with Claude/ChatGPT
-
-```bash
-# 1. Complete installation with AI
-cd my-project
-cp ~/downloads/kanban.md .
-cp ~/downloads/archive.md .
-cp ~/downloads/AI_WORKFLOW.md .
-cp ~/downloads/CLAUDE.md.exemple CLAUDE.md
-
-# 2. First session with Claude
-# Say: "Read CLAUDE.md and create a task to implement an auth system"
-
-# 3. Claude will automatically:
-# - Create TASK-001 in kanban.md
-# - Break down into subtasks
-# - Update as it progresses
-# - Document result
-
-# 4. You can visualize in app
-open ~/tools/task-manager.html
-# [Select my-project/]
-# See TASK-001 with all subtasks checked!
-```
-
----
-
-## 👨‍💻 Developer Documentation
-
-### Architecture Overview
-
-This project has been completely rewritten using **React** for better maintainability and developer experience, while still outputting a single, standalone HTML file.
-
-**Key Technologies:**
-- **React 18** - Modern UI framework with hooks
-- **Vite** - Lightning-fast build tool
-- **Lucide React** - Consistent icon system
-- **Tailwind CSS** - Utility-first styling
-- **DOMPurify** - XSS protection for markdown rendering
-
-**Build Output:**
+**Build output:**
 - Single `dist/index.html` file (~380KB)
-- All JavaScript and CSS inlined
-- No external dependencies at runtime
-- Works offline without any server
+- All JS and CSS inlined
+- No runtime dependencies
+- Works offline
+
+### Getting Started
+
+```bash
+# Clone and setup
+git clone https://github.com/gribdesbois/markdown-task-manager.git
+cd MarkdownTaskManager
+npm install
+
+# Development
+npm run dev          # Start dev server with HMR
+npm run build        # Build single HTML file
+npm run preview      # Preview production build
+```
 
 ### Project Structure
 
 ```
 MarkdownTaskManager/
 ├── src/
-│   ├── App.jsx                 # Main application component
-│   ├── main.jsx                # React entry point
-│   ├── style.css               # Global styles with theme system
-│   ├── components/
-│   │   └── ui/                 # Reusable UI components
-│   │       ├── button.jsx
-│   │       ├── dialog.jsx
-│   │       ├── input.jsx
-│   │       ├── select.jsx
-│   │       └── ...
+│   ├── App.jsx                 # Main component
+│   ├── components/ui/          # Reusable UI components
 │   ├── utils/
-│   │   ├── fileSystem.js       # File System Access API wrapper
-│   │   ├── fileWatcher.js      # Live file watching & sync
-│   │   ├── markdown.js         # Markdown parsing & generation
+│   │   ├── fileSystem.js       # File System Access API
+│   │   ├── fileWatcher.js      # Live file watching
+│   │   ├── markdown.js         # Parsing & generation
 │   │   └── translations.js     # i18n system
-│   └── theme/
-│       └── index.js            # Global theme configuration
+│   └── style.css               # Global styles
 ├── dist/
 │   └── index.html              # Built single-file app
-├── vite.config.js              # Vite configuration
-├── package.json                # Dependencies
-└── README.md                   # This file
+└── vite.config.js              # Build configuration
 ```
 
-### Getting Started as a Developer
+### Key Implementation Details
 
-#### Prerequisites
-
-- **Node.js** 18+ (LTS recommended)
-- **npm** 9+ (comes with Node.js)
-- Compatible browser: Chrome 86+, Edge 86+, or Opera 72+
-
-#### Clone and Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/gribdesbois/markdown-task-manager.git
-cd MarkdownTaskManager
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-```
-
-The app will open at `http://localhost:5173` with hot module replacement (HMR).
-
-#### Development Workflow
-
-```bash
-# Start dev server with HMR
-npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
-
-# Lint code
-npm run lint
-```
-
-### Key Features & Implementation
-
-#### 1. Automatic Task Reorganization
-
-**Feature:** Tasks automatically move to the correct section when the `**Status**` field is changed in the markdown file.
-
-**How it works:**
+**1. Auto-Reorganization:**
 ```javascript
-// In src/utils/markdown.js
+// Detect status changes in markdown
 const statusMatch = content.match(/\*\*Status\*\*:\s*(\S+)/i);
-if (statusMatch) {
-  const parsedStatus = statusMatch[1].toLowerCase().trim();
-  
-  if (parsedStatus !== status) {
-    // Mark task for reorganization
-    task._needsReorganization = true;
-    task.status = parsedStatus;
-  }
+if (statusMatch && parsedStatus !== currentStatus) {
+  task._needsReorganization = true;
+  // Trigger file save with updated positions
 }
 ```
 
-**Benefits:**
-- Reuses existing drag-drop logic for consistency
-- Works on initial load and external file changes
-- Saves AI tokens by avoiding manual moves
-- Prevents infinite loops with content tracking
-
-**Implementation details:**
-- Detection happens during markdown parsing (`parseMarkdown()`)
-- Reorganization triggers a file save with updated task positions
-- File watcher ignores self-generated saves via `setCurrentContent()`
-
-#### 2. Live File Watching
-
-**Feature:** The app watches for external changes to markdown files and syncs automatically.
-
-**Implementation:**
+**2. Live File Watching:**
 ```javascript
-// In src/utils/fileWatcher.js
+// Poll every 2 seconds for external changes
 setInterval(async () => {
   const file = await fileHandle.getFile();
   const newContent = await file.text();
-  
+
   if (newContent !== currentContent) {
     onExternalChange(newContent);
   }
-}, 2000); // Check every 2 seconds
+}, 2000);
 ```
 
-**Key considerations:**
-- Polling interval: 2 seconds (balance between responsiveness and performance)
-- Content comparison prevents false positives
-- Cleanup on unmount prevents memory leaks
-- Auto-save disabled during external change processing
-
-#### 3. Security: XSS Protection
-
-**Feature:** Markdown notes are sanitized before rendering to prevent XSS attacks.
-
-**Implementation:**
+**3. XSS Protection:**
 ```javascript
-// In src/utils/markdown.js
 import DOMPurify from 'dompurify';
 
 function markdownToHtml(markdown) {
-  // ... markdown conversion ...
-  
-  // Sanitize before returning
+  // Convert markdown, then sanitize
   return DOMPurify.sanitize(html, {
     ALLOWED_TAGS: ['h1', 'h2', 'h3', 'p', 'strong', 'em', 'code', 'pre', 'ul', 'li', 'a', 'br'],
     ALLOWED_ATTR: ['href', 'target', 'class']
@@ -1518,15 +477,9 @@ function markdownToHtml(markdown) {
 }
 ```
 
-**Why it matters:**
-- User-generated content could contain malicious scripts
-- DOMPurify removes dangerous HTML/JS while preserving formatting
-- Whitelist approach (only allow safe tags/attributes)
+### Adding Features
 
-### Adding New Features
-
-#### Creating a New Component
-
+**Create a component:**
 ```jsx
 // src/components/ui/my-component.jsx
 import * as React from "react";
@@ -1541,12 +494,10 @@ export function MyComponent({ className, children, ...props }) {
 }
 ```
 
-#### Adding a New Utility Function
-
+**Add a utility:**
 ```javascript
 // src/utils/myUtility.js
 export function myFunction(param) {
-  // Implementation
   return result;
 }
 
@@ -1554,130 +505,63 @@ export function myFunction(param) {
 import { myFunction } from "./utils/myUtility";
 ```
 
-#### Extending the Theme
-
+**Extend theme:**
 ```css
 /* src/style.css */
 :root {
   --my-custom-color: #3b82f6;
-  --my-spacing: 1rem;
 }
 
 .my-component {
   color: var(--my-custom-color);
-  padding: var(--my-spacing);
 }
 ```
 
-### Building for Production
+### Testing Checklist
 
-```bash
-# Build the single HTML file
-npm run build
+- [ ] Create test folder with markdown files
+- [ ] Open built `dist/index.html`
+- [ ] Test CRUD operations
+- [ ] Test drag-and-drop
+- [ ] Test all filters
+- [ ] Edit markdown externally
+- [ ] Test auto-reorganization
+- [ ] Test archive/restore
+- [ ] No console errors
+- [ ] Test on Chrome, Edge, Opera
 
-# Output: dist/index.html (~380KB)
-```
+### Common Issues
 
-The build process:
-1. Vite bundles all React components
-2. Inlines all JavaScript into the HTML
-3. Inlines all CSS styles
-4. Optimizes and minifies everything
-5. Outputs a single, standalone file
-
-**Configuration:** See `vite.config.js` for the `vitejs-plugin-singlefile` setup.
-
-### Testing Your Changes
-
-#### Manual Testing Checklist
-
-- [ ] Create a test folder with `kanban.md` and `archive.md`
-- [ ] Open the built `dist/index.html` in browser
-- [ ] Grant file system permissions
-- [ ] Test all CRUD operations on tasks
-- [ ] Test drag-and-drop between columns
-- [ ] Test filters (tags, categories, users, priority)
-- [ ] Edit markdown file externally and verify live sync
-- [ ] Change a task's `**Status**` field and verify auto-reorganization
-- [ ] Test archiving and restoring tasks
-- [ ] Verify no console errors
-- [ ] Test on Chrome, Edge, and Opera
-
-#### Performance Testing
-
-```bash
-# Check build size
-ls -lh dist/index.html
-
-# Test with large datasets
-# Create a kanban.md with 500+ tasks and test responsiveness
-```
-
-### Common Issues & Solutions
-
-#### Issue: File watcher not detecting changes
-
-**Solution:** Check that cleanup is working:
+**File watcher not detecting:**
 ```javascript
+// Ensure cleanup works
 useEffect(() => {
-  return () => {
-    fileWatcher.stopFileWatcher();
-  };
+  return () => fileWatcher.stopFileWatcher();
 }, [kanbanFileHandle]);
 ```
 
-#### Issue: Infinite loop when saving
-
-**Solution:** Always update file watcher content after save:
+**Infinite save loop:**
 ```javascript
+// Update watcher after save
 await writable.write(markdown);
-await writable.close();
 fileWatcher.setCurrentContent(markdown); // Critical!
 ```
 
-#### Issue: React state not updating
-
-**Solution:** Use functional updates and deep cloning:
+**React state not updating:**
 ```javascript
-setTasks(prev => {
-  const newTasks = prev.map(task => ({
-    ...task,
-    subtasks: task.subtasks.map(st => ({ ...st }))
-  }));
-  return newTasks;
-});
+// Use functional updates
+setTasks(prev => prev.map(task => ({ ...task })));
 ```
 
-### Contributing Guidelines
+### Code Style
 
-#### Code Style
+- Use functional components with hooks
+- Arrow functions for consistency
+- Components < 200 lines
+- Meaningful variable names
+- Comments for complex logic
 
-- Use **functional components** with hooks (no class components)
-- Use **arrow functions** for consistency
-- Keep components **small and focused** (< 200 lines)
-- Use **meaningful variable names**
-- Add **comments for complex logic**
-- Follow **existing patterns** in the codebase
-
-#### Git Workflow
-
-```bash
-# Create a feature branch
-git checkout -b feature/my-feature
-
-# Make changes and commit
-git add .
-git commit -m "feat: Add my feature
-
-- Detailed description
-- What was changed
-- Why it was changed"
-
-# Push and create PR
-git push origin feature/my-feature
-```
-
-#### Commit Message Format
+### Commit Format
 
 Follow conventional commits:
 
@@ -1689,139 +573,379 @@ Follow conventional commits:
 <footer>
 ```
 
-**Types:**
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation only
-- `style`: Formatting, no code change
-- `refactor`: Code change that neither fixes nor adds
-- `perf`: Performance improvement
-- `test`: Adding tests
-- `chore`: Build process, dependencies
+**Types:** feat, fix, docs, style, refactor, perf, test, chore
 
 **Example:**
 ```
 feat(auto-reorganization): Implement status-based task movement
 
-- Parse Status field from markdown tasks
+- Parse Status field from markdown
 - Compare with section location
-- Automatically save file to reorganize tasks
-- Prevent infinite loops with content tracking
+- Auto-save to reorganize
+- Prevent infinite loops
 
 Fixes #42
 ```
 
-#### Pull Request Checklist
+### Pull Request Checklist
 
-- [ ] Code follows project style guidelines
-- [ ] Commit messages are clear and follow convention
-- [ ] Changes are tested manually
-- [ ] No console errors or warnings
-- [ ] Build succeeds (`npm run build`)
-- [ ] Documentation updated if needed
-- [ ] PR description explains what and why
-
-### Debugging Tips
-
-#### Enable React DevTools
-
-Install the React DevTools browser extension for component inspection and profiling.
-
-#### Debug File System Operations
-
-```javascript
-// Add detailed logging
-console.log('📁 File handle:', fileHandle);
-console.log('📝 Content:', await file.text());
-console.log('✍️ Writing:', markdown);
-```
-
-#### Debug Markdown Parsing
-
-```javascript
-// In parseMarkdown()
-console.log('Input markdown:', content);
-console.log('Parsed tasks:', tasks);
-console.log('Parsed config:', config);
-```
-
-#### Debug State Updates
-
-```javascript
-// Use useEffect to log state changes
-useEffect(() => {
-  console.log('Tasks updated:', tasks);
-}, [tasks]);
-```
-
-### Architecture Decisions
-
-#### Why React over Vanilla JS?
-
-- **Component reusability**: UI components can be easily reused
-- **State management**: React's hooks provide clean state handling
-- **Developer experience**: Modern tooling, HMR, better debugging
-- **Maintainability**: Easier to understand and modify
-- **Community**: Large ecosystem of libraries and tools
-
-#### Why Single HTML File?
-
-- **Portability**: Easy to distribute and use
-- **Simplicity**: No server setup, no dependencies
-- **Offline**: Works completely offline
-- **Version control**: Single file is easy to track in Git
-
-#### Why Lucide Icons?
-
-- **Consistency**: All icons from same family
-- **React integration**: First-class React components
-- **Size**: Tree-shakeable (only include used icons)
-- **Quality**: Professional, well-designed icons
+- [ ] Follows project style
+- [ ] Clear commit messages
+- [ ] Tested manually
+- [ ] No console errors
+- [ ] Build succeeds
+- [ ] Docs updated
+- [ ] PR description complete
 
 ### Performance Optimizations
 
-The app implements several performance optimizations:
+```javascript
+// 1. Memoization
+const filteredTasks = useMemo(() => {
+  // Expensive filtering
+}, [tasks, filters]);
 
-1. **Memoization**:
-   ```javascript
-   const filteredTasks = useMemo(() => {
-     // Expensive filtering logic
-   }, [tasks, filters]);
-   ```
+// 2. useCallback
+const handleClick = useCallback(() => {
+  // Handler logic
+}, [dependencies]);
 
-2. **useCallback** for functions passed as props:
-   ```javascript
-   const handleClick = useCallback(() => {
-     // Handler logic
-   }, [dependencies]);
-   ```
-
-3. **Debounced search**:
-   ```javascript
-   useEffect(() => {
-     const timer = setTimeout(() => {
-       setDebouncedSearchTerm(globalSearchTerm);
-     }, 300);
-     return () => clearTimeout(timer);
-   }, [globalSearchTerm]);
-   ```
-
-4. **Lazy state updates**:
-   ```javascript
-   // Batch updates automatically in React 18
-   setTasks(newTasks);
-   setConfig(newConfig);
-   ```
+// 3. Debounced search
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setDebouncedSearchTerm(globalSearchTerm);
+  }, 300);
+  return () => clearTimeout(timer);
+}, [globalSearchTerm]);
+```
 
 ### Resources
 
-- **React Documentation**: https://react.dev/
-- **Vite Documentation**: https://vitejs.dev/
-- **File System Access API**: https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API
-- **Lucide Icons**: https://lucide.dev/
-- **Tailwind CSS**: https://tailwindcss.com/
-- **DOMPurify**: https://github.com/cure53/DOMPurify
+- [React Documentation](https://react.dev/)
+- [Vite Documentation](https://vitejs.dev/)
+- [File System Access API](https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API)
+- [Lucide Icons](https://lucide.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)
 
 ---
 
-**🎉 You're ready! Start organizing your tasks now.**
+## 🤝 Contributing
+
+Contributions welcome! Here's how:
+
+### Report Bugs
+
+1. Check existing issues first
+2. Include: description, steps to reproduce, browser/version, screenshots
+
+### Propose Features
+
+1. Create issue with `enhancement` tag
+2. Describe feature and usefulness
+3. Wait for feedback before implementing
+
+### Contribute Code
+
+```bash
+git checkout -b feature/my-feature
+# Make changes to task-manager.html or src/
+npm run build
+# Test in Chrome, Edge, Opera
+git commit -m "feat: Add my feature"
+git push origin feature/my-feature
+# Create Pull Request
+```
+
+**Guidelines:**
+- Test on Chrome, Edge, Opera
+- Follow existing code patterns
+- Add comments for complex logic
+- Update docs if needed
+
+---
+
+## 📊 Performance
+
+- **File size:** 380 KB (single HTML file, all inclusive)
+- **Load time:** < 100ms
+- **Parse time:** < 50ms for 1000 tasks
+- **Memory:** ~10 MB for 500 tasks
+
+---
+
+## 🗺️ Roadmap
+
+### Current: v1.0
+
+- ✅ Interactive Kanban
+- ✅ Rich task management
+- ✅ Advanced filters
+- ✅ Archive system
+- ✅ Multi-project support
+- ✅ Live file sync
+
+### v1.1 (Short term)
+
+- [ ] Dark mode
+- [ ] Keyboard shortcuts
+- [ ] PDF/HTML export
+- [ ] Visual statistics (charts)
+
+### v1.2 (Medium term)
+
+- [ ] File drag & drop (attachments)
+- [ ] Task templates
+- [ ] Reminder notifications
+
+### v2.0 (Long term)
+
+- [ ] Offline mode (Service Worker)
+- [ ] Cross-device sync (via git automation)
+- [ ] IDE plugins (VS Code, JetBrains)
+
+---
+
+## 🤖 Optional: AI Integration
+
+**Markdown Task Manager works great on its own.** But if you use AI assistants, they can help manage your tasks automatically.
+
+### What AI Can Do
+
+AI assistants (Claude, ChatGPT, Copilot, Gemini, etc.) can:
+- ✅ Create tasks in strict format
+- ✅ Break down complex tasks into subtasks
+- ✅ Update progress in real-time
+- ✅ Document complete results
+- ✅ Reference tasks in Git commits
+- ✅ Archive on demand
+
+### Quick Setup
+
+**1. Copy base files:**
+```bash
+cp AI_WORKFLOW.md your-project/
+cp kanban.md your-project/
+cp archive.md your-project/
+```
+
+**2. Configure your AI:**
+
+For **Claude:**
+```bash
+cp CLAUDE.md.exemple your-project/CLAUDE.md
+```
+
+For **Claude Code (CLI):**
+```bash
+cp -R .claude/skills/markdown-task-manager ~/.claude/skills/
+# Restart Claude Code
+```
+
+For **GitHub Copilot:**
+```bash
+mkdir -p your-project/.github
+cp COPILOT.md.exemple your-project/.github/copilot-instructions.md
+```
+
+For **ChatGPT, Gemini, Windsurf, OpenAI CLI, Qwen:**
+See templates: `CHATGPT.md.exemple`, `GEMINI.md.exemple`, `CODEIUM.md.exemple`, `OPENAI_CLI.md.exemple`, `QWEN.md.exemple`
+
+### Advanced: Claude Code Integration
+
+**Manus 2-Action Rule** - Auto-log research operations:
+
+```bash
+# Install the integration
+cp -r integrations/claude-code/ .claude/
+chmod +x .claude/hooks/pre-tool-use-2-action-reminder.py
+```
+
+**Benefits:**
+- Automatic logging of WebFetch/WebSearch to task Notes
+- Reminder after every 2 operations to create findings file
+- Archive-safe logs that survive task lifecycle
+- Zero separate log files - everything inline
+
+**Learn more:** [integrations/claude-code/README.md](integrations/claude-code/README.md)
+
+### AI Benefits
+
+With AI integration, you get:
+- 📝 Complete history of AI actions
+- 🔍 Easy search in markdown files
+- 📊 Statistics (velocity, time, progress)
+- 🔗 Git links (commits reference tasks)
+- 👥 Team visibility of AI work
+- 📦 Nothing lost in archives
+
+### AI Configuration Files
+
+| AI Assistant | Configuration File | Location |
+|--------------|-------------------|----------|
+| Claude (Anthropic) | `CLAUDE.md` | Project root |
+| GitHub Copilot | `copilot-instructions.md` | `.github/` |
+| OpenAI CLI | `OPENAI_CLI.md` | Project root |
+| ChatGPT | `CHATGPT.md` | Project root |
+| Gemini (Google) | `instructions.md` | `.gemini/` |
+| Qwen (Alibaba) | `QWEN.md` | Project root |
+| Codeium / Windsurf | `instructions.md` | `.windsurf/` |
+
+**Full AI integration guide:** See `AI_WORKFLOW.md` and example templates in this repository.
+
+---
+
+## 📚 Documentation
+
+### In This Repository
+
+- **AI_WORKFLOW.md** - Complete AI integration guide
+- **/examples/** - Sample kanban.md and archive.md files
+- **/examples/README.md** - Detailed markdown format
+- **integrations/claude-code/** - Claude Code hooks and skill
+
+### Templates
+
+- [`kanban.md`](/examples/kanban.md) - Base template
+- [`archive.md`](/examples/archive.md) - Archive template
+- [`AI_WORKFLOW.md`](/AI_WORKFLOW.md) - AI guidelines
+- AI configs: `CLAUDE.md.exemple`, `COPILOT.md.exemple`, etc.
+
+---
+
+## 📄 License
+
+**MIT License**
+
+Free to use, modify, and distribute commercially or privately.
+
+**Permissions:**
+- ✅ Commercial use
+- ✅ Modification
+- ✅ Distribution
+- ✅ Private use
+
+**Conditions:**
+- Include original license and copyright
+- Provide attribution
+
+See `LICENSE` file for details.
+
+---
+
+## 🎓 Complete Getting Started Scenarios
+
+### Scenario 1: Solo Developer
+
+```bash
+# 1. Download task-manager.html to ~/tools/
+cd ~/tools
+# [Download task-manager.html]
+
+# 2. Create a new project
+mkdir ~/projects/my-app
+cd ~/projects/my-app
+git init
+
+# 3. Create task files
+cat > kanban.md << 'EOF'
+# Kanban Board
+
+## ⚙️ Configuration
+**Columns**: 📝 To Do | 🚀 In Progress | ✅ Done
+**Categories**: Frontend, Backend
+**Users**: @me
+**Tags**: #feature, #bug
+
+## 📝 To Do
+## 🚀 In Progress
+## ✅ Done
+
+<!-- Config: Last Task ID: 000 -->
+EOF
+
+cat > archive.md << 'EOF'
+# Task Archive
+## ✅ Archives
+EOF
+
+# 4. Open and start using
+open ~/tools/task-manager.html
+# Select my-app/ folder
+```
+
+### Scenario 2: Team Migration from Trello
+
+```bash
+# 1. Add to existing project
+git clone https://github.com/team/project.git
+cd project
+
+# 2. Add task system
+cp ~/downloads/kanban.md .
+cp ~/downloads/archive.md .
+git add kanban.md archive.md
+git commit -m "chore: Add task management"
+git push
+
+# 3. Each team member:
+# - Downloads task-manager.html
+# - Clones/pulls project
+# - Opens task-manager.html
+# - Selects project/ folder
+
+# 4. Daily workflow:
+git pull                    # Get updates
+# [Work in app]
+git add kanban.md
+git commit -m "Update tasks"
+git push                    # Share with team
+```
+
+### Scenario 3: With AI Assistant
+
+```bash
+# 1. Full setup with AI
+cd my-project
+cp ~/downloads/kanban.md .
+cp ~/downloads/archive.md .
+cp ~/downloads/AI_WORKFLOW.md .
+cp ~/downloads/CLAUDE.md.exemple CLAUDE.md
+
+# 2. Tell Claude:
+# "Read CLAUDE.md and create a task to implement auth"
+
+# 3. Claude automatically:
+# - Creates TASK-001 in kanban.md
+# - Breaks into subtasks
+# - Updates as it works
+# - Documents results
+
+# 4. Visualize in app:
+open ~/tools/task-manager.html
+# [Select my-project/]
+# See TASK-001 with all progress!
+```
+
+---
+
+## 🙏 Acknowledgments
+
+Thanks to:
+- File System Access API (Chrome team)
+- Markdown standards (CommonMark)
+- Open source community
+- User feedback and contributions
+
+---
+
+## 📞 Support
+
+**Questions?** Open an issue on GitHub
+
+**Bugs?** Create issue with `bug` tag
+
+**Suggestions?** Create issue with `enhancement` tag
+
+---
+
+**Created with ❤️ for those who value privacy, simplicity, and control of their data**
