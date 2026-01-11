@@ -1,7 +1,7 @@
 {
-  "name": "markdowntaskmanager",
+  "name": "markdown-task-manager",
   "version": "1.0.0",
-  "description": "> **[🇫🇷 Version française / French version](./readmeFR.md)**",
+  "description": "Privacy-first Kanban task manager powered by local Markdown files. Single HTML file, zero dependencies, works offline.",
   "main": "index.js",
   "directories": {
     "doc": "docs",
@@ -17,9 +17,22 @@
     "type": "git",
     "url": "git+https://github.com/kepptic/MarkdownTaskManager.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "kanban",
+    "task-manager",
+    "markdown",
+    "offline-first",
+    "local-first",
+    "privacy",
+    "git-workflow",
+    "react",
+    "vite",
+    "single-file-app",
+    "productivity",
+    "project-management"
+  ],
+  "author": "kepptic",
+  "license": "MIT",
   "type": "commonjs",
   "bugs": {
     "url": "https://github.com/kepptic/MarkdownTaskManager/issues"
