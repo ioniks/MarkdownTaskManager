@@ -69,6 +69,8 @@ integrations/claude-code/
 ├── hooks/
 │   └── pre-tool-use-2-action-reminder.py  ← Main hook script
 ├── hooks.json                             ← Hook configuration
+├── rules/
+│   └── kanban-workflow.md                 ← Task-driven workflow rules
 ├── skills/
 │   └── research-preservation.md           ← Skill documentation
 └── examples/
@@ -139,6 +141,7 @@ Complete audit trail preserved forever!
 |----------|---------|
 | [SETUP.md](./SETUP.md) | Complete installation and configuration guide |
 | [HOOKS.md](./HOOKS.md) | Hook system patterns and implementation details |
+| [rules/kanban-workflow.md](./rules/kanban-workflow.md) | Task-driven workflow rules and best practices |
 | [skills/research-preservation.md](./skills/research-preservation.md) | Manus 2-Action Rule workflow documentation |
 | [examples/sample-kanban.md](./examples/sample-kanban.md) | Example kanban with inline logs |
 
