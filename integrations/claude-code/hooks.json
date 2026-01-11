@@ -1,0 +1,12 @@
+{
+  "preToolUse": [
+    {
+      "matcher": "WebFetch|WebSearch",
+      "hooks": [
+        {
+          "command": "python3 $CLAUDE_PROJECT_DIR/integrations/claude-code/hooks/pre-tool-use-2-action-reminder.py"
+        }
+      ]
+    }
+  ]
+}

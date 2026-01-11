@@ -223,6 +223,26 @@ alias tasks='start ~/tools/task-manager.html'  # Windows
 
 This system is designed to work with AI assistants to achieve **complete traceability** of work done.
 
+### 🎯 Claude Code Integration (NEW!)
+
+**Manus 2-Action Rule** - Automated research preservation for visual operations:
+
+```bash
+# Install the integration
+cp -r integrations/claude-code/ .claude/
+chmod +x .claude/hooks/pre-tool-use-2-action-reminder.py
+```
+
+**What you get:**
+- ✅ Automatic logging of WebFetch/WebSearch operations to task Notes
+- ✅ Reminder after every 2 operations to create findings file
+- ✅ Archive-safe logs that survive task lifecycle
+- ✅ Zero separate log files - everything inline in kanban.md
+
+**Learn more:** See [integrations/claude-code/README.md](integrations/claude-code/README.md)
+
+---
+
 ### Principle
 
 AI assistants (Claude, ChatGPT, Copilot, Gemini, etc.) can:
@@ -232,6 +252,7 @@ AI assistants (Claude, ChatGPT, Copilot, Gemini, etc.) can:
 4. ✅ Document complete result in `**Notes**:`
 5. ✅ Reference tasks in Git commits (`TASK-XXX`)
 6. ✅ Archive on demand only (not automatically)
+7. ✅ **[Claude Code]** Auto-log visual research operations (Manus Rule)
 
 ### Configuration
 
