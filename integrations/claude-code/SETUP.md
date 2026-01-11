@@ -422,7 +422,11 @@ if count % 1 == 0:
 ## Support
 
 **Issues:** https://github.com/kepptic/MarkdownTaskManager/issues
-**Documentation:** See `docs/MANUS_INLINE_LOGGING.md`
+
+**Documentation:**
+- [HOOKS.md](./HOOKS.md) - Hook system patterns and implementation
+- [docs/MANUS_INLINE_LOGGING.md](../../docs/MANUS_INLINE_LOGGING.md) - Technical deep-dive
+
 **License:** MIT
 
 ---

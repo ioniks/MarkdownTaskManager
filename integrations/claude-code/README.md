@@ -65,6 +65,7 @@ Start working with Claude Code - logs append automatically!
 integrations/claude-code/
 ├── README.md                              ← You are here
 ├── SETUP.md                               ← Detailed setup guide
+├── HOOKS.md                               ← Hook system documentation
 ├── hooks/
 │   └── pre-tool-use-2-action-reminder.py  ← Main hook script
 ├── hooks.json                             ← Hook configuration
@@ -137,6 +138,7 @@ Complete audit trail preserved forever!
 | Document | Purpose |
 |----------|---------|
 | [SETUP.md](./SETUP.md) | Complete installation and configuration guide |
+| [HOOKS.md](./HOOKS.md) | Hook system patterns and implementation details |
 | [skills/research-preservation.md](./skills/research-preservation.md) | Manus 2-Action Rule workflow documentation |
 | [examples/sample-kanban.md](./examples/sample-kanban.md) | Example kanban with inline logs |
 
