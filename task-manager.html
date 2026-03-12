@@ -14,13 +14,28 @@
         :root {
             --bg-primary: #f5f5f5;
             --bg-secondary: #ffffff;
+            --bg-tertiary: #f8f9fa;
+            --bg-input: #ffffff;
             --border-color: #e0e0e0;
+            --border-input: #cbd5e0;
             --text-primary: #212121;
             --text-secondary: #757575;
+            --text-label: #333333;
             --accent: #2196F3;
             --accent-hover: #1976D2;
             --shadow: 0 2px 4px rgba(0,0,0,0.1);
             --shadow-hover: 0 4px 8px rgba(0,0,0,0.15);
+            --badge-category-bg: #E3F2FD;
+            --badge-category-text: #1565C0;
+            --badge-assignee-bg: #F3E5F5;
+            --badge-assignee-text: #6A1B9A;
+            --tag-bg: #FFF3E0;
+            --tag-text: #E65100;
+            --notification-bg: #ffffff;
+            --debug-bg: #f9f9f9;
+            --debug-border: #ddd;
+            --btn-secondary-hover: #e8e8e8;
+            --search-clear-color: #718096;
 
             /* Priority colors */
             --priority-default: #888888;
@@ -32,6 +47,33 @@
             --priority-purple: #A855F7;
             --priority-white: #E5E7EB;
             --priority-black: #1F2937;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-tertiary: #1a1a2e;
+            --bg-input: #0f3460;
+            --border-color: #2a2a4a;
+            --border-input: #3a3a5a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0b8;
+            --text-label: #c8c8d8;
+            --accent: #4facfe;
+            --accent-hover: #3a8fd4;
+            --shadow: 0 2px 4px rgba(0,0,0,0.3);
+            --shadow-hover: 0 4px 8px rgba(0,0,0,0.4);
+            --badge-category-bg: #1a3a5c;
+            --badge-category-text: #64b5f6;
+            --badge-assignee-bg: #2a1a3c;
+            --badge-assignee-text: #ce93d8;
+            --tag-bg: #3c2a1a;
+            --tag-text: #ffb74d;
+            --notification-bg: #16213e;
+            --debug-bg: #1a1a2e;
+            --debug-border: #2a2a4a;
+            --btn-secondary-hover: #2a2a4a;
+            --search-clear-color: #a0a0b8;
         }
 
         body {
@@ -95,7 +137,7 @@
         }
 
         .btn-secondary:hover {
-            background: #e8e8e8;
+            background: var(--btn-secondary-hover);
         }
 
         .container {
@@ -180,7 +222,7 @@
         }
 
         .task-card {
-            background: white;
+            background: var(--bg-secondary);
             border: 1px solid var(--border-color);
             border-radius: 6px;
             padding: 1rem;
@@ -247,18 +289,18 @@
         .badge-priority.Black { background: var(--priority-black); }
 
         .badge-category {
-            background: #E3F2FD;
-            color: #1565C0;
+            background: var(--badge-category-bg);
+            color: var(--badge-category-text);
         }
 
         .badge-assignee {
-            background: #F3E5F5;
-            color: #6A1B9A;
+            background: var(--badge-assignee-bg);
+            color: var(--badge-assignee-text);
         }
 
         .tag {
-            background: #FFF3E0;
-            color: #E65100;
+            background: var(--tag-bg);
+            color: var(--tag-text);
             padding: 0.2rem 0.5rem;
             border-radius: 3px;
             font-size: 0.7rem;
@@ -351,7 +393,7 @@
         }
 
         .modal-content {
-            background: white;
+            background: var(--bg-secondary);
             border-radius: 8px;
             padding: 2rem;
             width: 80%;
@@ -423,7 +465,7 @@
             position: fixed;
             bottom: 2rem;
             right: 2rem;
-            background: white;
+            background: var(--notification-bg);
             padding: 1rem 1.5rem;
             border-radius: 6px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -483,8 +525,8 @@
         }
 
         .debug-info {
-            background: #f9f9f9;
-            border: 1px solid #ddd;
+            background: var(--debug-bg);
+            border: 1px solid var(--debug-border);
             padding: 1rem;
             margin: 1rem 0;
             border-radius: 4px;
@@ -492,6 +534,53 @@
             font-size: 0.85rem;
             white-space: pre-wrap;
             word-wrap: break-word;
+        }
+        /* Dark mode toggle button */
+        .theme-toggle {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.6rem 0.8rem;
+            cursor: pointer;
+            font-size: 1.1rem;
+            line-height: 1;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--btn-secondary-hover);
+        }
+
+        /* Dark mode overrides for inline styles */
+        [data-theme="dark"] #filterBar,
+        [data-theme="dark"] .welcome div[style*="background: white"],
+        [data-theme="dark"] #newTaskForm {
+            background: var(--bg-tertiary) !important;
+        }
+
+        [data-theme="dark"] select,
+        [data-theme="dark"] input[type="text"],
+        [data-theme="dark"] input[type="date"],
+        [data-theme="dark"] textarea {
+            background: var(--bg-input) !important;
+            color: var(--text-primary) !important;
+            border-color: var(--border-input) !important;
+        }
+
+        [data-theme="dark"] label {
+            color: var(--text-label) !important;
+        }
+
+        [data-theme="dark"] small {
+            color: var(--text-secondary) !important;
+        }
+
+        [data-theme="dark"] #filterBar {
+            border-bottom-color: var(--border-color) !important;
+        }
+
+        [data-theme="dark"] .modal-content {
+            color: var(--text-primary);
         }
     </style>
 </head>
@@ -512,6 +601,7 @@
                 <button id="newTaskBtn" class="btn btn-secondary" style="display: none;">➕ Tâche</button>
                 <button id="archiveBtn" class="btn btn-secondary" style="display: none;">📦 Archives</button>
                 <button id="manageColsBtn" class="btn btn-secondary" style="display: none;">⚙️ Colonnes</button>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode" id="themeToggleBtn">🌙</button>
             </div>
         </div>
     </header>
@@ -741,6 +831,27 @@
     </div>
 
     <script>
+        // Dark mode
+        function toggleTheme() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            document.getElementById('themeToggleBtn').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            localStorage.setItem('theme', newTheme);
+        }
+
+        (function() {
+            const saved = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = saved || (prefersDark ? 'dark' : 'light');
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.addEventListener('DOMContentLoaded', () => {
+                    document.getElementById('themeToggleBtn').textContent = '☀️';
+                });
+            }
+        })();
+
         // File System Access API
         let directoryHandle = null;
         let kanbanFileHandle = null;
