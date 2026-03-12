@@ -771,10 +771,10 @@
                     <textarea id="taskDescription" rows="4" style="width: 100%; padding: 0.75rem; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 0.95rem; resize: vertical; background: white; box-sizing: border-box;"></textarea>
                 </div>
                 <div style="margin-bottom: 1.5rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Sous-tâches</label>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text);">Sous-tâches</label>
                     <ul id="formSubtasksList" style="list-style: none; padding: 0; margin: 0 0 0.5rem 0; max-height: 150px; overflow-y: auto;"></ul>
                     <div style="display: flex; gap: 0.5rem;">
-                        <input type="text" id="formSubtaskInput" placeholder="Ajouter une sous-tâche..." style="flex: 1; padding: 0.5rem; border: 2px solid #cbd5e0; border-radius: 4px; font-size: 0.9rem; background: white;">
+                        <input type="text" id="formSubtaskInput" placeholder="Ajouter une sous-tâche..." style="flex: 1; padding: 0.5rem; border: 2px solid var(--border, #cbd5e0); border-radius: 4px; font-size: 0.9rem; background: var(--bg); color: var(--text);">
                         <button type="button" onclick="addFormSubtask()" class="btn btn-secondary" style="padding: 0.5rem 1rem;">+ Ajouter</button>
                     </div>
                 </div>
@@ -818,7 +818,7 @@
             </div>
             <div style="padding: 1.5rem;">
                 <div style="margin-bottom: 1rem;">
-                    <input type="text" id="archiveSearch" placeholder="Rechercher dans les archives..." style="width: 100%; padding: 0.75rem; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 0.95rem;">
+                    <input type="text" id="archiveSearch" placeholder="Rechercher dans les archives..." style="width: 100%; padding: 0.75rem; border: 2px solid var(--border, #cbd5e0); border-radius: 6px; font-size: 0.95rem; background: var(--bg); color: var(--text);">
                 </div>
                 <div id="archiveList" style="max-height: 500px; overflow-y: auto;"></div>
             </div>
@@ -2642,13 +2642,13 @@ ${t('markdown.archiveSection')}
             const modal = document.getElementById('columnsModal');
             const list = document.getElementById('columnsList');
             list.innerHTML = config.columns.map((col, idx) => `
-                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; padding: 0.75rem; background: white; border: 2px solid #cbd5e0; border-radius: 6px; align-items: center;">
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; padding: 0.75rem; background: var(--bg); border: 2px solid var(--border, #cbd5e0); border-radius: 6px; align-items: center;">
                     <div style="display: flex; gap: 0.25rem;">
                         <button onclick="moveColumn(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.85rem;" title="${t('action.moveUp')}">↑</button>
                         <button onclick="moveColumn(${idx}, 1)" ${idx === config.columns.length - 1 ? 'disabled' : ''} class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.85rem;" title="${t('action.moveDown')}">↓</button>
                     </div>
-                    <input type="text" value="${col.name}" onchange="updateColumn(${idx}, 'name', this.value)" style="flex: 1; padding: 0.5rem; border: 1px solid #cbd5e0; border-radius: 4px;">
-                    <input type="text" value="${col.id}" onchange="updateColumn(${idx}, 'id', this.value)" style="width: 120px; padding: 0.5rem; border: 1px solid #cbd5e0; border-radius: 4px;" placeholder="ID">
+                    <input type="text" value="${col.name}" onchange="updateColumn(${idx}, 'name', this.value)" style="flex: 1; padding: 0.5rem; border: 1px solid var(--border, #cbd5e0); border-radius: 4px; background: var(--bg); color: var(--text);">
+                    <input type="text" value="${col.id}" onchange="updateColumn(${idx}, 'id', this.value)" style="width: 120px; padding: 0.5rem; border: 1px solid var(--border, #cbd5e0); border-radius: 4px; background: var(--bg); color: var(--text);" placeholder="ID">
                     <button onclick="deleteColumn(${idx})" class="btn btn-secondary" style="padding: 0.5rem;">🗑️</button>
                 </div>
             `).join('');
@@ -2757,7 +2757,7 @@ ${t('markdown.archiveSection')}
         function renderFormSubtasks() {
             const list = document.getElementById('formSubtasksList');
             list.innerHTML = formSubtasks.map((st, idx) => `
-                <li style="padding: 0.5rem; margin-bottom: 0.25rem; background: white; border: 1px solid #cbd5e0; border-radius: 4px; display: flex; align-items: center; gap: 0.5rem;">
+                <li style="padding: 0.5rem; margin-bottom: 0.25rem; background: var(--bg); border: 1px solid var(--border, #cbd5e0); border-radius: 4px; display: flex; align-items: center; gap: 0.5rem;">
                     <input type="checkbox" ${st.completed ? 'checked' : ''} onchange="toggleFormSubtask(${idx})" style="width: 16px; height: 16px; cursor: pointer;">
                     <span style="flex: 1; ${st.completed ? 'text-decoration: line-through; color: #999;' : ''}">${st.text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
                     <button type="button" onclick="deleteFormSubtask(${idx})" style="background: none; border: none; cursor: pointer; color: #e53e3e; font-size: 1rem;">🗑️</button>
@@ -3046,7 +3046,7 @@ ${t('markdown.archiveSection')}
                             }).join('')}
                         </ul>
                         <div style="display: flex; gap: 0.5rem;">
-                            <input type="text" id="newSubtaskInput" placeholder="${t('subtask.newPlaceholder')}" onkeypress="if(event.key==='Enter') addSubtask('${task.id}')" style="flex: 1; padding: 0.5rem; border: 2px solid #cbd5e0; border-radius: 4px; font-size: 0.9rem;">
+                            <input type="text" id="newSubtaskInput" placeholder="${t('subtask.newPlaceholder')}" onkeypress="if(event.key==='Enter') addSubtask('${task.id}')" style="flex: 1; padding: 0.5rem; border: 2px solid var(--border, #cbd5e0); border-radius: 4px; font-size: 0.9rem; background: var(--bg); color: var(--text);">
                             <button onclick="addSubtask('${task.id}')" class="btn btn-primary" style="padding: 0.5rem 1rem;">${t('taskForm.subtaskAdd')}</button>
                         </div>
                     </div>
@@ -3359,14 +3359,14 @@ ${t('markdown.archiveSection')}
 
             if (filtered.length === 0) {
                 console.log('⚠️ No tasks to display - showing empty message');
-                list.innerHTML = `<p style="text-align: center; color: #999; padding: 2rem;">${t('archives.empty')}</p>`;
+                list.innerHTML = `<p style="text-align: center; color: var(--text-secondary, #999); padding: 2rem;">${t('archives.empty')}</p>`;
                 return;
             }
 
             console.log('✓ Rendering', filtered.length, 'tasks');
 
             list.innerHTML = filtered.map(task => `
-                <div style="background: white; border: 2px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem;">
+                <div style="background: var(--bg); border: 2px solid var(--border, #e2e8f0); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem;">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
                         <div>
                             <span style="background: #6b7280; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">${task.id}</span>
@@ -3377,7 +3377,7 @@ ${t('markdown.archiveSection')}
                             <button onclick="unarchiveTask('${task.id}')" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">↩️ Restaurer</button>
                         </div>
                     </div>
-                    ${task.description ? `<p style="color: #666; margin: 0.5rem 0;">${markdownToHtml(task.description)}</p>` : ''}
+                    ${task.description ? `<p style="color: var(--text-secondary, #666); margin: 0.5rem 0;">${markdownToHtml(task.description)}</p>` : ''}
                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
                         ${task.priority ? `<span style="background: #fbbf24; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">${displayPriority(task.priority)}</span>` : ''}
                         ${task.category ? `<span style="background: #8b5cf6; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">${task.category}</span>` : ''}
