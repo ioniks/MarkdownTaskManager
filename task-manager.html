@@ -704,12 +704,7 @@
                 <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
             <div id="modalBody" class="task-detail"></div>
-            <div class="actions">
-                <button class="btn btn-secondary" onclick="closeModal()">Fermer</button>
-                <button class="btn btn-secondary" onclick="deleteCurrentTask()" style="background: #ef4444; color: white;">🗑️ Supprimer</button>
-                <button class="btn btn-secondary" onclick="archiveCurrentTask()" style="background: #f59e0b; color: white;">📦 Archiver</button>
-                <button class="btn btn-primary" id="editTaskBtn" onclick="editCurrentTask()">✏️ Modifier</button>
-            </div>
+            <div id="taskModalActions" class="actions"></div>
         </div>
     </div>
 
@@ -873,6 +868,7 @@
         let formSubtasks = [];
         let archivedTasks = [];
         let archiveFileHandle = null;
+        let wasArchiveModalActive = false;
 
         // ===== TRANSLATION SYSTEM =====
         let currentLanguage = 'en'; // Default language
@@ -3289,8 +3285,25 @@ ${t('markdown.archiveSection')}
         // Show task detail
         function showTaskDetail(task) {
             currentDetailTask = task;
+            const actions = document.getElementById('taskModalActions');
             const modal = document.getElementById('taskModal');
             const modalBody = document.getElementById('modalBody');
+            const archiveModal = document.getElementById('archiveModal');
+
+            let actionsHtml = `<button class="btn btn-secondary" onclick="closeModal()">${t('taskDetail.close')}</button>`;
+
+            // If coming from the archiveModal, hide: archive, edit, and delete buttons
+            wasArchiveModalActive = archiveModal.classList.contains('active');
+            if (wasArchiveModalActive) {
+                archiveModal.classList.remove('active');
+            }
+            else {
+                actionsHtml += `<button class="btn btn-primary" onclick="editCurrentTask()">${t('taskDetail.edit')}</button>`;
+                actionsHtml += `<button class="btn btn-secondary" onclick="archiveCurrentTask()">${t('taskDetail.archive')}</button>`;
+                actionsHtml += `<button class="btn btn-secondary" onclick="deleteCurrentTask()">${t('taskDetail.delete')}</button>`;
+            }
+
+            actions.innerHTML = actionsHtml;
 
             // Get priority with translation
             let priorityWithIcon = task.priority;
@@ -3409,10 +3422,12 @@ ${t('markdown.archiveSection')}
                                 `;
                             }).join('')}
                         </ul>
+                        ${!wasArchiveModalActive ? `
                         <div style="display: flex; gap: 0.5rem;">
                             <input type="text" id="newSubtaskInput" placeholder="${t('subtask.newPlaceholder')}" onkeypress="if(event.key==='Enter') addSubtask('${task.id}')" style="flex: 1; padding: 0.5rem; border: 2px solid var(--border, #cbd5e0); border-radius: 4px; font-size: 0.9rem; background: var(--bg); color: var(--text);">
                             <button onclick="addSubtask('${task.id}')" class="btn btn-primary" style="padding: 0.5rem 1rem;">${t('taskForm.subtaskAdd')}</button>
                         </div>
+                        ` : ''}
                     </div>
 
                     <!-- Notes -->
@@ -3432,6 +3447,10 @@ ${t('markdown.archiveSection')}
 
         function closeModal() {
             document.getElementById('taskModal').classList.remove('active');
+            if (wasArchiveModalActive) {
+                document.getElementById('archiveModal').classList.add('active');
+                wasArchiveModalActive = false; // Reset for next time
+            }
         }
 
         function editCurrentTask() {
@@ -3730,24 +3749,25 @@ ${t('markdown.archiveSection')}
             console.log('✓ Rendering', filtered.length, 'tasks');
 
             list.innerHTML = filtered.map(task => `
-                <div style="background: var(--bg); border: 2px solid var(--border, #e2e8f0); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-                        <div>
-                            <span style="background: #6b7280; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">${task.id}</span>
-                            <strong style="margin-left: 0.5rem; font-size: 1.1rem;">${task.title}</strong>
+                <div class="task-card" onclick="showTaskDetail(archivedTasks.find(t => t.id === '${task.id}'))">
+                    <div style="background: var(--bg); border: 2px solid var(--border, #e2e8f0); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                            <div>
+                                <span style="background: #6b7280; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">${task.id}</span>
+                                <strong style="margin-left: 0.5rem; font-size: 1.1rem;">${task.title}</strong>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button onclick="deleteTask('${task.id}', true)" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: #ef4444; color: white;">🗑️</button>
+                                <button onclick="unarchiveTask('${task.id}')" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">${t('action.restore')}</button>
+                            </div>
                         </div>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button onclick="deleteTask('${task.id}', true)" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: #ef4444; color: white;">🗑️</button>
-                            <button onclick="unarchiveTask('${task.id}')" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">↩️ Restaurer</button>
+                        ${task.description ? `<p style="color: var(--text-secondary, #666); margin: 0.5rem 0;">${markdownToHtml(task.description)}</p>` : ''}
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                            ${task.priority ? `<span style="background: #fbbf24; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">${displayPriority(task.priority)}</span>` : ''}
+                            ${task.category ? `<span style="background: #8b5cf6; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">${task.category}</span>` : ''}
+                            ${task.tags.map(t => `<span style="background: #3b82f6; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">${t}</span>`).join('')}
                         </div>
                     </div>
-                    ${task.description ? `<p style="color: var(--text-secondary, #666); margin: 0.5rem 0;">${markdownToHtml(task.description)}</p>` : ''}
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
-                        ${task.priority ? `<span style="background: #fbbf24; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">${displayPriority(task.priority)}</span>` : ''}
-                        ${task.category ? `<span style="background: #8b5cf6; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">${task.category}</span>` : ''}
-                        ${task.tags.map(t => `<span style="background: #3b82f6; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">${t}</span>`).join('')}
-                    </div>
-                </div>
             `).join('');
         }
 
