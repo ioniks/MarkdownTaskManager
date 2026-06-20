@@ -503,6 +503,7 @@
                 <select id="languageSelector" onchange="setLanguage(this.value)" style="padding: 0.6rem 1rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9rem; background: white; cursor: pointer;">
                     <option value="en">English</option>
                     <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
                 </select>
                 <select id="projectSelector" style="display: none; padding: 0.6rem 1rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9rem; background: white; cursor: pointer; min-width: 180px;">
                 </select>
@@ -932,7 +933,8 @@
                 // Language selector
                 'language.label': 'Language:',
                 'language.en': 'English',
-                'language.fr': 'Français'
+                'language.fr': 'Français',
+                'language.de': 'Deutsch'
             },
             fr: {
                 // Page title
@@ -1107,7 +1109,184 @@
                 // Language selector
                 'language.label': 'Langue :',
                 'language.en': 'English',
-                'language.fr': 'Français'
+                'language.fr': 'Français',
+                'language.de': 'Deutsch'
+            },
+            de: {
+                // Page title
+                'page.title': 'Markdown Task Manager',
+
+                // Header
+                'header.title': '📋 Task Manager',
+                'header.renameProject': 'Projekt umbenennen',
+                'header.deleteProject': 'Projekt aus Liste entfernen',
+                'header.folder': '📁 Ordner',
+                'header.newTask': '➕ Aufgabe',
+                'header.archives': '📦 Archiv',
+                'header.columns': '⚙️ Spalten',
+
+                // Filters
+                'filters.tags': 'Tags:',
+                'filters.category': 'Kategorie:',
+                'filters.user': 'Benutzer:',
+                'filters.priority': 'Priorität:',
+                'filters.select': 'Auswählen...',
+                'filters.add': '+',
+                'filters.clearAll': '✕ Alles löschen',
+                'filters.search': 'In Aufgaben suchen...',
+                'filters.searchClear': '✕',
+
+                // Welcome screen
+                'welcome.title': 'Willkommen! 👋',
+                'welcome.description': 'Wählen Sie den Ordner aus, der die Markdown-Dateien beinhaltet (kanban.md and archive.md)',
+                'welcome.start': '📁 Loslegen',
+                'welcome.howItWorks': '💡 Wie funktioniert es?',
+                'welcome.step1': 'Klicken Sie oben auf "Loslegen"',
+                'welcome.step2': 'Wählen Sie den Ordner aus, der die Markdown-Dateien beinhaltet',
+                'welcome.step3': 'Die App lädt automatisch kanban.md',
+                'welcome.step4': 'Verwalten Sie Ihre Aufgaben grafisch mit Kanban',
+                'welcome.step5': 'Änderungen werden als Markdown-Datei gespeichert',
+                'welcome.browserWarning': '⚠️ Unterstützte Browser: Chrome 86+, Edge 86+, Opera 72+',
+
+                // Task detail modal
+                'taskDetail.title': 'Aufgabendetails',
+                'taskDetail.close': 'Schließen',
+                'taskDetail.delete': '🗑️ Löschen',
+                'taskDetail.archive': '📦 Archivieren',
+                'taskDetail.edit': '✏️ Bearbeiten',
+
+                // Task form modal
+                'taskForm.newTask': 'Neue Aufgabe',
+                'taskForm.editTask': 'Aufgabe bearbeiten',
+                'taskForm.titleLabel': 'Titel *',
+                'taskForm.columnLabel': 'Spalte *',
+                'taskForm.priorityLabel': 'Priorität',
+                'taskForm.priorityNone': 'Ohne',
+                'taskForm.priorityCritical': 'Kritisch',
+                'taskForm.priorityHigh': 'Hoch',
+                'taskForm.priorityMedium': 'Mittel',
+                'taskForm.priorityLow': 'Niedrig',
+                'taskForm.categoryLabel': 'Kategorie',
+                'taskForm.categoryPlaceholder': 'Frontend, Backend...',
+                'taskForm.assignedLabel': 'Zugewiesen an',
+                'taskForm.assignedPlaceholder': '@alice',
+                'taskForm.createdLabel': 'Erstellt',
+                'taskForm.startedLabel': 'Begonnen',
+                'taskForm.dueLabel': 'Fällig',
+                'taskForm.completedLabel': 'Abgeschlossen',
+                'taskForm.tagsLabel': 'Tags',
+                'taskForm.tagsPlaceholder': '#bug #feature',
+                'taskForm.tagsHelp': 'Mit Leerzeichen trennen',
+                'taskForm.descriptionLabel': 'Beschreibung',
+                'taskForm.subtasksLabel': 'Unteraufgaben',
+                'taskForm.subtaskPlaceholder': 'Unteraufgabe hinzufügen...',
+                'taskForm.subtaskAdd': '+ Hinzufügen',
+                'taskForm.notesLabel': 'Anmerkungen',
+                'taskForm.notesPlaceholder': 'Technische Anmerkungen, Ergebnisse, Entscheidungen, etc...',
+                'taskForm.notesHelp': 'Markdown-Unterstützung: **fett**, *kursiv*, `code`, Listen, Links, **Abschnitte**:',
+                'taskForm.cancel': 'Abbrechen',
+                'taskForm.create': 'Erstellen',
+                'taskForm.save': 'Speichern',
+
+                // Columns modal
+                'columns.title': 'Spalten bearbeiten',
+                'columns.add': '+ Spalte hinzufügen',
+
+                // Archives modal
+                'archives.title': '📦 Archiv',
+                'archives.search': 'Suche im Archiv...',
+                'archives.empty': 'Keine archivierten Aufgaben',
+
+                // Project selector
+                'projects.select': 'Wählen Sie ein Projekt...',
+
+                // Task metadata in detail modal
+                'meta.priority': 'Priorität',
+                'meta.status': 'Status',
+                'meta.category': 'Kategorie',
+                'meta.assigned': 'Zugewiesen an',
+                'meta.created': 'Erstellungsdatum',
+                'meta.started': 'Startdatum',
+                'meta.due': 'Fälligkeitsdatum',
+                'meta.completed': 'Erledigungsdatum',
+                'meta.tags': 'Tags',
+                'meta.description': 'Beschreibung',
+                'meta.subtasks': 'Unteraufgaben ({completed}/{total})',
+                'meta.notes': 'Anmerkungen',
+
+                // Empty states
+                'empty.noTasks': 'Keine Aufgaben',
+
+                // Buttons and actions
+                'action.restore': '↩️ Wiederherstellen',
+                'action.delete': '🗑️',
+                'action.edit': '✏️',
+                'action.moveUp': 'Nach oben',
+                'action.moveDown': 'Nach unten',
+
+                // Tooltips
+                'tooltip.filterByCategory': 'Nach dieser Kategorie filtern',
+                'tooltip.filterByUser': 'Nach diesem Benutzer filtern',
+                'tooltip.filterByTag': 'Nach diesem Tag filtern',
+                'tooltip.filterByPriority': 'Nach dieser Priorität filtern',
+                'tooltip.doubleClickEdit': 'Doppelklick zum Bearbeiten',
+                'tooltip.delete': 'Löschen',
+
+                // Notifications
+                'notif.folderLoaded': 'Ordner erfolgreich geladen!',
+                'notif.folderError': 'Problem beim Laden des Ordners',
+                'notif.initializingFolder': 'Ordner wird initialisiert...',
+                'notif.filesInitialized': 'Dateien erfolgreich initialisiert! (kanban.md and archive.md)',
+                'notif.filesError': 'Problem beim Erstellen der Dateien',
+                'notif.projectLoaded': 'Projekt "{name}" geladen',
+                'notif.permissionDenied': 'Zugriff verweigert für dieses Projekt',
+                'notif.projectError': 'Problem beim Wechseln des Projekts',
+                'notif.projectRenamed': 'Projekt erfolgreich umbenannt',
+                'notif.projectDeleted': 'Projekt aus Liste gelöscht',
+                'notif.renameError': 'Problem beim Umbenennen',
+                'notif.projectRestored': 'Projekt erfolgreich wiederhergestellt',
+                'notif.taskMoved': 'Aufgabe verschoben!',
+                'notif.taskEdited': 'Aufgabe {id} aktualisiert!',
+                'notif.taskCreated': 'Aufgabe {id} erstellt!',
+                'notif.taskArchived': 'Aufgabe archiviert!',
+                'notif.taskDeleted': 'Aufgabe endgültig gelöscht',
+                'notif.taskRestored': 'Aufgabe in ursprünglicher Spalte zurückgesetzt!',
+
+                // Prompts and confirmations
+                'prompt.projectName': 'Projektname (leer lassen, um "{name}" zu verwenden):',
+                'prompt.renameProject': 'Neuer Projektname:',
+                'prompt.columnName': 'Spaltenname:',
+                'prompt.columnId': 'Spalten-ID (z.B., todo, done):',
+                'prompt.editSubtask': 'Unteraufgabe bearbeiten:',
+                'confirm.deleteColumn': 'Diese Spalte löschen?',
+                'confirm.deleteSubtask': 'Diese Unteraufgabe löschen?',
+                'confirm.deleteProject': 'Projekt "{name}" aus Liste löschen?\n\nDas Projekt wird nur aus der Liste gelöscht. Die Dateien bleiben bestehen.',
+                'confirm.archiveTask': 'Aufgabe "{title}" archivieren?',
+                'confirm.deleteTask': '⚠️ WARNUNG: Aufgabe "{title}" endgültig löschen?\n\nDies kann nicht rückgängig gemacht werden.',
+                'confirm.deleteTaskFromArchive': '⚠️ WARNUNG: Aufgabe "{title}" endgültig löschen?\n\nDies kann nicht rückgängig gemacht werden.\n\nWenn die Aufgabe in der Historie vorgehalten werden soll, klicken Sie stattdessen auf "Archivieren".',
+
+                // Alerts
+                'alert.browserNotSupported': 'Ihr Browser unterstützt die File System Access API nicht.\n\Bitte Chrome 86+, Edge 86+ oder Opera 72+ nutzen.',
+
+                // Subtasks in detail modal
+                'subtask.newPlaceholder': 'Neue Unteraufgabe...',
+
+                // Markdown generation
+                'markdown.archiveTitle': '# Aufgaben-Archiv',
+                'markdown.archiveDesc': '> Archivierte Aufgaben',
+                'markdown.archiveSection': '## ✅ Archiv',
+                'markdown.configSection': '## ⚙️ Konfiguration',
+                'markdown.configColumns': '**Spalten**:',
+                'markdown.configCategories': '**Kategorien**:',
+                'markdown.configUsers': '**Benutzer**:',
+                'markdown.configPriorities': '**Prioritäten**:',
+                'markdown.configTags': '**Tags**:',
+
+                // Language selector
+                'language.label': 'Sprache:',
+                'language.en': 'English',
+                'language.fr': 'Français',
+                'language.de': 'Deutsch'
             }
         };
 
