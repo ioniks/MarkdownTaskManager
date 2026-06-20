@@ -245,6 +245,31 @@
             opacity: 0.5;
         }
 
+        /* Per-column "+" add button (issue #12) */
+        .column-add-btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            width: 28px;
+            height: 28px;
+            font-size: 1.2rem;
+            line-height: 1;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+        .column-add-btn:hover { background: var(--accent-hover); }
+
+        /* Touch drag & drop feedback (issue #12) */
+        .kanban-column.drop-target {
+            outline: 2px dashed var(--accent);
+            outline-offset: -4px;
+        }
+
         .task-header {
             display: flex;
             justify-content: space-between;
@@ -588,6 +613,31 @@
         [data-theme="dark"] .modal-content {
             color: var(--text-primary);
         }
+
+        /* Responsive / mobile (issue #12) — placed last so it overrides base rules */
+        @media (max-width: 768px) {
+            .kanban-board {
+                padding: 1rem;
+                gap: 1rem;
+                scroll-snap-type: x mandatory;
+            }
+            .kanban-column {
+                flex: 0 0 85%;
+                min-width: 0;
+                scroll-snap-align: start;
+            }
+            .modal-content {
+                width: 95%;
+                padding: 1.25rem;
+            }
+            /* Stack multi-column form grids vertically on small screens */
+            .modal-form-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        @media (max-width: 480px) {
+            .kanban-column { flex: 0 0 92%; }
+        }
     </style>
 </head>
 <body>
@@ -726,7 +776,7 @@
                     <select id="taskStatus" required style="width: 100%; padding: 0.75rem; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 0.95rem; background: white; box-sizing: border-box;">
                     </select>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="modal-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                     <div>
                         <label for="taskPriority" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Priorité</label>
                         <select id="taskPriority" style="width: 100%; padding: 0.75rem; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 0.95rem; background: white; box-sizing: border-box;">
@@ -746,7 +796,7 @@
                     <label for="taskAssignee" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Assigné à</label>
                     <input type="text" id="taskAssignee" list="usersList" placeholder="@alice" style="width: 100%; padding: 0.75rem; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 0.95rem; background: white; box-sizing: border-box;">
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="modal-form-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                     <div>
                         <label for="taskCreated" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Créé</label>
                         <input type="date" id="taskCreated" style="width: 100%; padding: 0.75rem; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 0.95rem; background: white; box-sizing: border-box;">
@@ -3058,7 +3108,7 @@ ${t('markdown.archiveSection')}
         }
 
         // Task edit/create modal
-        function openTaskModal(task = null) {
+        function openTaskModal(task = null, defaultColumnId = null) {
             isEditMode = !!task;
             const modal = document.getElementById('newTaskModal');
             const form = document.getElementById('newTaskForm');
@@ -3099,6 +3149,9 @@ ${t('markdown.archiveSection')}
             } else {
                 form.reset();
                 document.getElementById('taskEditId').value = '';
+                if (defaultColumnId) {
+                    document.getElementById('taskStatus').value = defaultColumnId;
+                }
                 formSubtasks = [];
             }
 
@@ -3176,7 +3229,10 @@ ${t('markdown.archiveSection')}
                         <div class="column-title">
                             ${column.name}
                         </div>
-                        <div class="column-count">${columnTasks.length}</div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div class="column-count">${columnTasks.length}</div>
+                            <button class="column-add-btn" onclick="openTaskModal(null, '${column.id}')" title="${t('taskForm.newTask')}">+</button>
+                        </div>
                     </div>
                     <div class="task-list" ondrop="drop(event)" ondragover="allowDrop(event)">
                         ${columnTasks.length === 0 ? `<div class="empty-state">${t('empty.noTasks')}</div>` : ''}
@@ -3243,6 +3299,7 @@ ${t('markdown.archiveSection')}
 
             taskEl.addEventListener('dragstart', drag);
             taskEl.addEventListener('click', () => showTaskDetail(task));
+            attachTouchDrag(taskEl);
 
             return taskEl;
         }
@@ -3285,6 +3342,74 @@ ${t('markdown.archiveSection')}
                     }
                 }
             }
+        }
+
+        // ===== Touch drag & drop (mobile) — HTML5 DnD does not fire on touch devices (issue #12) =====
+        let touchDrag = null;
+
+        function attachTouchDrag(taskEl) {
+            taskEl.addEventListener('touchstart', (e) => {
+                if (e.touches.length !== 1) return;
+                const tch = e.touches[0];
+                touchDrag = {
+                    taskId: taskEl.dataset.taskId,
+                    el: taskEl,
+                    startX: tch.clientX,
+                    startY: tch.clientY,
+                    active: false,
+                    // Long-press to start dragging (otherwise the touch is a scroll/tap)
+                    timer: setTimeout(() => {
+                        if (touchDrag) {
+                            touchDrag.active = true;
+                            taskEl.classList.add('dragging');
+                            if (navigator.vibrate) navigator.vibrate(10);
+                        }
+                    }, 250)
+                };
+            }, { passive: true });
+
+            taskEl.addEventListener('touchmove', (e) => {
+                if (!touchDrag) return;
+                const tch = e.touches[0];
+                if (!touchDrag.active) {
+                    // Moved before the long-press fired → treat as scroll, cancel the pending drag
+                    if (Math.abs(tch.clientX - touchDrag.startX) > 10 || Math.abs(tch.clientY - touchDrag.startY) > 10) {
+                        clearTimeout(touchDrag.timer);
+                        touchDrag = null;
+                    }
+                    return;
+                }
+                e.preventDefault(); // block page scroll while dragging
+                const under = document.elementFromPoint(tch.clientX, tch.clientY);
+                const col = under && under.closest('.kanban-column');
+                document.querySelectorAll('.kanban-column').forEach(c => c.classList.toggle('drop-target', c === col));
+            }, { passive: false });
+
+            const endHandler = (e) => {
+                if (!touchDrag) return;
+                clearTimeout(touchDrag.timer);
+                if (touchDrag.active) {
+                    e.preventDefault(); // suppress the synthetic click that follows a drag
+                    touchDrag.el.classList.remove('dragging');
+                    const tch = e.changedTouches[0];
+                    const under = document.elementFromPoint(tch.clientX, tch.clientY);
+                    const col = under && under.closest('.kanban-column');
+                    document.querySelectorAll('.kanban-column').forEach(c => c.classList.remove('drop-target'));
+                    if (col) {
+                        const newStatus = col.dataset.columnId;
+                        const task = tasks.find(t => t.id === touchDrag.taskId);
+                        if (task && task.status !== newStatus) {
+                            task.status = newStatus;
+                            renderKanban();
+                            autoSave();
+                            showNotification(t('notif.taskMoved'), 'success');
+                        }
+                    }
+                }
+                touchDrag = null;
+            };
+            taskEl.addEventListener('touchend', endHandler, { passive: false });
+            taskEl.addEventListener('touchcancel', endHandler, { passive: false });
         }
 
         // Show task detail
@@ -3334,7 +3459,7 @@ ${t('markdown.archiveSection')}
                     <h3 style="margin: 0 0 1.5rem 0; font-size: 1.5rem; color: var(--text);">${task.title}</h3>
 
                     <!-- Metadata Grid -->
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem; padding: 1rem; background: var(--bg); border-radius: 8px;">
+                    <div class="modal-form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem; padding: 1rem; background: var(--bg); border-radius: 8px;">
                         ${task.priority ? `
                             <div>
                                 <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">${t('meta.priority')}</div>
