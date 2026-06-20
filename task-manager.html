@@ -14,13 +14,28 @@
         :root {
             --bg-primary: #f5f5f5;
             --bg-secondary: #ffffff;
+            --bg-tertiary: #f8f9fa;
+            --bg-input: #ffffff;
             --border-color: #e0e0e0;
+            --border-input: #cbd5e0;
             --text-primary: #212121;
             --text-secondary: #757575;
+            --text-label: #333333;
             --accent: #2196F3;
             --accent-hover: #1976D2;
             --shadow: 0 2px 4px rgba(0,0,0,0.1);
             --shadow-hover: 0 4px 8px rgba(0,0,0,0.15);
+            --badge-category-bg: #E3F2FD;
+            --badge-category-text: #1565C0;
+            --badge-assignee-bg: #F3E5F5;
+            --badge-assignee-text: #6A1B9A;
+            --tag-bg: #FFF3E0;
+            --tag-text: #E65100;
+            --notification-bg: #ffffff;
+            --debug-bg: #f9f9f9;
+            --debug-border: #ddd;
+            --btn-secondary-hover: #e8e8e8;
+            --search-clear-color: #718096;
 
             /* Priority colors */
             --priority-default: #888888;
@@ -32,6 +47,33 @@
             --priority-purple: #A855F7;
             --priority-white: #E5E7EB;
             --priority-black: #1F2937;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-tertiary: #1a1a2e;
+            --bg-input: #0f3460;
+            --border-color: #2a2a4a;
+            --border-input: #3a3a5a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0b8;
+            --text-label: #c8c8d8;
+            --accent: #4facfe;
+            --accent-hover: #3a8fd4;
+            --shadow: 0 2px 4px rgba(0,0,0,0.3);
+            --shadow-hover: 0 4px 8px rgba(0,0,0,0.4);
+            --badge-category-bg: #1a3a5c;
+            --badge-category-text: #64b5f6;
+            --badge-assignee-bg: #2a1a3c;
+            --badge-assignee-text: #ce93d8;
+            --tag-bg: #3c2a1a;
+            --tag-text: #ffb74d;
+            --notification-bg: #16213e;
+            --debug-bg: #1a1a2e;
+            --debug-border: #2a2a4a;
+            --btn-secondary-hover: #2a2a4a;
+            --search-clear-color: #a0a0b8;
         }
 
         body {
@@ -95,7 +137,7 @@
         }
 
         .btn-secondary:hover {
-            background: #e8e8e8;
+            background: var(--btn-secondary-hover);
         }
 
         .container {
@@ -180,7 +222,7 @@
         }
 
         .task-card {
-            background: white;
+            background: var(--bg-secondary);
             border: 1px solid var(--border-color);
             border-radius: 6px;
             padding: 1rem;
@@ -247,18 +289,18 @@
         .badge-priority.Black { background: var(--priority-black); }
 
         .badge-category {
-            background: #E3F2FD;
-            color: #1565C0;
+            background: var(--badge-category-bg);
+            color: var(--badge-category-text);
         }
 
         .badge-assignee {
-            background: #F3E5F5;
-            color: #6A1B9A;
+            background: var(--badge-assignee-bg);
+            color: var(--badge-assignee-text);
         }
 
         .tag {
-            background: #FFF3E0;
-            color: #E65100;
+            background: var(--tag-bg);
+            color: var(--tag-text);
             padding: 0.2rem 0.5rem;
             border-radius: 3px;
             font-size: 0.7rem;
@@ -351,7 +393,7 @@
         }
 
         .modal-content {
-            background: white;
+            background: var(--bg-secondary);
             border-radius: 8px;
             padding: 2rem;
             width: 80%;
@@ -423,7 +465,7 @@
             position: fixed;
             bottom: 2rem;
             right: 2rem;
-            background: white;
+            background: var(--notification-bg);
             padding: 1rem 1.5rem;
             border-radius: 6px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -483,8 +525,8 @@
         }
 
         .debug-info {
-            background: #f9f9f9;
-            border: 1px solid #ddd;
+            background: var(--debug-bg);
+            border: 1px solid var(--debug-border);
             padding: 1rem;
             margin: 1rem 0;
             border-radius: 4px;
@@ -492,6 +534,53 @@
             font-size: 0.85rem;
             white-space: pre-wrap;
             word-wrap: break-word;
+        }
+        /* Dark mode toggle button */
+        .theme-toggle {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.6rem 0.8rem;
+            cursor: pointer;
+            font-size: 1.1rem;
+            line-height: 1;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--btn-secondary-hover);
+        }
+
+        /* Dark mode overrides for inline styles */
+        [data-theme="dark"] #filterBar,
+        [data-theme="dark"] .welcome div[style*="background: white"],
+        [data-theme="dark"] #newTaskForm {
+            background: var(--bg-tertiary) !important;
+        }
+
+        [data-theme="dark"] select,
+        [data-theme="dark"] input[type="text"],
+        [data-theme="dark"] input[type="date"],
+        [data-theme="dark"] textarea {
+            background: var(--bg-input) !important;
+            color: var(--text-primary) !important;
+            border-color: var(--border-input) !important;
+        }
+
+        [data-theme="dark"] label {
+            color: var(--text-label) !important;
+        }
+
+        [data-theme="dark"] small {
+            color: var(--text-secondary) !important;
+        }
+
+        [data-theme="dark"] #filterBar {
+            border-bottom-color: var(--border-color) !important;
+        }
+
+        [data-theme="dark"] .modal-content {
+            color: var(--text-primary);
         }
     </style>
 </head>
@@ -514,6 +603,7 @@
                 <button id="newTaskBtn" class="btn btn-secondary" style="display: none;">➕ Tâche</button>
                 <button id="archiveBtn" class="btn btn-secondary" style="display: none;">📦 Archives</button>
                 <button id="manageColsBtn" class="btn btn-secondary" style="display: none;">⚙️ Colonnes</button>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode" id="themeToggleBtn">🌙</button>
             </div>
         </div>
     </header>
@@ -683,10 +773,10 @@
                     <textarea id="taskDescription" rows="4" style="width: 100%; padding: 0.75rem; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 0.95rem; resize: vertical; background: white; box-sizing: border-box;"></textarea>
                 </div>
                 <div style="margin-bottom: 1.5rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Sous-tâches</label>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text);">Sous-tâches</label>
                     <ul id="formSubtasksList" style="list-style: none; padding: 0; margin: 0 0 0.5rem 0; max-height: 150px; overflow-y: auto;"></ul>
                     <div style="display: flex; gap: 0.5rem;">
-                        <input type="text" id="formSubtaskInput" placeholder="Ajouter une sous-tâche..." style="flex: 1; padding: 0.5rem; border: 2px solid #cbd5e0; border-radius: 4px; font-size: 0.9rem; background: white;">
+                        <input type="text" id="formSubtaskInput" placeholder="Ajouter une sous-tâche..." style="flex: 1; padding: 0.5rem; border: 2px solid var(--border, #cbd5e0); border-radius: 4px; font-size: 0.9rem; background: var(--bg); color: var(--text);">
                         <button type="button" onclick="addFormSubtask()" class="btn btn-secondary" style="padding: 0.5rem 1rem;">+ Ajouter</button>
                     </div>
                 </div>
@@ -730,7 +820,7 @@
             </div>
             <div style="padding: 1.5rem;">
                 <div style="margin-bottom: 1rem;">
-                    <input type="text" id="archiveSearch" placeholder="Rechercher dans les archives..." style="width: 100%; padding: 0.75rem; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 0.95rem;">
+                    <input type="text" id="archiveSearch" placeholder="Rechercher dans les archives..." style="width: 100%; padding: 0.75rem; border: 2px solid var(--border, #cbd5e0); border-radius: 6px; font-size: 0.95rem; background: var(--bg); color: var(--text);">
                 </div>
                 <div id="archiveList" style="max-height: 500px; overflow-y: auto;"></div>
             </div>
@@ -743,6 +833,27 @@
     </div>
 
     <script>
+        // Dark mode
+        function toggleTheme() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            document.getElementById('themeToggleBtn').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            localStorage.setItem('theme', newTheme);
+        }
+
+        (function() {
+            const saved = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = saved || (prefersDark ? 'dark' : 'light');
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.addEventListener('DOMContentLoaded', () => {
+                    document.getElementById('themeToggleBtn').textContent = '☀️';
+                });
+            }
+        })();
+
         // File System Access API
         let directoryHandle = null;
         let kanbanFileHandle = null;
@@ -2889,13 +3000,13 @@ ${t('markdown.archiveSection')}
             const modal = document.getElementById('columnsModal');
             const list = document.getElementById('columnsList');
             list.innerHTML = config.columns.map((col, idx) => `
-                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; padding: 0.75rem; background: white; border: 2px solid #cbd5e0; border-radius: 6px; align-items: center;">
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; padding: 0.75rem; background: var(--bg); border: 2px solid var(--border, #cbd5e0); border-radius: 6px; align-items: center;">
                     <div style="display: flex; gap: 0.25rem;">
                         <button onclick="moveColumn(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.85rem;" title="${t('action.moveUp')}">↑</button>
                         <button onclick="moveColumn(${idx}, 1)" ${idx === config.columns.length - 1 ? 'disabled' : ''} class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.85rem;" title="${t('action.moveDown')}">↓</button>
                     </div>
-                    <input type="text" value="${col.name}" onchange="updateColumn(${idx}, 'name', this.value)" style="flex: 1; padding: 0.5rem; border: 1px solid #cbd5e0; border-radius: 4px;">
-                    <input type="text" value="${col.id}" onchange="updateColumn(${idx}, 'id', this.value)" style="width: 120px; padding: 0.5rem; border: 1px solid #cbd5e0; border-radius: 4px;" placeholder="ID">
+                    <input type="text" value="${col.name}" onchange="updateColumn(${idx}, 'name', this.value)" style="flex: 1; padding: 0.5rem; border: 1px solid var(--border, #cbd5e0); border-radius: 4px; background: var(--bg); color: var(--text);">
+                    <input type="text" value="${col.id}" onchange="updateColumn(${idx}, 'id', this.value)" style="width: 120px; padding: 0.5rem; border: 1px solid var(--border, #cbd5e0); border-radius: 4px; background: var(--bg); color: var(--text);" placeholder="ID">
                     <button onclick="deleteColumn(${idx})" class="btn btn-secondary" style="padding: 0.5rem;">🗑️</button>
                 </div>
             `).join('');
@@ -3004,7 +3115,7 @@ ${t('markdown.archiveSection')}
         function renderFormSubtasks() {
             const list = document.getElementById('formSubtasksList');
             list.innerHTML = formSubtasks.map((st, idx) => `
-                <li style="padding: 0.5rem; margin-bottom: 0.25rem; background: white; border: 1px solid #cbd5e0; border-radius: 4px; display: flex; align-items: center; gap: 0.5rem;">
+                <li style="padding: 0.5rem; margin-bottom: 0.25rem; background: var(--bg); border: 1px solid var(--border, #cbd5e0); border-radius: 4px; display: flex; align-items: center; gap: 0.5rem;">
                     <input type="checkbox" ${st.completed ? 'checked' : ''} onchange="toggleFormSubtask(${idx})" style="width: 16px; height: 16px; cursor: pointer;">
                     <span style="flex: 1; ${st.completed ? 'text-decoration: line-through; color: #999;' : ''}">${st.text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
                     <button type="button" onclick="deleteFormSubtask(${idx})" style="background: none; border: none; cursor: pointer; color: #e53e3e; font-size: 1rem;">🗑️</button>
@@ -3293,7 +3404,7 @@ ${t('markdown.archiveSection')}
                             }).join('')}
                         </ul>
                         <div style="display: flex; gap: 0.5rem;">
-                            <input type="text" id="newSubtaskInput" placeholder="${t('subtask.newPlaceholder')}" onkeypress="if(event.key==='Enter') addSubtask('${task.id}')" style="flex: 1; padding: 0.5rem; border: 2px solid #cbd5e0; border-radius: 4px; font-size: 0.9rem;">
+                            <input type="text" id="newSubtaskInput" placeholder="${t('subtask.newPlaceholder')}" onkeypress="if(event.key==='Enter') addSubtask('${task.id}')" style="flex: 1; padding: 0.5rem; border: 2px solid var(--border, #cbd5e0); border-radius: 4px; font-size: 0.9rem; background: var(--bg); color: var(--text);">
                             <button onclick="addSubtask('${task.id}')" class="btn btn-primary" style="padding: 0.5rem 1rem;">${t('taskForm.subtaskAdd')}</button>
                         </div>
                     </div>
@@ -3606,14 +3717,14 @@ ${t('markdown.archiveSection')}
 
             if (filtered.length === 0) {
                 console.log('⚠️ No tasks to display - showing empty message');
-                list.innerHTML = `<p style="text-align: center; color: #999; padding: 2rem;">${t('archives.empty')}</p>`;
+                list.innerHTML = `<p style="text-align: center; color: var(--text-secondary, #999); padding: 2rem;">${t('archives.empty')}</p>`;
                 return;
             }
 
             console.log('✓ Rendering', filtered.length, 'tasks');
 
             list.innerHTML = filtered.map(task => `
-                <div style="background: white; border: 2px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem;">
+                <div style="background: var(--bg); border: 2px solid var(--border, #e2e8f0); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem;">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
                         <div>
                             <span style="background: #6b7280; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">${task.id}</span>
@@ -3624,7 +3735,7 @@ ${t('markdown.archiveSection')}
                             <button onclick="unarchiveTask('${task.id}')" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">↩️ Restaurer</button>
                         </div>
                     </div>
-                    ${task.description ? `<p style="color: #666; margin: 0.5rem 0;">${markdownToHtml(task.description)}</p>` : ''}
+                    ${task.description ? `<p style="color: var(--text-secondary, #666); margin: 0.5rem 0;">${markdownToHtml(task.description)}</p>` : ''}
                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
                         ${task.priority ? `<span style="background: #fbbf24; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">${displayPriority(task.priority)}</span>` : ''}
                         ${task.category ? `<span style="background: #8b5cf6; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">${task.category}</span>` : ''}
