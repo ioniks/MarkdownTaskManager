@@ -1,5 +1,6 @@
         function generateMarkdown() {
-            let md = `# Kanban Board\n\n<!-- Config: Last Task ID: ${config.lastTaskId} -->\n\n`;
+            // The Format marker makes V2 detection unambiguous (vs a legacy column named "Tasks").
+            let md = `# Kanban Board\n\n<!-- Config: Last Task ID: ${config.lastTaskId} -->\n<!-- Format: v2 -->\n\n`;
 
             // Update config with values from tasks (merge with existing)
             const allCategories = new Set(config.categories || []);
@@ -40,49 +41,49 @@
             md += `**Tags**: ${config.tags.map(t => '#' + t).join(' ')}\n\n`;
             md += `---\n\n`;
 
-            // Add tasks by column
-            config.columns.forEach(column => {
-                md += `## ${column.name}\n\n`;
+            // V2: a single "## Tasks" section. Each task carries its own **Status**
+            // field (= its column), and its order in the file equals its order in
+            // tasks[] (= its rank within its column). Moving a task between columns is
+            // a one-line **Status** edit; the block itself never has to move.
+            md += `## Tasks\n\n`;
+            tasks.forEach(task => {
+                md += `### ${task.id} | ${task.title}\n`;
+                md += `**Status**: ${task.status}\n`;
 
-                const columnTasks = tasks.filter(t => t.status === column.id);
-                columnTasks.forEach(task => {
-                    md += `### ${task.id} | ${task.title}\n`;
+                let meta = '';
+                if (task.priority) meta += `**Priority**: ${task.priority}`;
+                if (task.category) meta += ` | **Category**: ${task.category}`;
+                if (task.assignees.length > 0) meta += ` | **Assigned**: ${task.assignees.join(', ')}`;
+                if (meta) md += meta + '\n';
 
-                    let meta = '';
-                    if (task.priority) meta += `**Priority**: ${task.priority}`;
-                    if (task.category) meta += ` | **Category**: ${task.category}`;
-                    if (task.assignees.length > 0) meta += ` | **Assigned**: ${task.assignees.join(', ')}`;
-                    if (meta) md += meta + '\n';
+                // Write dates line
+                let dates = '';
+                if (task.created) dates += `**Created**: ${task.created}`;
+                if (task.started) dates += (dates ? ' | ' : '') + `**Started**: ${task.started}`;
+                if (task.due) dates += (dates ? ' | ' : '') + `**Due**: ${task.due}`;
+                if (task.completed) dates += (dates ? ' | ' : '') + `**Finished**: ${task.completed}`;
+                if (dates) md += dates + '\n';
 
-                    // Write dates line
-                    let dates = '';
-                    if (task.created) dates += `**Created**: ${task.created}`;
-                    if (task.started) dates += (dates ? ' | ' : '') + `**Started**: ${task.started}`;
-                    if (task.due) dates += (dates ? ' | ' : '') + `**Due**: ${task.due}`;
-                    if (task.completed) dates += (dates ? ' | ' : '') + `**Finished**: ${task.completed}`;
-                    if (dates) md += dates + '\n';
+                if (task.tags.length > 0) {
+                    md += `**Tags**: ${task.tags.join(' ')}\n`;
+                }
 
-                    if (task.tags.length > 0) {
-                        md += `**Tags**: ${task.tags.join(' ')}\n`;
-                    }
+                if (task.description) {
+                    md += `\n${task.description}\n`;
+                }
 
-                    if (task.description) {
-                        md += `\n${task.description}\n`;
-                    }
+                if (task.subtasks.length > 0) {
+                    md += `\n**Subtasks**:\n`;
+                    task.subtasks.forEach(st => {
+                        md += `- [${st.completed ? 'x' : ' '}] ${st.text}\n`;
+                    });
+                }
 
-                    if (task.subtasks.length > 0) {
-                        md += `\n**Subtasks**:\n`;
-                        task.subtasks.forEach(st => {
-                            md += `- [${st.completed ? 'x' : ' '}] ${st.text}\n`;
-                        });
-                    }
+                if (task.notes) {
+                    md += `\n**Notes**:\n${task.notes}\n`;
+                }
 
-                    if (task.notes) {
-                        md += `\n**Notes**:\n${task.notes}\n`;
-                    }
-
-                    md += `\n`; // Just one blank line between tasks, no ---
-                });
+                md += `\n`; // Just one blank line between tasks, no ---
             });
 
             return md;
