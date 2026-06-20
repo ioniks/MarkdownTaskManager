@@ -125,33 +125,68 @@
             event.target.classList.add('dragging');
         }
 
+        // Id of the card the dragged task should be inserted BEFORE, given a vertical
+        // drop position (classic reorder pattern). Returns null to append at the end.
+        function getDropBeforeId(taskListEl, y, excludeId = null) {
+            const cards = [...taskListEl.querySelectorAll('.task-card:not(.dragging)')];
+            for (const card of cards) {
+                if (card.dataset.taskId === excludeId) continue;
+                const rect = card.getBoundingClientRect();
+                if (y < rect.top + rect.height / 2) return card.dataset.taskId;
+            }
+            return null;
+        }
+
+        // Move a task within tasks[] (the canonical display/file order): set its status
+        // and reposition it before beforeTaskId (or at the end). The block's position in
+        // tasks[] = its rank within its column. Returns true if status or order changed.
+        function moveTask(taskId, newStatus, beforeTaskId = null) {
+            const oldIdx = tasks.findIndex(t => t.id === taskId);
+            if (oldIdx < 0) return false;
+            const task = tasks[oldIdx];
+            const statusChanged = newStatus && task.status !== newStatus;
+            const targetStatus = newStatus || task.status;
+            tasks.splice(oldIdx, 1);
+            let insertIdx;
+            if (beforeTaskId) {
+                insertIdx = tasks.findIndex(t => t.id === beforeTaskId);
+                if (insertIdx < 0) insertIdx = tasks.length;
+            } else {
+                // No explicit anchor (dropped at the bottom of a column): append right after
+                // the last task already in that column, so the .md stays grouped by column.
+                insertIdx = tasks.length;
+                for (let i = tasks.length - 1; i >= 0; i--) {
+                    if (tasks[i].status === targetStatus) { insertIdx = i + 1; break; }
+                }
+            }
+            tasks.splice(insertIdx, 0, task);
+            const posChanged = tasks.indexOf(task) !== oldIdx;
+            if (newStatus) task.status = newStatus;
+            return statusChanged || posChanged;
+        }
+
         function drop(event) {
             event.preventDefault();
             const taskId = event.dataTransfer.getData('taskId');
-            const taskEl = document.querySelector(`[data-task-id="${taskId}"]`);
 
-            if (taskEl) {
-                taskEl.classList.remove('dragging');
+            // Find the target column's task list
+            let dropTarget = event.target;
+            while (dropTarget && !dropTarget.classList.contains('task-list')) {
+                dropTarget = dropTarget.parentElement;
+            }
+            if (!dropTarget || !dropTarget.classList.contains('task-list')) return;
 
-                // Find the column
-                let dropTarget = event.target;
-                while (dropTarget && !dropTarget.classList.contains('task-list')) {
-                    dropTarget = dropTarget.parentElement;
-                }
+            const newStatus = dropTarget.closest('.kanban-column').dataset.columnId;
+            // Compute the drop position (which card to insert before) excluding the dragged card
+            const beforeId = getDropBeforeId(dropTarget, event.clientY, taskId);
+            const draggedEl = document.querySelector(`[data-task-id="${taskId}"]`);
+            if (draggedEl) draggedEl.classList.remove('dragging');
 
-                if (dropTarget && dropTarget.classList.contains('task-list')) {
-                    const columnEl = dropTarget.closest('.kanban-column');
-                    const newStatus = columnEl.dataset.columnId;
-
-                    // Update task status
-                    const task = tasks.find(t => t.id === taskId);
-                    if (task && task.status !== newStatus) {
-                        task.status = newStatus;
-                        renderKanban();
-                        autoSave();
-                        showNotification(t('notif.taskMoved'), 'success');
-                    }
-                }
+            // moveTask handles both cross-column moves and within-column reordering
+            if (moveTask(taskId, newStatus, beforeId)) {
+                renderKanban();
+                autoSave();
+                showNotification(t('notif.taskMoved'), 'success');
             }
         }
 
@@ -208,9 +243,9 @@
                     document.querySelectorAll('.kanban-column').forEach(c => c.classList.remove('drop-target'));
                     if (col) {
                         const newStatus = col.dataset.columnId;
-                        const task = tasks.find(t => t.id === touchDrag.taskId);
-                        if (task && task.status !== newStatus) {
-                            task.status = newStatus;
+                        const taskList = col.querySelector('.task-list');
+                        const beforeId = getDropBeforeId(taskList, tch.clientY, touchDrag.taskId);
+                        if (moveTask(touchDrag.taskId, newStatus, beforeId)) {
                             renderKanban();
                             autoSave();
                             showNotification(t('notif.taskMoved'), 'success');
