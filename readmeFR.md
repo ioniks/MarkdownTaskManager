@@ -1145,6 +1145,8 @@ Contributions bienvenues ! Voici comment aider :
 - ✅ Durcissement XSS : rendu échappé + validation du schéma des liens Markdown — *1.3.1*
 - ✅ **Statut « économe en tokens » (statut en champ)** — la colonne d'une tâche est un champ `**Status**:` dans une seule section `## Tasks` ; déplacer une tâche entre colonnes devient une modification d'une seule ligne, et une IA lit/met à jour le tableau via un simple `grep` (aucun index stocké). Parser rétro-compatible + **migration automatique et sûre V1→V2 au chargement** (crée un `.v1-backup.md`, sans perte de données) ; l'archive est migrée aussi. — *2.0*
 - ✅ Sources découpées dans `src/` et compilées vers l'unique `task-manager.html` par un build Node sans dépendance (`npm run build`) — *2.0*
+- ✅ **Échéances visibles** — la date **Due** est affichée sur chaque carte et signalée (orange si à 2 jours ou moins, rouge si dépassée) ; les tâches terminées ne sont jamais signalées — *2.0*
+- ✅ Fidélité de migration — le titre H1 personnalisé est préservé (plus de réécriture en « Kanban Board »), les lignes config Catégories/Utilisateurs/Tags ne gonflent plus à chaque sauvegarde, et les champs d'autocomplétion sont échappés — *2.0*
 
 ### Prochaines versions
 

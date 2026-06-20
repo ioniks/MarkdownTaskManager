@@ -1182,6 +1182,8 @@ Contributions welcome! Here's how to help:
 - ✅ XSS hardening: escaped rendering + Markdown link scheme validation — *1.3.1*
 - ✅ **Token-efficient status (status as a field)** — a task's column is a `**Status**:` field in a single `## Tasks` section, so moving a task between columns is a one-line edit; AIs read/update the board via cheap `grep` (no stored index). Backward-compatible parser + **automatic, safe V1→V2 migration on load** (creates a `.v1-backup.md`, no data loss); the archive is migrated too. — *2.0*
 - ✅ Source split into `src/` and compiled to the single `task-manager.html` by a dependency-free Node build (`npm run build`) — *2.0*
+- ✅ **Visible deadlines** — the **Due** date is shown on every card and highlighted (orange when due within 2 days, red once overdue); finished tasks are never flagged — *2.0*
+- ✅ Migration fidelity — a custom H1 title is preserved (no longer reset to "Kanban Board"), the config Categories/Users/Tags lines no longer grow unbounded on every save, and the autocomplete fields are escaped — *2.0*
 
 ### Next versions
 
