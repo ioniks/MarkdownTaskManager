@@ -78,13 +78,14 @@
         function updateAutocomplete() {
             const { categories, users, tags } = extractUniqueValues();
 
-            // Update form datalists (keep full format for proper storage)
-            document.getElementById('categoriesList').innerHTML = categories.map(c => `<option value="${c}">`).join('');
-            document.getElementById('usersList').innerHTML = users.map(u => `<option value="${u}">`).join('');
-            document.getElementById('tagsList').innerHTML = tags.map(t => `<option value="${t}">`).join('');
+            // Update form datalists (keep full format for proper storage). Escape values: they can
+            // come from a shared kanban.md, and an <option value> is an HTML attribute → XSS sink.
+            document.getElementById('categoriesList').innerHTML = categories.map(c => `<option value="${escapeHtml(c)}">`).join('');
+            document.getElementById('usersList').innerHTML = users.map(u => `<option value="${escapeHtml(u)}">`).join('');
+            document.getElementById('tagsList').innerHTML = tags.map(t => `<option value="${escapeHtml(t)}">`).join('');
 
             // Update filter selects
-            document.getElementById('filterTagSelect').innerHTML = `<option value="">${t('filters.select')}</option>` + tags.map(t => `<option value="${t}">${t}</option>`).join('');
+            document.getElementById('filterTagSelect').innerHTML = `<option value="">${t('filters.select')}</option>` + tags.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
             document.getElementById('filterCategorySelect').innerHTML = `<option value="">${t('filters.select')}</option>` + categories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
             document.getElementById('filterUserSelect').innerHTML = `<option value="">${t('filters.select')}</option>` + users.map(u => {
                 const normalizedId = normalizeUserId(u);
