@@ -1,0 +1,72 @@
+        /* Dark mode toggle button */
+        .theme-toggle {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.6rem 0.8rem;
+            cursor: pointer;
+            font-size: 1.1rem;
+            line-height: 1;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--btn-secondary-hover);
+        }
+
+        /* Dark mode overrides for inline styles */
+        [data-theme="dark"] #filterBar,
+        [data-theme="dark"] .welcome div[style*="background: white"],
+        [data-theme="dark"] #newTaskForm {
+            background: var(--bg-tertiary) !important;
+        }
+
+        [data-theme="dark"] select,
+        [data-theme="dark"] input[type="text"],
+        [data-theme="dark"] input[type="date"],
+        [data-theme="dark"] textarea {
+            background: var(--bg-input) !important;
+            color: var(--text-primary) !important;
+            border-color: var(--border-input) !important;
+        }
+
+        [data-theme="dark"] label {
+            color: var(--text-label) !important;
+        }
+
+        [data-theme="dark"] small {
+            color: var(--text-secondary) !important;
+        }
+
+        [data-theme="dark"] #filterBar {
+            border-bottom-color: var(--border-color) !important;
+        }
+
+        [data-theme="dark"] .modal-content {
+            color: var(--text-primary);
+        }
+
+        /* Responsive / mobile (issue #12) — placed last so it overrides base rules */
+        @media (max-width: 768px) {
+            .kanban-board {
+                padding: 1rem;
+                gap: 1rem;
+                scroll-snap-type: x mandatory;
+            }
+            .kanban-column {
+                flex: 0 0 85%;
+                min-width: 0;
+                scroll-snap-align: start;
+            }
+            .modal-content {
+                width: 95%;
+                padding: 1.25rem;
+            }
+            /* Stack multi-column form grids vertically on small screens */
+            .modal-form-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        @media (max-width: 480px) {
+            .kanban-column { flex: 0 0 92%; }
+        }

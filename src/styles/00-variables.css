@@ -1,0 +1,83 @@
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f8f9fa;
+            --bg-input: #ffffff;
+            --border-color: #e0e0e0;
+            --border-input: #cbd5e0;
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --text-label: #333333;
+            --accent: #2196F3;
+            --accent-hover: #1976D2;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-hover: 0 4px 8px rgba(0,0,0,0.15);
+            --badge-category-bg: #E3F2FD;
+            --badge-category-text: #1565C0;
+            --badge-assignee-bg: #F3E5F5;
+            --badge-assignee-text: #6A1B9A;
+            --tag-bg: #FFF3E0;
+            --tag-text: #E65100;
+            --notification-bg: #ffffff;
+            --debug-bg: #f9f9f9;
+            --debug-border: #ddd;
+            --btn-secondary-hover: #e8e8e8;
+            --search-clear-color: #718096;
+
+            /* Short aliases used by some inline styles (var(--bg)/var(--text)/var(--border)).
+               They reference the suffixed vars, so they follow the dark theme automatically. */
+            --bg: var(--bg-secondary);
+            --text: var(--text-primary);
+            --border: var(--border-color);
+
+            /* Priority colors */
+            --priority-default: #888888;
+            --priority-red: #EF4444;
+            --priority-orange: #F97316;
+            --priority-yellow: #EAB308;
+            --priority-green: #22C55E;
+            --priority-blue: #3B82F6;
+            --priority-purple: #A855F7;
+            --priority-white: #E5E7EB;
+            --priority-black: #1F2937;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-tertiary: #1a1a2e;
+            --bg-input: #0f3460;
+            --border-color: #2a2a4a;
+            --border-input: #3a3a5a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0b8;
+            --text-label: #c8c8d8;
+            --accent: #4facfe;
+            --accent-hover: #3a8fd4;
+            --shadow: 0 2px 4px rgba(0,0,0,0.3);
+            --shadow-hover: 0 4px 8px rgba(0,0,0,0.4);
+            --badge-category-bg: #1a3a5c;
+            --badge-category-text: #64b5f6;
+            --badge-assignee-bg: #2a1a3c;
+            --badge-assignee-text: #ce93d8;
+            --tag-bg: #3c2a1a;
+            --tag-text: #ffb74d;
+            --notification-bg: #16213e;
+            --debug-bg: #1a1a2e;
+            --debug-border: #2a2a4a;
+            --btn-secondary-hover: #2a2a4a;
+            --search-clear-color: #a0a0b8;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }

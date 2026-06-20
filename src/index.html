@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Task Manager</title>
+    <style>
+        /* build:css */
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1 id="headerTitle">📋 Task Manager</h1>
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+                <select id="languageSelector" onchange="setLanguage(this.value)" style="padding: 0.6rem 1rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9rem; background: white; cursor: pointer;">
+                    <option value="en">English</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                    <option value="zh_cn">简体中文</option>
+                </select>
+                <select id="projectSelector" style="display: none; padding: 0.6rem 1rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9rem; background: white; cursor: pointer; min-width: 180px;">
+                </select>
+                <button id="renameProjectBtn" class="btn btn-secondary" style="display: none; padding: 0.6rem;" title="Renommer le projet" onclick="renameCurrentProject()">✏️</button>
+                <button id="deleteProjectBtn" class="btn btn-secondary" style="display: none; padding: 0.6rem;" title="Supprimer le projet" onclick="deleteCurrentProject()">🗑️</button>
+                <button id="selectFolderBtn" class="btn btn-primary">📁 Dossier</button>
+                <button id="newTaskBtn" class="btn btn-secondary" style="display: none;">➕ Tâche</button>
+                <button id="archiveBtn" class="btn btn-secondary" style="display: none;">📦 Archives</button>
+                <button id="manageColsBtn" class="btn btn-secondary" style="display: none;">⚙️ Colonnes</button>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode" id="themeToggleBtn">🌙</button>
+            </div>
+        </div>
+    </header>
+    <div id="filterBar" style="display: none; background: white; border-bottom: 1px solid var(--border); padding: 1rem 0;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+            <!-- Global Search -->
+            <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
+                <div style="position: relative; max-width: 600px; width: 100%;">
+                    <input
+                        type="text"
+                        id="globalSearchInput"
+                        placeholder="Rechercher dans les tâches..."
+                        style="width: 100%; padding: 0.75rem 3rem 0.75rem 1rem; border: 2px solid #cbd5e0; border-radius: 8px; font-size: 1rem; transition: border-color 0.2s;"
+                        oninput="applyGlobalSearch()"
+                    >
+                    <button
+                        id="clearGlobalSearch"
+                        onclick="clearGlobalSearch()"
+                        style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #718096; cursor: pointer; font-size: 1.2rem; padding: 0.5rem; display: none;"
+                        title="Clear search"
+                    >✕</button>
+                </div>
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 0.75rem; justify-content: center;">
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <label style="font-weight: 500; font-size: 0.9rem;">Tags:</label>
+                    <select id="filterTagSelect" style="padding: 0.5rem; border: 1px solid #cbd5e0; border-radius: 4px; min-width: 150px;">
+                        <option value="">Sélectionner...</option>
+                    </select>
+                    <button onclick="addFilter('tag')" class="btn btn-primary" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;">+</button>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <label style="font-weight: 500; font-size: 0.9rem;">Catégorie:</label>
+                    <select id="filterCategorySelect" style="padding: 0.5rem; border: 1px solid #cbd5e0; border-radius: 4px; min-width: 150px;">
+                        <option value="">Sélectionner...</option>
+                    </select>
+                    <button onclick="addFilter('category')" class="btn btn-primary" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;">+</button>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <label style="font-weight: 500; font-size: 0.9rem;">Utilisateur:</label>
+                    <select id="filterUserSelect" style="padding: 0.5rem; border: 1px solid #cbd5e0; border-radius: 4px; min-width: 150px;">
+                        <option value="">Sélectionner...</option>
+                    </select>
+                    <button onclick="addFilter('user')" class="btn btn-primary" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;">+</button>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <label style="font-weight: 500; font-size: 0.9rem;">Priorité:</label>
+                    <select id="filterPrioritySelect" style="padding: 0.5rem; border: 1px solid #cbd5e0; border-radius: 4px; min-width: 150px;">
+                        <option value="">Sélectionner...</option>
+                    </select>
+                    <button onclick="addFilter('priority')" class="btn btn-primary" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;">+</button>
+                </div>
+                <button onclick="clearFilters()" class="btn btn-secondary" style="padding: 0.5rem 1rem;">✕ Tout effacer</button>
+            </div>
+            <div id="activeFilters" style="display: flex; gap: 0.5rem; flex-wrap: wrap; min-height: 32px; justify-content: center;"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="welcomeScreen" class="welcome">
+            <h2>Bienvenue ! 👋</h2>
+            <p>Sélectionnez le dossier contenant vos fichiers Markdown (kanban.md et archive.md)</p>
+            <button onclick="document.getElementById('selectFolderBtn').click()" class="btn btn-primary" style="font-size: 1.1rem; padding: 0.8rem 2rem;">
+                📁 Commencer
+            </button>
+            <div style="margin-top: 2rem; padding: 1.5rem; background: white; border-radius: 8px; max-width: 600px; margin-left: auto; margin-right: auto; text-align: left;">
+                <h3 style="margin-bottom: 1rem;">💡 Comment ça marche ?</h3>
+                <ol style="margin-left: 1.5rem; color: var(--text-secondary);">
+                    <li>Cliquez sur "Commencer" ci-dessus</li>
+                    <li>Sélectionnez le dossier contenant vos fichiers Markdown</li>
+                    <li>L'application charge automatiquement kanban.md</li>
+                    <li>Gérez vos tâches visuellement avec le Kanban</li>
+                    <li>Les modifications sont sauvegardées dans les fichiers Markdown</li>
+                </ol>
+                <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-secondary);">
+                    ⚠️ <strong>Navigateurs supportés</strong> : Chrome 86+, Edge 86+, Opera 72+
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div id="kanbanView" style="display: none;">
+        <div id="debugInfo" class="debug-info" style="display: none;"></div>
+        <div class="kanban-board" id="kanbanBoard"></div>
+    </div>
+
+    <!-- Modal Task Detail -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Détails de la tâche</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalBody" class="task-detail"></div>
+            <div id="taskModalActions" class="actions"></div>
+        </div>
+    </div>
+
+    <!-- Modal New Task -->
+    <div id="newTaskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nouvelle tâche</h2>
+                <button class="close-btn" onclick="closeTaskModal()">&times;</button>
+            </div>
+            <form id="newTaskForm" style="padding: 1.5rem; background: #f8f9fa;">
+                <input type="hidden" id="taskEditId">
+                <div style="margin-bottom: 1rem;">
+                    <label for="taskTitle" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Titre *</label>
+                    <input type="text" id="taskTitle" required style="width: 100%; padding: 0.75rem; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 0.95rem; background: white; box-sizing: border-box;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label for="taskStatus" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Colonne *</label>
+                    <select id="taskStatus" required style="width: 100%; padding: 0.75rem; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 0.95rem; background: white; box-sizing: border-box;">
+                    </select>
+                </div>
+                <div class="modal-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <label for="taskPriority" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Priorité</label>
+                        <select id="taskPriority" style="width: 100%; padding: 0.75rem; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 0.95rem; background: white; box-sizing: border-box;">
+                            <option value="">Aucune</option>
+                            <option value="Critique">🔴 Critique</option>
+                            <option value="Haute">🟠 Haute</option>
+                            <option value="Moyenne">🟡 Moyenne</option>
+                            <option value="Basse">🟢 Basse</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="taskCategory" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Catégorie</label>
+                        <input type="text" id="taskCategory" list="categoriesList" placeholder="Frontend, Backend..." style="width: 100%; padding: 0.75rem; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 0.95rem; background: white; box-sizing: border-box;">
+                    </div>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label for="taskAssignee" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Assigné à</label>
+                    <input type="text" id="taskAssignee" list="usersList" placeholder="@alice" style="width: 100%; padding: 0.75rem; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 0.95rem; background: white; box-sizing: border-box;">
+                </div>
+                <div class="modal-form-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <label for="taskCreated" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Créé</label>
+                        <input type="date" id="taskCreated" style="width: 100%; padding: 0.75rem; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 0.95rem; background: white; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label for="taskStarted" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Commencé</label>
+                        <input type="date" id="taskStarted" style="width: 100%; padding: 0.75rem; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 0.95rem; background: white; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label for="taskDue" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Échéance</label>
+                        <input type="date" id="taskDue" style="width: 100%; padding: 0.75rem; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 0.95rem; background: white; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label for="taskCompleted" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Terminé</label>
+                        <input type="date" id="taskCompleted" style="width: 100%; padding: 0.75rem; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 0.95rem; background: white; box-sizing: border-box;">
+                    </div>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label for="taskTags" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Tags</label>
+                    <input type="text" id="taskTags" list="tagsList" placeholder="#bug #feature" style="width: 100%; padding: 0.75rem; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 0.95rem; background: white; box-sizing: border-box;">
+                    <small style="color: var(--text-secondary); font-size: 0.85rem;">Séparez avec des espaces</small>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label for="taskDescription" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Description</label>
+                    <textarea id="taskDescription" rows="4" style="width: 100%; padding: 0.75rem; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 0.95rem; resize: vertical; background: white; box-sizing: border-box;"></textarea>
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text);">Sous-tâches</label>
+                    <ul id="formSubtasksList" style="list-style: none; padding: 0; margin: 0 0 0.5rem 0; max-height: 150px; overflow-y: auto;"></ul>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="formSubtaskInput" placeholder="Ajouter une sous-tâche..." style="flex: 1; padding: 0.5rem; border: 2px solid var(--border, #cbd5e0); border-radius: 4px; font-size: 0.9rem; background: var(--bg); color: var(--text);">
+                        <button type="button" onclick="addFormSubtask()" class="btn btn-secondary" style="padding: 0.5rem 1rem;">+ Ajouter</button>
+                    </div>
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="taskNotes" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Notes</label>
+                    <textarea id="taskNotes" rows="6" placeholder="Notes techniques, résultats, décisions, etc.&#10;&#10;Vous pouvez utiliser du Markdown :&#10;**Gras**, *Italique*, `code`, listes, liens..." style="width: 100%; padding: 0.75rem; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 0.95rem; resize: vertical; background: white; box-sizing: border-box; font-family: monospace;"></textarea>
+                    <small style="color: var(--text-secondary); font-size: 0.85rem;">Markdown supporté : **gras**, *italique*, `code`, listes, liens, **Sous-sections**:</small>
+                </div>
+                <div class="actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeTaskModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary" id="taskFormSubmitBtn">Créer</button>
+                </div>
+            </form>
+            <!-- Datalists for autocomplete -->
+            <datalist id="categoriesList"></datalist>
+            <datalist id="usersList"></datalist>
+            <datalist id="tagsList"></datalist>
+        </div>
+    </div>
+
+    <!-- Modal Manage Columns -->
+    <div id="columnsModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 id="columnsModalTitle">Gérer les colonnes</h2>
+                <button class="close-btn" onclick="closeColumnsModal()">&times;</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <div id="columnsList"></div>
+                <button id="addColumnBtn" onclick="addColumn()" class="btn btn-primary" style="margin-top: 1rem; width: 100%;">+ Ajouter une colonne</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Archives -->
+    <div id="archiveModal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2 id="archiveModalTitle">📦 Archives</h2>
+                <button class="close-btn" onclick="closeArchiveModal()">&times;</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <div style="margin-bottom: 1rem;">
+                    <input type="text" id="archiveSearch" placeholder="Rechercher dans les archives..." style="width: 100%; padding: 0.75rem; border: 2px solid var(--border, #cbd5e0); border-radius: 6px; font-size: 0.95rem; background: var(--bg); color: var(--text);">
+                </div>
+                <div id="archiveList" style="max-height: 500px; overflow-y: auto;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification">
+        <span id="notificationText"></span>
+    </div>
+
+    <script>
+        /* build:js */
+    </script>
+</body>
+</html>

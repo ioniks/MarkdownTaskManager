@@ -1,0 +1,231 @@
+        .kanban-board {
+            display: flex;
+            gap: 1.5rem;
+            margin: 0;
+            padding: 2rem;
+            overflow-x: auto;
+            justify-content: flex-start;
+        }
+
+        .kanban-column {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            min-width: 280px;
+            flex: 1 1 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .column-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .column-count {
+            background: var(--bg-primary);
+            padding: 0.25rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .task-list {
+            min-height: 100px;
+            flex: 1; /* Grow to fill column height */
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .task-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            cursor: move;
+            transition: all 0.2s;
+        }
+
+        .task-card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-2px);
+        }
+
+        .task-card.dragging {
+            opacity: 0.5;
+        }
+
+        /* Per-column "+" add button (issue #12) */
+        .column-add-btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            width: 28px;
+            height: 28px;
+            font-size: 1.2rem;
+            line-height: 1;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+        .column-add-btn:hover { background: var(--accent-hover); }
+
+        /* Touch drag & drop feedback (issue #12) */
+        .kanban-column.drop-target {
+            outline: 2px dashed var(--accent);
+            outline-offset: -4px;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.5rem;
+        }
+
+        .task-id {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .task-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .task-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .badge {
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-priority {
+            color: white;
+            background: var(--priority-default);
+        }
+
+        .badge-priority.Default { background: var(--priority-default); }
+        .badge-priority.Red { background: var(--priority-red); }
+        .badge-priority.Orange { background: var(--priority-orange); }
+        .badge-priority.Yellow { background: var(--priority-yellow); }
+        .badge-priority.Green { background: var(--priority-green); }
+        .badge-priority.Blue { background: var(--priority-blue); }
+        .badge-priority.Purple { background: var(--priority-purple); }
+        .badge-priority.White { background: var(--priority-white); color: #1F2937; }
+        .badge-priority.Black { background: var(--priority-black); }
+
+        .badge-category {
+            background: var(--badge-category-bg);
+            color: var(--badge-category-text);
+        }
+
+        .badge-assignee {
+            background: var(--badge-assignee-bg);
+            color: var(--badge-assignee-text);
+        }
+
+        .tag {
+            background: var(--tag-bg);
+            color: var(--tag-text);
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+        }
+
+        .task-description {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .task-subtasks {
+            margin-top: 0.75rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .subtask-progress {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 4px;
+            background: var(--bg-primary);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            transition: width 0.3s;
+        }
+
+        /* Code block styles */
+        pre {
+            margin: 1rem 0;
+            border-radius: 6px;
+            overflow-x: auto;
+            background: #2d2d2d;
+            padding: 1rem;
+        }
+
+        pre code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+            color: #f8f8f2;
+            display: block;
+        }
+
+        /* Inline code styling */
+        code {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 0.125rem 0.35rem;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+        }
+
+        /* Override for code inside pre */
+        pre code {
+            background: none;
+            padding: 0;
+        }
