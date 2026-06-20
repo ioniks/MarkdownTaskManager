@@ -126,6 +126,15 @@ ${t('markdown.archiveSection')}
             }
         }
 
+        // Slugify a column name/heading to an id (lowercase, drop emoji/punctuation, dash spaces).
+        // MUST stay identical to the id derivation used when a column has no explicit (id), so that
+        // slug(heading) === column.id holds. NOTE: \w (no /u flag) strips accents — "Terminé" → "termin"
+        // — which is consistent with how the id was derived, but means an explicit id like "termine"
+        // won't match a "## Terminé" heading by slug (name match still works). Known, guarded limit.
+        function legacySlug(s) {
+            return s.toLowerCase().replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-');
+        }
+
         // Parse Markdown - IMPROVED VERSION
         function parseMarkdown(content) {
             tasks = [];
@@ -173,7 +182,7 @@ ${t('markdown.archiveSection')}
                             // No explicit (id): derive a slug from the name so legacy files
                             // without ids still parse (e.g. "📝 To Do" → "to-do") instead of being dropped.
                             name = col;
-                            baseId = col.toLowerCase().replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-') || ('col' + (idx + 1));
+                            baseId = legacySlug(col) || ('col' + (idx + 1));
                         }
                         // Ensure ids are unique (handles slug or explicit-id collisions deterministically).
                         let id = baseId, n = 2;
@@ -254,8 +263,18 @@ ${t('markdown.archiveSection')}
             const reEscape = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const hasMarker = /<!--\s*Format:\s*v2\s*-->/i.test(content);
             const hasTasksHeading = /(^|\n)##\s+Tasks\s*(\n|$)/.test(content);
+            // A legacy column section is detected by its exact name OR by the slug of any "## "
+            // heading matching a column id. The slug arm lets an old/hand-edited file whose heading
+            // lost its emoji ("## Backlog" for a "📝 Backlog (backlog)" column) still be classified
+            // legacy instead of mis-read as V2. It is gated on !hasTasksHeading: a V2-shaped file
+            // (single "## Tasks") must NOT be dragged to the legacy path just because a column id
+            // happens to equal slug("Tasks")/slug("Configuration") — that would ignore the **Status**
+            // fields and corrupt statuses. The exact-name arm still handles a legacy column named
+            // literally "Tasks". Real V2 files carry the marker and win via hasMarker regardless.
+            const sectionTitles = [...content.matchAll(/(?:^|\n)##\s+([^\r\n]+?)\s*(?:\n|$)/g)].map(m => m[1].trim());
             const hasColumnSections = config.columns.some(c =>
-                new RegExp(`(^|\\n)##\\s+${reEscape(c.name)}\\s*(\\n|$)`).test(content));
+                new RegExp(`(^|\\n)##\\s+${reEscape(c.name)}\\s*(\\n|$)`).test(content) ||
+                (!hasTasksHeading && sectionTitles.some(t => legacySlug(t) === c.id)));
             const hasUnified = hasMarker || (hasTasksHeading && !hasColumnSections);
             loadedFormatV2 = hasUnified;
 
@@ -281,15 +300,25 @@ ${t('markdown.archiveSection')}
         // is its own section). The V2 unified path calls parseTaskBlocks() directly.
         function parseTasksFromSection(content, sectionName, statusId, honorStatusField = false) {
             const sections = content.split(/\n##\s+/);
-            let sectionContent = null;
+            // Pass 1 — exact/legacy NAME match. Byte-for-byte the previous behaviour (same
+            // substring strip), so a section heading equal to the column name parses exactly as
+            // before. A name match always wins over a slug match (pass 2 only runs if none here).
             for (let section of sections) {
                 if (section.startsWith(sectionName)) {
-                    sectionContent = section.substring(sectionName.length).trim();
-                    break;
+                    return parseTaskBlocks(section.substring(sectionName.length).trim(), statusId, honorStatusField);
                 }
             }
-            if (!sectionContent) return [];
-            return parseTaskBlocks(sectionContent, statusId, honorStatusField);
+            // Pass 2 — id-centred SLUG fallback: a heading whose slug equals the column id
+            // (emoji/case/spacing-insensitive). Strip the whole title line here (the slug is
+            // computed on the full title, so the title must not leak into the body).
+            for (let section of sections) {
+                const nl = section.search(/\r?\n/);
+                const title = (nl >= 0 ? section.slice(0, nl) : section).trim();
+                if (legacySlug(title) === statusId) {
+                    return parseTaskBlocks(nl >= 0 ? section.slice(nl).trim() : '', statusId, honorStatusField);
+                }
+            }
+            return [];
         }
 
         // Parse "### TASK-NNN | Title" blocks from a chunk of markdown. The split is anchored
