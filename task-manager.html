@@ -3231,7 +3231,7 @@ ${t('markdown.archiveSection')}
                         </div>
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             <div class="column-count">${columnTasks.length}</div>
-                            <button class="column-add-btn" onclick="openTaskModal(null, '${column.id}')" title="${t('taskForm.newTask')}">+</button>
+                            <button class="column-add-btn">+</button>
                         </div>
                     </div>
                     <div class="task-list" ondrop="drop(event)" ondragover="allowDrop(event)">
@@ -3240,6 +3240,12 @@ ${t('markdown.archiveSection')}
                 `;
 
                 const taskList = columnEl.querySelector('.task-list');
+
+                // Bind the per-column "+" handler in JS (no inline onclick) so the
+                // column id is passed as a value, never concatenated into HTML.
+                const addBtn = columnEl.querySelector('.column-add-btn');
+                addBtn.title = t('taskForm.newTask');
+                addBtn.addEventListener('click', () => openTaskModal(null, column.id));
 
                 columnTasks.forEach(task => {
                     const taskEl = createTaskElement(task);
