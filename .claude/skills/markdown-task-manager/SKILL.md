@@ -20,6 +20,7 @@ description: Use when managing tasks, the system is a Kanban task manager based 
 ```markdown
 ### TASK-XXX | Task title
 
+**Status**: <column-id>
 **Priority**: [Critical|High|Medium|Low] | **Category**: [Value] | **Assigned**: @user1, @user2
 **Created**: YYYY-MM-DD | **Started**: YYYY-MM-DD | **Due**: YYYY-MM-DD | **Finished**: YYYY-MM-DD
 **Tags**: #tag1 #tag2 #tag3
@@ -46,24 +47,28 @@ What was done.
 - `**Subtasks**` or `**Notes**` without `:`
 - Automatic archiving (only on user request)
 
-**Why?** The HTML parser of the application does not recognize `##` inside tasks.
+**Why?** All tasks share one `## Tasks` section, so a stray `##`/`###` heading inside a task can break parsing.
 
 ## 🔄 Workflow
 
+> **V2 — status is a field, not a position.** A task's column is its `**Status**:`
+> value; all tasks live in one `## Tasks` section. **Move a task by editing its one
+> `**Status**:` line — never cut/paste the whole block** (~1 line vs 20+).
+
 ### 1. New Request
 1. Read `kanban.md` to get the last task ID
-2. Create task in `kanban.md` → "📝 To Do" section
+2. Add the task to the `## Tasks` section with `**Status**: todo` (first column id)
 3. Unique ID (TASK-XXX) auto-incremented
 4. Break down into subtasks if needed
 5. Increment counter in `<!-- Config: Last Task ID: XXX -->`
 
 ### 2. Start Work
-1. Move task → "🚀 In Progress" section
+1. Edit one line: `**Status**: todo` → `**Status**: in-progress`
 2. Add `**Started**: YYYY-MM-DD`
 3. Check off subtasks progressively
 
 ### 3. Finish Work
-1. Move → "✅ Done" section
+1. Edit one line: `**Status**: in-progress` → `**Status**: done`
 2. Add `**Finished**: YYYY-MM-DD`
 3. Document in `**Notes**:`:
    - `**Result**:` - What was done
@@ -75,7 +80,7 @@ What was done.
 
 **⚠️ Tasks are NOT archived immediately!**
 
-- Completed tasks remain in "✅ Done"
+- Completed tasks stay at `**Status**: done`
 - **Only on user request** → move to `archive.md`
 - **Never archive directly at end of work**
 
@@ -87,29 +92,42 @@ What was done.
 # Kanban Board
 
 <!-- Config: Last Task ID: 42 -->
+<!-- Format: v2 -->
 
 ## ⚙️ Configuration
 
-**Columns**: 📝 To Do | 🚀 In Progress | 👀 Review | ✅ Done
+**Columns**: 📝 To Do (todo) | 🚀 In Progress (in-progress) | 👀 Review (in-review) | ✅ Done (done)
 **Categories**: Frontend, Backend, DevOps
 **Users**: @alice, @bob
+**Priorities**: 🔴 Critical | 🟠 High | 🟡 Medium | 🟢 Low
 **Tags**: #bug, #feature, #docs
 
 ---
 
-## 📝 To Do
+## Tasks
 
 ### TASK-001 | Title
+**Status**: todo
 [...]
-
-## 🚀 In Progress
-
-## 👀 Review
-
-## ✅ Done
 
 ### TASK-003 | Completed task
+**Status**: done
 [...]
+```
+
+All tasks share the single `## Tasks` section; the column comes from `**Status**:`
+(which must equal a column `id` from the Config), and file order = order within a column.
+
+### ⚡ Token-economical operations (for AI)
+
+No stored index — rebuild it on demand with `grep`, and read/edit **one task**:
+
+```bash
+grep -nE "^### TASK-|^\*\*Status\*\*:" kanban.md    # board overview (index on demand)
+grep -n "^### TASK-042 " kanban.md                   # locate a task by id
+sed -n '/^### TASK-042 /,/^### TASK-/p' kanban.md     # read just that task
+# MOVE = edit one line:   **Status**: todo  ->  **Status**: in-progress
+grep -n "^\*\*Status\*\*: in-progress" kanban.md | head -1   # next task in a column
 ```
 
 ### archive.md

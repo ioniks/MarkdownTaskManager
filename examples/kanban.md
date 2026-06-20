@@ -2,7 +2,7 @@
 
 ## ⚙️ Configuration
 
-**Columns**: 📝 Backlog | 📋 To Do | 🚀 In Progress | 👀 In Review | ✅ Done
+**Columns**: 📝 Backlog (backlog) | 📋 To Do (todo) | 🚀 In Progress (in-progress) | 👀 In Review (in-review) | ✅ Done (done)
 **Categories**: Frontend, Backend, Database, DevOps, Design, Tests, Documentation, Security
 **Users**: @alice, @bob, @charlie, @diana
 **Tags**: #bug, #feature, #urgent, #refactor, #performance, #security, #api, #ui, #database

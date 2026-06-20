@@ -11,6 +11,7 @@ This file contains general guidelines for all AI assistants (Claude, ChatGPT, Co
 ```markdown
 ### TASK-XXX | Task title
 
+**Status**: <column-id>
 **Priority**: [Value] | **Category**: [Value] | **Assigned**: @user1, @user2
 **Created**: YYYY-MM-DD | **Started**: YYYY-MM-DD | **Due**: YYYY-MM-DD | **Finished**: YYYY-MM-DD
 **Tags**: #tag1 #tag2 #tag3
@@ -33,7 +34,7 @@ What was done.
 
 ### Fields
 
-**REQUIRED**: `### TASK-XXX |`, `**Priority**:`, `**Category**:`, `**Created**:`
+**REQUIRED**: `### TASK-XXX |`, `**Status**:` (the column id — this is what places the task in a column), `**Priority**:`, `**Category**:`, `**Created**:`
 
 **OPTIONAL**: `**Assigned**:`, `**Started**:`, `**Due**:`, `**Finished**:`, `**Tags**:`, Description, `**Subtasks**:`, `**Notes**:`
 
@@ -42,24 +43,31 @@ What was done.
 - `## Title` or `### Title` inside a task
 - `**Subtasks**` or `**Notes**` without `:`
 
-**Why?** The web application's HTML parser does not recognize `##` inside tasks.
+**Why?** All tasks live in a single `## Tasks` section, so a stray `##`/`###`
+heading inside a task can break parsing. Keep notes/description heading-free.
 
 ---
 
 ## 🔄 Workflow
 
+> **V2 — status is a field, not a position.** A task's column is its `**Status**:`
+> value, not the section it sits in. All tasks live in a single `## Tasks` section,
+> and a task's position within the file = its order within its column.
+> **To move a task between columns, edit its one `**Status**:` line — never cut and
+> re-paste the whole block.** (Cheap: ~1 line instead of moving 20+.)
+
 ### 1. New request
-1. Create task in `kanban.md` → "📝 To Do"
-2. Unique ID (TASK-XXX) auto-incremented
-3. Break down into subtasks if needed
+1. Add the task to the `## Tasks` section of `kanban.md`
+2. Set `**Status**:` to the first column id (e.g. `todo`)
+3. Unique ID (TASK-XXX) auto-incremented; break into subtasks if needed
 
 ### 2. Start work
-1. Move → "🚀 In Progress"
+1. Edit one line: `**Status**: todo` → `**Status**: in-progress`
 2. Add `**Started**: YYYY-MM-DD`
 3. Check off subtasks progressively
 
 ### 3. Finish work
-1. Move → "✅ Done"
+1. Edit one line: `**Status**: in-progress` → `**Status**: done`
 2. Add `**Finished**: YYYY-MM-DD`
 3. Document in `**Notes**:`:
    - `**Result**:` - What was done
@@ -74,6 +82,41 @@ What was done.
 - Completed tasks remain in "✅ Done"
 - **Only on user request** → move to `archive.md` section `## ✅ Archives`
 - **Never archive directly at the end of work**
+
+---
+
+## ⚡ Token-economical operations (for AI)
+
+The board is **one `## Tasks` section**; each task carries its own `**Status**:`.
+There is **no stored index** — rebuild it on the fly with `grep`, and read/edit a
+**single task** instead of loading the whole file.
+
+```bash
+# Board overview (id + status) — rebuilds the "index" on demand, very cheap
+grep -nE "^### TASK-|^\*\*Status\*\*:" kanban.md
+
+# Select one task by id → its line number
+grep -n "^### TASK-042 " kanban.md
+
+# Read just that task (its header up to the next header)
+sed -n '/^### TASK-042 /,/^### TASK-/p' kanban.md
+
+# MOVE a task between columns = edit ONE line (the block never moves):
+#   **Status**: todo   →   **Status**: in-progress
+
+# Next task in a column = first block with that status (file order = column order)
+grep -n "^\*\*Status\*\*: in-progress" kanban.md | head -1
+
+# List a column, already in order
+grep -n "^\*\*Status\*\*: todo" kanban.md
+
+# Search
+grep -n "\*\*Priority\*\*: High" kanban.md     # by priority
+grep -n "\*\*Tags\*\*:.*#bug" kanban.md          # by tag
+```
+
+**Rule of thumb:** a targeted `grep` + a one-line `Edit` beats reading/rewriting the
+whole file. Moving a task is a single `**Status**:` edit — do **not** move the block.
 
 ---
 
@@ -164,30 +207,32 @@ Real-time notifications with WebSockets.
 # Kanban Board
 
 <!-- Config: Last Task ID: 42 -->
+<!-- Format: v2 -->
 
 ## ⚙️ Configuration
 
-**Columns**: 📝 To Do | 🚀 In Progress | 👀 Review | ✅ Done
+**Columns**: 📝 To Do (todo) | 🚀 In Progress (in-progress) | 👀 Review (in-review) | ✅ Done (done)
 **Categories**: Frontend, Backend, DevOps
 **Users**: @alice, @bob
+**Priorities**: 🔴 Critical | 🟠 High | 🟡 Medium | 🟢 Low
 **Tags**: #bug, #feature, #docs
 
 ---
 
-## 📝 To Do
+## Tasks
 
 ### TASK-001 | Title
+**Status**: todo
 [...]
-
-## 🚀 In Progress
-
-## 👀 Review
-
-## ✅ Done
 
 ### TASK-003 | Completed task
+**Status**: done
 [...]
 ```
+
+> **Columns** require the `(id)` suffix — the `id` is what each task's `**Status**:`
+> points to. All tasks live in the single `## Tasks` section; the column is read from
+> `**Status**:`, and order within the file = order within the column.
 
 ### archive.md
 

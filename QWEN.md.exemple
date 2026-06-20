@@ -20,4 +20,23 @@ This file contains everything: format, workflow, commands, examples.
 
 ---
 
+## 🆕 V2 — Status is a field (token-efficient)
+
+A task's column is its **`**Status**:`** value, **not** its position. All tasks live in a single `## Tasks` section in `kanban.md`. **To move a task between columns, edit its one `**Status**:` line — never cut/paste the whole block.** Block order in the file = order within its column.
+
+Most token-economical operations (rebuild any "index" on demand with `grep`, read/edit ONE task, never the whole file):
+
+```bash
+grep -nE "^### TASK-|^\*\*Status\*\*:" kanban.md    # board overview = index on demand
+grep -n "^### TASK-042 " kanban.md                   # locate a task by id
+sed -n '/^### TASK-042 /,/^### TASK-/p' kanban.md     # read just that task
+# MOVE a task = edit one line:   **Status**: todo  ->  **Status**: in-progress
+grep -n "^\*\*Status\*\*: in-progress" kanban.md | head -1   # next task in a column
+grep -n "^\*\*Status\*\*: todo" kanban.md            # list a column (already in order)
+```
+
+A new task = a `### TASK-XXX | Title` block in `## Tasks` with `**Status**: <column-id>`. No `##`/`###` headings inside a task.
+
+---
+
 **Read `AI_WORKFLOW.md` now.**
