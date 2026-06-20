@@ -79,6 +79,12 @@
                     });
                 }
 
+                // Re-emit preserved unsupported sections verbatim (kept here, before Notes, so a
+                // re-parse captures them again as task.extra rather than folding them into notes).
+                if (task.extra) {
+                    md += `\n${task.extra}\n`;
+                }
+
                 if (task.notes) {
                     md += `\n**Notes**:\n${task.notes}\n`;
                 }

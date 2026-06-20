@@ -76,6 +76,9 @@
                     md += `\n**Subtasks**:\n`;
                     task.subtasks.forEach(st => md += `- [${st.completed ? 'x' : ' '}] ${st.text}\n`);
                 }
+                if (task.extra) {
+                    md += `\n${task.extra}\n`;
+                }
                 if (task.notes) {
                     md += `\n**Notes**:\n${task.notes}\n`;
                 }

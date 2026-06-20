@@ -369,7 +369,8 @@ ${t('markdown.archiveSection')}
                 completed: '',
                 description: '',
                 subtasks: [],
-                notes: ''
+                notes: '',
+                extra: '' // verbatim passthrough for unsupported sections (see below)
             };
 
             // Parse metadata line
@@ -425,13 +426,19 @@ ${t('markdown.archiveSection')}
             }
             task.description = descriptionLines.join('\n'); // full text — the card clamps the display via CSS
 
-            // Parse subtasks
-            const subtaskMatches = content.matchAll(/- \[(x| )\] (.+)/g);
-            for (const match of subtaskMatches) {
-                task.subtasks.push({
-                    completed: match[1] === 'x',
-                    text: match[2].trim()
-                });
+            // Parse subtasks — ONLY inside the **Subtasks** section (until the next "**Field**:" or
+            // end), not globally. A global scan would also collect "- [ ]" lines that live inside a
+            // preserved **Links**/**Review**/**Dependencies** section (or in notes); the generator
+            // would then re-emit them BOTH as subtasks and inside task.extra, duplicating them on
+            // every parse→generate→parse cycle (subtasks growing 2→4→6…). Scoping keeps it 1:1.
+            let inSubtasksSection = false;
+            for (let line of lines) {
+                if (/^\s*\*\*Subtasks\*\*/i.test(line)) { inSubtasksSection = true; continue; }
+                if (inSubtasksSection && /^\s*\*\*[^*\r\n]+\*\*\s*:/.test(line)) inSubtasksSection = false;
+                if (inSubtasksSection) {
+                    const m = line.match(/- \[(x| )\] (.+)/);
+                    if (m) task.subtasks.push({ completed: m[1] === 'x', text: m[2].trim() });
+                }
             }
 
             // Parse notes - everything after **Notes**: until end of task
@@ -439,6 +446,28 @@ ${t('markdown.archiveSection')}
             if (notesMatch) {
                 task.notes = notesMatch[1].trim();
             }
+
+            // Preserve unsupported sections verbatim. SCOPE: exactly **Links**/**Review**/**Dependencies**
+            // — the three headers the description loop STOPS at but never stores, so they alone vanish
+            // on save/migration. Other "**Field**:" content is already kept elsewhere: before a
+            // stop-word it stays in the description; after **Notes** it stays in the greedy notes tail.
+            // (A non-standard "**Foo**:" placed between **Subtasks** and **Notes** is the one acknowledged
+            // gap — rare, and a fully generic capture would clash with bold-prefixed description lines.)
+            // Capture each section from its header to the next recognised section or end; the generator
+            // re-emits task.extra between subtasks and notes. Description/notes parsing are untouched.
+            const extraStart = /^\s*\*\*(Links|Review|Dependencies)\*\*\s*:/i;
+            const extraStop = /^\s*\*\*(Status|Priority|Category|Assigned|Created|Started|Due|Finished|Tags|Subtasks)\*\*/i;
+            const extraLines = [];
+            let capturingExtra = false;
+            for (let line of lines) {
+                // Stop the whole scan at **Notes**: notes is captured greedily to end-of-block, so
+                // anything after it is already preserved there — scanning past it would double-capture.
+                if (/^\s*\*\*Notes\*\*/i.test(line)) break;
+                if (extraStart.test(line)) { capturingExtra = true; extraLines.push(line); continue; }
+                if (capturingExtra && extraStop.test(line)) { capturingExtra = false; }
+                if (capturingExtra) extraLines.push(line);
+            }
+            task.extra = extraLines.join('\n').trim();
 
             return task;
         }
