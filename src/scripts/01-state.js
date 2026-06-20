@@ -12,3 +12,5 @@
         let archivedTasks = [];
         let archiveFileHandle = null;
         let wasArchiveModalActive = false;
+        let loadedFormatV2 = false; // true once the loaded kanban.md is V2 (status carried by a **Status** field)
+        let loadedArchiveV2 = false; // true once the loaded archive.md carries the v2 format marker

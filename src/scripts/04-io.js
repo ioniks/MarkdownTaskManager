@@ -9,6 +9,17 @@
                 await loadArchive(); // Load archive for historical autocomplete data
                 updateAutocomplete();
                 renderKanban();
+                // Auto-migrate a legacy (V1) kanban.md to V2 on disk: nothing is lost and future
+                // AI reads/edits stay cheap. One-time — V2 files carry the format marker.
+                // Guard against silent data loss: never overwrite a file that HAD task headers
+                // but parsed to nothing (unrecognized columns/sections), and back it up first.
+                const hadHeaders = /###\s+TASK-/.test(currentKanbanContent);
+                if (!loadedFormatV2 && !(hadHeaders && tasks.length === 0)) {
+                    await backupOriginal('kanban.md', currentKanbanContent);
+                    if (await autoSave()) {
+                        console.log('Migrated kanban.md from V1 (sections) to V2 (status field)');
+                    }
+                }
             } catch (error) {
                 // Only create default files if the file truly doesn't exist
                 if (error.name === 'NotFoundError') {
@@ -83,6 +94,22 @@ ${t('markdown.archiveSection')}
 `;
         }
 
+        // One-time backup of a file's original content before a destructive V1→V2 migration,
+        // so the conversion can always be undone. Skips if a backup already exists.
+        async function backupOriginal(name, content) {
+            try {
+                const backupName = name.replace(/\.md$/, '.v1-backup.md');
+                try { await directoryHandle.getFileHandle(backupName); return; } catch (e) { /* none yet → create */ }
+                const fh = await directoryHandle.getFileHandle(backupName, { create: true });
+                const w = await fh.createWritable();
+                await w.write(content);
+                await w.close();
+                console.log('Backup written:', backupName);
+            } catch (e) {
+                console.warn('Backup failed (continuing):', e);
+            }
+        }
+
         // Parse Markdown - IMPROVED VERSION
         function parseMarkdown(content) {
             tasks = [];
@@ -114,13 +141,26 @@ ${t('markdown.archiveSection')}
                 const columnsMatch = configText.match(/\*\*Columns\*\*:\s*(.+)/);
                 if (columnsMatch) {
                     console.log('Raw columns:', columnsMatch[1]);
-                    config.columns = columnsMatch[1].split('|').map(col => {
-                        // Fixed regex to handle space before parenthesis
-                        const match = col.trim().match(/(.+?)\s*\((.+?)\)/);
+                    const usedColIds = new Set();
+                    config.columns = columnsMatch[1].split('|').map((col, idx) => {
+                        col = col.trim();
+                        if (!col) return null;
+                        const match = col.match(/^(.+?)\s*\((.+?)\)\s*$/);
+                        let name, baseId;
                         if (match) {
-                            return { name: match[1].trim(), id: match[2].trim() };
+                            name = match[1].trim();
+                            baseId = match[2].trim();
+                        } else {
+                            // No explicit (id): derive a slug from the name so legacy files
+                            // without ids still parse (e.g. "📝 To Do" → "to-do") instead of being dropped.
+                            name = col;
+                            baseId = col.toLowerCase().replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-') || ('col' + (idx + 1));
                         }
-                        return null;
+                        // Ensure ids are unique (handles slug or explicit-id collisions deterministically).
+                        let id = baseId, n = 2;
+                        while (usedColIds.has(id)) id = `${baseId}-${n++}`;
+                        usedColIds.add(id);
+                        return { name, id };
                     }).filter(Boolean);
                     console.log('Parsed columns:', config.columns);
                 }
@@ -198,6 +238,7 @@ ${t('markdown.archiveSection')}
             const hasColumnSections = config.columns.some(c =>
                 new RegExp(`(^|\\n)##\\s+${reEscape(c.name)}\\s*(\\n|$)`).test(content));
             const hasUnified = hasMarker || (hasTasksHeading && !hasColumnSections);
+            loadedFormatV2 = hasUnified;
 
             if (hasUnified) {
                 // The "## Tasks" section runs to the end of the file, so a "## " or "### "
@@ -334,7 +375,7 @@ ${t('markdown.archiveSection')}
                     descriptionLines.push(line.trim());
                 }
             }
-            task.description = descriptionLines.join(' ').substring(0, 200);
+            task.description = descriptionLines.join('\n'); // full text — the card clamps the display via CSS
 
             // Parse subtasks
             const subtaskMatches = content.matchAll(/- \[(x| )\] (.+)/g);

@@ -1,5 +1,5 @@
         async function autoSave() {
-            if (!kanbanFileHandle) return;
+            if (!kanbanFileHandle) return false;
             try {
                 const newContent = generateMarkdown();
                 const writable = await kanbanFileHandle.createWritable();
@@ -7,8 +7,10 @@
                 await writable.close();
                 currentKanbanContent = newContent;
                 console.log('Auto-saved');
+                return true;
             } catch (error) {
                 console.error('Auto-save failed:', error);
+                return false;
             }
         }
 
