@@ -20,17 +20,27 @@
                 console.log('✓ Archive parsed. Total archived tasks:', archivedTasks.length);
 
                 // Auto-migrate a legacy archive.md to the V2 shape (format marker + **Status**
-                // per task). Only when tasks were found, so a parse miss never wipes the file.
-                // Its OWN try/catch: a failed write must NOT reach the outer catch (which resets
-                // archivedTasks = [] and could then persist an empty archive).
-                if (!loadedArchiveV2 && archivedTasks.length > 0) {
+                // per task). Same TOTAL-parse guard as kanban.md: only rewrite when every
+                // "### TASK-" header parsed to exactly one unique task — a malformed/unparsed
+                // archive block must abstain, not be dropped on saveArchive(). Its OWN try/catch:
+                // a failed write must NOT reach the outer catch (which resets archivedTasks = []).
+                const archiveBlockCount = (content.match(/^###\s+TASK-/gm) || []).length;
+                const archiveUnique = new Set(archivedTasks.map(t => t.id)).size;
+                if (!loadedArchiveV2 && archivedTasks.length > 0
+                        && archivedTasks.length === archiveBlockCount && archiveUnique === archiveBlockCount) {
                     try {
-                        await backupOriginal('archive.md', content);
-                        await saveArchive();
-                        console.log('Migrated archive.md to V2 format');
+                        // Same rule as kanban.md: never overwrite without a confirmed backup.
+                        if (await backupOriginal('archive.md', content)) {
+                            await saveArchive();
+                            console.log('Migrated archive.md to V2 format');
+                        } else {
+                            console.warn('Skipped archive.md migration: backup failed. File left unchanged.');
+                        }
                     } catch (e) {
                         console.error('Archive migration write failed (kept in memory):', e);
                     }
+                } else if (!loadedArchiveV2 && archivedTasks.length > 0) {
+                    console.warn(`Skipped archive.md migration: incomplete parse (${archivedTasks.length}/${archiveBlockCount} blocks). File left unchanged.`);
                 }
             } catch (error) {
                 console.error('❌ archive.md not found or error:', error);

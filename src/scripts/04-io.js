@@ -11,14 +11,26 @@
                 renderKanban();
                 // Auto-migrate a legacy (V1) kanban.md to V2 on disk: nothing is lost and future
                 // AI reads/edits stay cheap. One-time — V2 files carry the format marker.
-                // Guard against silent data loss: never overwrite a file that HAD task headers
-                // but parsed to nothing (unrecognized columns/sections), and back it up first.
-                const hadHeaders = /###\s+TASK-/.test(currentKanbanContent);
-                if (!loadedFormatV2 && !(hadHeaders && tasks.length === 0)) {
-                    await backupOriginal('kanban.md', currentKanbanContent);
-                    if (await autoSave()) {
+                // Guard against silent data loss: only migrate when the parse was TOTAL — every
+                // "### TASK-" header in the file produced exactly one parsed task. Count ALL task
+                // headers (including malformed ones like "### TASK-ABC" or "### TASK-1" without a
+                // "| title"): those are NOT parsed, so counting only well-formed headers would let
+                // a file with a malformed block pass the guard and lose it on rewrite.
+                const blockCount = (currentKanbanContent.match(/^###\s+TASK-/gm) || []).length;
+                // Also require every parsed id to be UNIQUE and to cover all headers: this rejects a
+                // pathological slug collision where one task is parsed twice while another is missed
+                // (counts stay equal but the rewrite would drop the missed task). Provably 1:1.
+                const uniqueParsed = new Set(tasks.map(t => t.id)).size;
+                if (!loadedFormatV2 && tasks.length === blockCount && uniqueParsed === blockCount) {
+                    // Only overwrite once the original is safely backed up — a failed backup must
+                    // abort the migration, never leave the file rewritten without a recovery copy.
+                    if (await backupOriginal('kanban.md', currentKanbanContent) && await autoSave()) {
                         console.log('Migrated kanban.md from V1 (sections) to V2 (status field)');
+                    } else {
+                        console.warn('Skipped V1→V2 migration: backup or save failed. File left unchanged.');
                     }
+                } else if (!loadedFormatV2) {
+                    console.warn(`Skipped V1→V2 migration: incomplete parse (${tasks.length}/${blockCount} task blocks). File left unchanged.`);
                 }
             } catch (error) {
                 // Only create default files if the file truly doesn't exist
@@ -95,18 +107,22 @@ ${t('markdown.archiveSection')}
         }
 
         // One-time backup of a file's original content before a destructive V1→V2 migration,
-        // so the conversion can always be undone. Skips if a backup already exists.
+        // so the conversion can always be undone. Returns true when a usable backup exists
+        // (freshly written OR already present), false on failure — callers MUST abort the
+        // migration on false rather than overwrite the original with no recovery copy.
         async function backupOriginal(name, content) {
             try {
                 const backupName = name.replace(/\.md$/, '.v1-backup.md');
-                try { await directoryHandle.getFileHandle(backupName); return; } catch (e) { /* none yet → create */ }
+                try { await directoryHandle.getFileHandle(backupName); return true; } catch (e) { /* none yet → create */ }
                 const fh = await directoryHandle.getFileHandle(backupName, { create: true });
                 const w = await fh.createWritable();
                 await w.write(content);
                 await w.close();
                 console.log('Backup written:', backupName);
+                return true;
             } catch (e) {
-                console.warn('Backup failed (continuing):', e);
+                console.warn('Backup failed — migration aborted to keep the original intact:', e);
+                return false;
             }
         }
 
@@ -131,8 +147,11 @@ ${t('markdown.archiveSection')}
                 console.log('Last Task ID:', config.lastTaskId);
             }
 
-            // Parse config section
-            const configSection = content.match(/## ⚙️ Configuration\s+([\s\S]*?)---/);
+            // Parse config section. Stop at the first of: a `---` separator (V2/legacy with
+            // separator), the next `## ` heading (legacy file whose config isn't followed by
+            // `---`), or end-of-file. Requiring `---` would make a legacy file without it fall
+            // back to DEFAULT columns/categories/users/tags, silently losing the user's config.
+            const configSection = content.match(/## ⚙️ Configuration\s+([\s\S]*?)(?:\n---|\n##\s|$)/);
             if (configSection) {
                 const configText = configSection[1];
                 console.log('Config section found');
