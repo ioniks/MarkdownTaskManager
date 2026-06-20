@@ -9,15 +9,28 @@
                 console.log('✓ Archive content read, length:', content.length, 'characters');
                 console.log('Archive content preview:', content.substring(0, 500));
 
-                // Use the SAME section parser for archive.md!
-                console.log('📖 Using unified parseTasksFromSection() parser...');
-
-                // Parse the "✅ Archives" section directly with status 'archived'
-                archivedTasks = parseTasksFromSection(content, '✅ Archives', 'archived');
+                // Parse every "### TASK-" block in archive.md, regardless of the section
+                // heading's language (archive is a flat list — this also fixes the German
+                // "## ✅ Archiv" vs hardcoded "✅ Archives" mismatch). honorStatusField=true so
+                // an archived task keeps the original column it was in (stored in **Status**),
+                // making restore exact; old archives with no **Status** fall back to 'archived'.
+                loadedArchiveV2 = /<!--\s*Format:\s*v2\s*-->/i.test(content);
+                archivedTasks = parseTaskBlocks(content, 'archived', true);
 
                 console.log('✓ Archive parsed. Total archived tasks:', archivedTasks.length);
-                if (archivedTasks.length > 0) {
-                    console.log('Archive tasks:', archivedTasks.map(t => `${t.id} (${t.status})`).join(', '));
+
+                // Auto-migrate a legacy archive.md to the V2 shape (format marker + **Status**
+                // per task). Only when tasks were found, so a parse miss never wipes the file.
+                // Its OWN try/catch: a failed write must NOT reach the outer catch (which resets
+                // archivedTasks = [] and could then persist an empty archive).
+                if (!loadedArchiveV2 && archivedTasks.length > 0) {
+                    try {
+                        await backupOriginal('archive.md', content);
+                        await saveArchive();
+                        console.log('Migrated archive.md to V2 format');
+                    } catch (e) {
+                        console.error('Archive migration write failed (kept in memory):', e);
+                    }
                 }
             } catch (error) {
                 console.error('❌ archive.md not found or error:', error);
@@ -30,9 +43,10 @@
                 archiveFileHandle = await directoryHandle.getFileHandle('archive.md', { create: true });
             }
 
-            let md = `${t('markdown.archiveTitle')}\n\n${t('markdown.archiveDesc')}\n\n${t('markdown.archiveSection')}\n\n`;
+            let md = `${t('markdown.archiveTitle')}\n<!-- Format: v2 -->\n\n${t('markdown.archiveDesc')}\n\n${t('markdown.archiveSection')}\n\n`;
             archivedTasks.forEach(task => {
                 md += `### ${task.id} | ${task.title}\n`;
+                md += `**Status**: ${task.status}\n`;
                 let meta = '';
                 if (task.priority) meta += `**Priority**: ${task.priority}`;
                 if (task.category) meta += ` | **Category**: ${task.category}`;
