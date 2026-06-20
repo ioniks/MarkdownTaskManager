@@ -52,6 +52,7 @@
             return `# Kanban Board
 
 <!-- Config: Last Task ID: 0 -->
+<!-- Format: v2 -->
 
 ## ⚙️ Configuration
 
@@ -67,13 +68,7 @@
 
 ---
 
-## 📝 To Do
-
-## 🚀 In Progress
-
-## 👀 In Review
-
-## ✅ Done
+## Tasks
 `;
         }
 
@@ -190,86 +185,87 @@ ${t('markdown.archiveSection')}
                 config.tags = ['bug', 'feature', 'ui', 'backend', 'urgent', 'refactor', 'docs', 'test'];
             }
 
-            // Parse tasks by sections using the unified parser
-            config.columns.forEach(column => {
-                const columnTasks = parseTasksFromSection(content, column.name, column.id);
-                tasks.push(...columnTasks);
-            });
+            // Parse tasks. V2: a single "## Tasks" section where each task carries its own
+            // **Status** field. Legacy: one "## <Column>" section per status (status inferred
+            // from the section). The **Status** field wins; the section is the fallback → old
+            // kanban.md files keep working unchanged.
+            // Detect V2 by an explicit format marker, OR by a "## Tasks" heading with no legacy
+            // column section present (so a legacy column literally named "Tasks" is never
+            // mis-detected and silently dropped).
+            const reEscape = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const hasMarker = /<!--\s*Format:\s*v2\s*-->/i.test(content);
+            const hasTasksHeading = /(^|\n)##\s+Tasks\s*(\n|$)/.test(content);
+            const hasColumnSections = config.columns.some(c =>
+                new RegExp(`(^|\\n)##\\s+${reEscape(c.name)}\\s*(\\n|$)`).test(content));
+            const hasUnified = hasMarker || (hasTasksHeading && !hasColumnSections);
+
+            if (hasUnified) {
+                // The "## Tasks" section runs to the end of the file, so a "## " or "### "
+                // heading inside a task's notes/description never truncates the board.
+                const body = content.replace(/^[\s\S]*?(?:^|\n)##\s+Tasks\s*(?:\n|$)/, '');
+                tasks.push(...parseTaskBlocks(body, config.columns[0].id, true));
+            } else {
+                // Legacy: status comes from the section only — never honour a stray
+                // **Status** line that might sit inside an old task's notes.
+                config.columns.forEach(column => {
+                    tasks.push(...parseTasksFromSection(content, column.name, column.id, false));
+                });
+            }
 
             console.log(`\n=== Total tasks parsed: ${tasks.length} ===`);
             console.log('Tasks:', tasks.map(t => `${t.id} (${t.status})`).join(', '));
         }
 
-        // Parse tasks from a markdown section (reusable for both kanban and archive)
-        function parseTasksFromSection(content, sectionName, statusId) {
-            console.log(`\n--- Parsing section: ${sectionName} (status: ${statusId}) ---`);
-            const tasksFound = [];
-
-            // Split by ## to get sections
+        // Extract the "## <sectionName>" section, then parse its task blocks.
+        // Used by the legacy column path and by the archive (each column / "Archives"
+        // is its own section). The V2 unified path calls parseTaskBlocks() directly.
+        function parseTasksFromSection(content, sectionName, statusId, honorStatusField = false) {
             const sections = content.split(/\n##\s+/);
             let sectionContent = null;
-
             for (let section of sections) {
                 if (section.startsWith(sectionName)) {
-                    // Extract content after the section title
                     sectionContent = section.substring(sectionName.length).trim();
                     break;
                 }
             }
+            if (!sectionContent) return [];
+            return parseTaskBlocks(sectionContent, statusId, honorStatusField);
+        }
 
-            if (!sectionContent) {
-                console.log(`Section "${sectionName}" not found or empty`);
-                return tasksFound;
-            }
-
-            console.log(`Section content length: ${sectionContent.length}`);
-
-            // SIMPLE PARSING: Split by ### TASK-
-            const taskBlocks = sectionContent.split(/###\s+TASK-/).slice(1); // Skip first empty element
-            console.log(`Found ${taskBlocks.length} task blocks`);
-
-            taskBlocks.forEach((block, index) => {
-                // Each block starts with: XXX | Title
-                const lines = block.split('\n');
-                const firstLine = lines[0].trim();
-
-                console.log(`Block ${index + 1} first line: "${firstLine}"`);
-
-                // Extract ID and title from first line
-                const pipeIndex = firstLine.indexOf('|');
-                if (pipeIndex > 0) {
-                    const idPart = firstLine.substring(0, pipeIndex).trim();
-                    const titlePart = firstLine.substring(pipeIndex + 1).trim();
-
-                    // Check if idPart is a valid number
-                    const idMatch = idPart.match(/^(\d+)$/);
-                    if (idMatch && titlePart) {
-                        const taskId = 'TASK-' + idPart.padStart(3, '0');
-                        const title = titlePart;
-                        const taskContent = lines.slice(1).join('\n');
-
-                        console.log(`✓ Matched! Parsing task: ${taskId} - ${title}`);
-                        const task = parseTask(taskId, title, taskContent, statusId);
-                        if (task) {
-                            tasksFound.push(task);
-                            console.log(`✓ Task added. Total in this section: ${tasksFound.length}`);
-                        } else {
-                            console.log(`✗ parseTask returned null`);
-                        }
-                    } else {
-                        console.log(`✗ Invalid ID format: "${idPart}"`);
-                    }
-                } else {
-                    console.log(`✗ No pipe character found in first line`);
-                }
+        // Parse "### TASK-NNN | Title" blocks from a chunk of markdown. The split is anchored
+        // to line starts so a "### TASK-" appearing mid-line in notes is not split on.
+        function parseTaskBlocks(sectionContent, statusId, honorStatusField = false) {
+            const tasksFound = [];
+            // Only a real, line-anchored "### TASK-<digits> | <title>" header starts a block.
+            // A malformed "### TASK-foo" or a header-like line inside notes is NOT a boundary,
+            // so it neither drops the following content nor truncates the surrounding task.
+            const headerRe = /^###\s+TASK-(\d+)\s*\|\s*(.+?)\s*$/gm;
+            const headers = [...sectionContent.matchAll(headerRe)];
+            headers.forEach((h, i) => {
+                const titlePart = h[2].trim();
+                if (!titlePart) return;
+                const start = h.index + h[0].length;
+                const end = i + 1 < headers.length ? headers[i + 1].index : sectionContent.length;
+                const taskContent = sectionContent.slice(start, end);
+                const taskId = 'TASK-' + h[1].padStart(3, '0');
+                const task = parseTask(taskId, titlePart, taskContent, statusId, honorStatusField);
+                if (task) tasksFound.push(task);
             });
-
-            console.log(`Total tasks parsed from "${sectionName}": ${tasksFound.length}`);
             return tasksFound;
         }
 
         // Parse individual task
-        function parseTask(id, title, content, status) {
+        function parseTask(id, title, content, fallbackStatus, honorStatusField = false) {
+            // V2: the **Status** field is authoritative when present and a valid column id;
+            // otherwise fall back to the section-derived status (legacy files / archive).
+            let status = fallbackStatus;
+            if (honorStatusField) {
+                const statusMatch = content.match(/^\s*\*\*Status\*\*:\s*([^\r\n]+)/im);
+                if (statusMatch) {
+                    const s = statusMatch[1].trim();
+                    if (config.columns.some(c => c.id === s)) status = s;
+                }
+            }
             const task = {
                 id,
                 title: title.trim(),
@@ -323,7 +319,7 @@ ${t('markdown.archiveSection')}
 
             for (let line of lines) {
                 // Skip metadata lines
-                if (line.match(/^\*\*(Priority|Category|Assigned|Created|Started|Due|Finished|Tags)\*\*/)) {
+                if (line.match(/^\*\*(Status|Priority|Category|Assigned|Created|Started|Due|Finished|Tags)\*\*/)) {
                     continue;
                 }
                 // Stop at subsections
