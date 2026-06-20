@@ -3757,8 +3757,8 @@ ${t('markdown.archiveSection')}
                                 <strong style="margin-left: 0.5rem; font-size: 1.1rem;">${task.title}</strong>
                             </div>
                             <div style="display: flex; gap: 0.5rem;">
-                                <button onclick="deleteTask('${task.id}', true)" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: #ef4444; color: white;">🗑️</button>
-                                <button onclick="unarchiveTask('${task.id}')" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">${t('action.restore')}</button>
+                                <button onclick="event.stopPropagation(); deleteTask('${task.id}', true)" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: #ef4444; color: white;">🗑️</button>
+                                <button onclick="event.stopPropagation(); unarchiveTask('${task.id}')" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">${t('action.restore')}</button>
                             </div>
                         </div>
                         ${task.description ? `<p style="color: var(--text-secondary, #666); margin: 0.5rem 0;">${markdownToHtml(task.description)}</p>` : ''}
