@@ -2716,6 +2716,11 @@ ${t('markdown.archiveSection')}
         }
 
         // Enhanced markdown to HTML converter for notes
+        // Escape user-controlled text/attribute values before inserting into innerHTML (XSS hardening)
+        function escapeHtml(s) {
+            return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
         function markdownToHtml(markdown) {
             if (!markdown) return '';
 
@@ -2758,8 +2763,12 @@ ${t('markdown.archiveSection')}
             // Convert `inline code`
             html = html.replace(/`([^`]+)`/g, '<code style="background: #2d2d2d; color: #f8f8f2; padding: 0.125rem 0.35rem; border-radius: 3px; font-family: \'Consolas\', \'Monaco\', monospace; font-size: 0.9em;">$1</code>');
 
-            // Convert links [text](url)
-            html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color: var(--primary); text-decoration: underline;">$1</a>');
+            // Convert links [text](url) — validate URL scheme to block javascript:/data: (XSS)
+            html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (m, text, url) => {
+                const u = url.trim();
+                const safe = /^(https?:|mailto:|#|\/)/i.test(u) ? u : '#';
+                return `<a href="${escapeHtml(safe)}" target="_blank" style="color: var(--primary); text-decoration: underline;">${text}</a>`;
+            });
 
             // Convert bullet lists and paragraphs
             const lines = html.split('\n');
@@ -2899,10 +2908,10 @@ ${t('markdown.archiveSection')}
 
             // Update filter selects
             document.getElementById('filterTagSelect').innerHTML = `<option value="">${t('filters.select')}</option>` + tags.map(t => `<option value="${t}">${t}</option>`).join('');
-            document.getElementById('filterCategorySelect').innerHTML = `<option value="">${t('filters.select')}</option>` + categories.map(c => `<option value="${c}">${c}</option>`).join('');
+            document.getElementById('filterCategorySelect').innerHTML = `<option value="">${t('filters.select')}</option>` + categories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
             document.getElementById('filterUserSelect').innerHTML = `<option value="">${t('filters.select')}</option>` + users.map(u => {
                 const normalizedId = normalizeUserId(u);
-                return `<option value="${normalizedId}">${u}</option>`;
+                return `<option value="${escapeHtml(normalizedId)}">${escapeHtml(u)}</option>`;
             }).join('');
 
             // Update priority filter select from config
@@ -3057,8 +3066,8 @@ ${t('markdown.archiveSection')}
                         <button onclick="moveColumn(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.85rem;" title="${t('action.moveUp')}">↑</button>
                         <button onclick="moveColumn(${idx}, 1)" ${idx === config.columns.length - 1 ? 'disabled' : ''} class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.85rem;" title="${t('action.moveDown')}">↓</button>
                     </div>
-                    <input type="text" value="${col.name}" onchange="updateColumn(${idx}, 'name', this.value)" style="flex: 1; padding: 0.5rem; border: 1px solid var(--border, #cbd5e0); border-radius: 4px; background: var(--bg); color: var(--text);">
-                    <input type="text" value="${col.id}" onchange="updateColumn(${idx}, 'id', this.value)" style="width: 120px; padding: 0.5rem; border: 1px solid var(--border, #cbd5e0); border-radius: 4px; background: var(--bg); color: var(--text);" placeholder="ID">
+                    <input type="text" value="${escapeHtml(col.name)}" onchange="updateColumn(${idx}, 'name', this.value)" style="flex: 1; padding: 0.5rem; border: 1px solid var(--border, #cbd5e0); border-radius: 4px; background: var(--bg); color: var(--text);">
+                    <input type="text" value="${escapeHtml(col.id)}" onchange="updateColumn(${idx}, 'id', this.value)" style="width: 120px; padding: 0.5rem; border: 1px solid var(--border, #cbd5e0); border-radius: 4px; background: var(--bg); color: var(--text);" placeholder="ID">
                     <button onclick="deleteColumn(${idx})" class="btn btn-secondary" style="padding: 0.5rem;">🗑️</button>
                 </div>
             `).join('');
@@ -3120,7 +3129,7 @@ ${t('markdown.archiveSection')}
 
             // Populate columns select
             document.getElementById('taskStatus').innerHTML = config.columns.map(col =>
-                `<option value="${col.id}">${col.name}</option>`
+                `<option value="${escapeHtml(col.id)}">${escapeHtml(col.name)}</option>`
             ).join('');
 
             // Populate priorities select
@@ -3227,7 +3236,7 @@ ${t('markdown.archiveSection')}
                 columnEl.innerHTML = `
                     <div class="column-header">
                         <div class="column-title">
-                            ${column.name}
+                            ${escapeHtml(column.name)}
                         </div>
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             <div class="column-count">${columnTasks.length}</div>
@@ -3286,22 +3295,29 @@ ${t('markdown.archiveSection')}
 
             taskEl.innerHTML = `
                 <div class="task-header">
-                    <span class="task-id">${task.id}</span>
-                    <button class="task-edit-btn" onclick="event.stopPropagation(); openTaskModal(tasks.find(t => t.id === '${task.id}'))" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 0.25rem;">✏️</button>
+                    <span class="task-id">${escapeHtml(task.id)}</span>
+                    <button class="task-edit-btn" data-edit-task="1" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 0.25rem;">✏️</button>
                 </div>
-                <div class="task-title">${task.title}</div>
+                <div class="task-title">${escapeHtml(task.title)}</div>
                 ${task.description ? `<div class="task-description">${markdownToHtml(task.description)}</div>` : ''}
                 <div class="task-meta">
-                    ${task.priority ? `<span class="badge badge-priority ${priorityBadgeClass}" onclick="event.stopPropagation(); clickToFilter('priority', '${task.priority.replace(/'/g, "\\'")}');" style="cursor: pointer;" title="${t('tooltip.filterByPriority')}">${displayPriority(task.priority)}</span>` : ''}
-                    ${task.category ? `<span class="badge badge-category" onclick="event.stopPropagation(); clickToFilter('category', '${task.category.replace(/'/g, "\\'")}');" style="cursor: pointer;" title="${t('tooltip.filterByCategory')}">${task.category}</span>` : ''}
+                    ${task.priority ? `<span class="badge badge-priority ${priorityBadgeClass}" data-filter="priority" data-filter-value="${escapeHtml(task.priority)}" style="cursor: pointer;" title="${t('tooltip.filterByPriority')}">${escapeHtml(displayPriority(task.priority))}</span>` : ''}
+                    ${task.category ? `<span class="badge badge-category" data-filter="category" data-filter-value="${escapeHtml(task.category)}" style="cursor: pointer;" title="${t('tooltip.filterByCategory')}">${escapeHtml(task.category)}</span>` : ''}
                     ${task.assignees.map(a => {
                         const normalizedId = normalizeUserId(a);
-                        return `<span class="badge badge-assignee" onclick="event.stopPropagation(); clickToFilter('user', '${normalizedId.replace(/'/g, "\\'")}');" style="cursor: pointer;" title="${t('tooltip.filterByUser')}">${a}</span>`;
+                        return `<span class="badge badge-assignee" data-filter="user" data-filter-value="${escapeHtml(normalizedId)}" style="cursor: pointer;" title="${t('tooltip.filterByUser')}">${escapeHtml(a)}</span>`;
                     }).join('')}
-                    ${task.tags.map(tag => `<span class="tag" onclick="event.stopPropagation(); clickToFilter('tag', '${tag.replace(/'/g, "\\'")}');" style="cursor: pointer;" title="${t('tooltip.filterByTag')}">${tag}</span>`).join('')}
+                    ${task.tags.map(tag => `<span class="tag" data-filter="tag" data-filter-value="${escapeHtml(tag)}" style="cursor: pointer;" title="${t('tooltip.filterByTag')}">${escapeHtml(tag)}</span>`).join('')}
                 </div>
                 ${subtaskProgress}
             `;
+
+            // Bind handlers in JS (values passed via closure / dataset, never concatenated into HTML → no XSS)
+            const editBtn = taskEl.querySelector('[data-edit-task]');
+            if (editBtn) editBtn.addEventListener('click', (e) => { e.stopPropagation(); openTaskModal(task); });
+            taskEl.querySelectorAll('[data-filter]').forEach(el => {
+                el.addEventListener('click', (e) => { e.stopPropagation(); clickToFilter(el.dataset.filter, el.dataset.filterValue); });
+            });
 
             taskEl.addEventListener('dragstart', drag);
             taskEl.addEventListener('click', () => showTaskDetail(task));
@@ -3462,7 +3478,7 @@ ${t('markdown.archiveSection')}
                     </div>
 
                     <!-- Title -->
-                    <h3 style="margin: 0 0 1.5rem 0; font-size: 1.5rem; color: var(--text);">${task.title}</h3>
+                    <h3 style="margin: 0 0 1.5rem 0; font-size: 1.5rem; color: var(--text);">${escapeHtml(task.title)}</h3>
 
                     <!-- Metadata Grid -->
                     <div class="modal-form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem; padding: 1rem; background: var(--bg); border-radius: 8px;">
@@ -3475,20 +3491,20 @@ ${t('markdown.archiveSection')}
 
                         <div>
                             <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">${t('meta.status')}</div>
-                            <div style="font-weight: 500;">${statusName}</div>
+                            <div style="font-weight: 500;">${escapeHtml(statusName)}</div>
                         </div>
 
                         ${task.category ? `
                             <div>
                                 <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">${t('meta.category')}</div>
-                                <div style="font-weight: 500;">${task.category}</div>
+                                <div style="font-weight: 500;">${escapeHtml(task.category)}</div>
                             </div>
                         ` : ''}
 
                         ${task.assignees.length > 0 ? `
                             <div>
                                 <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">${t('meta.assigned')}</div>
-                                <div style="font-weight: 500;">${task.assignees.join(', ')}</div>
+                                <div style="font-weight: 500;">${escapeHtml(task.assignees.join(', '))}</div>
                             </div>
                         ` : ''}
 
@@ -3890,7 +3906,7 @@ ${t('markdown.archiveSection')}
                         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
                             <div>
                                 <span style="background: #6b7280; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">${task.id}</span>
-                                <strong style="margin-left: 0.5rem; font-size: 1.1rem;">${task.title}</strong>
+                                <strong style="margin-left: 0.5rem; font-size: 1.1rem;">${escapeHtml(task.title)}</strong>
                             </div>
                             <div style="display: flex; gap: 0.5rem;">
                                 <button onclick="event.stopPropagation(); deleteTask('${task.id}', true)" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: #ef4444; color: white;">🗑️</button>
@@ -3900,8 +3916,8 @@ ${t('markdown.archiveSection')}
                         ${task.description ? `<p style="color: var(--text-secondary, #666); margin: 0.5rem 0;">${markdownToHtml(task.description)}</p>` : ''}
                         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
                             ${task.priority ? `<span style="background: #fbbf24; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">${displayPriority(task.priority)}</span>` : ''}
-                            ${task.category ? `<span style="background: #8b5cf6; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">${task.category}</span>` : ''}
-                            ${task.tags.map(t => `<span style="background: #3b82f6; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">${t}</span>`).join('')}
+                            ${task.category ? `<span style="background: #8b5cf6; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">${escapeHtml(task.category)}</span>` : ''}
+                            ${task.tags.map(t => `<span style="background: #3b82f6; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">${escapeHtml(t)}</span>`).join('')}
                         </div>
                     </div>
             `).join('');
