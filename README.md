@@ -41,6 +41,8 @@ Markdown Task Manager is a **standalone web application** contained in a single 
 - ✅ **Plain text readable**: Editable with any editor
 - ✅ **No server**: Works entirely in the browser
 - ✅ **Multi-project**: Manage multiple projects with history
+- ✅ **Dark mode & responsive**: Light/dark theme, mobile-ready with touch drag & drop
+- ✅ **Multilingual**: English, French, German and Simplified Chinese
 
 ---
 
@@ -555,7 +557,7 @@ With this system, you have:
 ### 6. Interface Translation
 
 **Multi-language support:**
-- English and French languages available
+- English, French, German and Simplified Chinese available
 - Language selector in application settings
 - Complete interface translation
 - Seamless language switching
@@ -601,9 +603,9 @@ With this system, you have:
 
 - **Export**: Your Markdown files are already exported!
 - **Theme**: Modern and clean interface
-- **Responsive**: Works on different screen sizes
+- **Responsive**: Optimized for mobile — touch drag & drop, stacked forms, per-column "+" button
+- **Dark mode**: Light/dark toggle with system auto-detection
 - **Keyboard shortcuts**: Quick navigation (coming soon)
-- **Dark mode**: Light/dark toggle (coming soon)
 
 ---
 
@@ -1160,9 +1162,10 @@ Contributions welcome! Here's how to help:
 
 ## 📝 Roadmap
 
-### Current version: 1.0
+### Current version: 1.3.1
 
-- ✅ Interactive Kanban
+**Core (since 1.0)**
+- ✅ Interactive Kanban with drag & drop
 - ✅ Complete task management
 - ✅ Advanced filters
 - ✅ Archive system
@@ -1170,25 +1173,25 @@ Contributions welcome! Here's how to help:
 - ✅ Auto-save
 - ✅ AI integration
 
+**Added in 1.1 → 1.3.1**
+- ✅ Extended priority system (50+ emoji icons) — *1.1*
+- ✅ Dark mode (toggle + system auto-detection) — *1.2*
+- ✅ German and Simplified Chinese translations — *1.2*
+- ✅ Archived task detail view — *1.2*
+- ✅ Mobile support: touch drag & drop, responsive layout, per-column "+" button — *1.3 (issue #12)*
+- ✅ XSS hardening: escaped rendering + Markdown link scheme validation — *1.3.1*
+
 ### Next versions
 
-**v1.1 (Short term)**
-- [ ] Dark mode
+**v2.0 — Token-efficient status (in progress)**
+- [ ] Decouple a task's status from its position in the file (status as a field) so moving a task between columns becomes a one-line edit — drastically cutting the tokens an AI needs to update the board
+- [ ] Backward-compatible parser (status field first, section fallback)
+
+**Later**
 - [ ] Keyboard shortcuts
-- [ ] PDF/HTML export
-- [ ] Visual statistics (charts)
-
-**v1.2 (Medium term)**
-- [ ] File drag & drop (attachments)
-- [ ] Mentions in comments (@user)
-- [ ] Reminder notifications (deadlines)
-- [ ] Task templates
-
-**v2.0 (Long term)**
-- [ ] Complete offline mode (Service Worker)
-- [ ] Cross-device synchronization (via automatic Git)
-- [ ] System plugin (IDE integration)
-- [ ] Optional REST API (local server)
+- [ ] PDF/HTML export & visual statistics (charts)
+- [ ] File attachments, @mentions, deadline reminders, task templates
+- [ ] Full offline mode (Service Worker), cross-device sync, IDE plugin, optional local REST API
 
 ---
 

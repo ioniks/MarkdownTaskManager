@@ -39,6 +39,8 @@ Le Markdown Task Manager est une **application web autonome** contenue dans un s
 - ✅ **Lisible en texte brut** : Éditable avec n'importe quel éditeur
 - ✅ **Sans serveur** : Fonctionne entièrement dans le navigateur
 - ✅ **Multi-projets** : Gérez plusieurs projets avec historique
+- ✅ **Mode sombre & responsive** : Thème clair/sombre, prêt pour mobile (glisser-déposer tactile)
+- ✅ **Multilingue** : Anglais, Français, Allemand et Chinois simplifié
 
 ---
 
@@ -553,7 +555,7 @@ Avec ce système, vous avez :
 ### 6. Traduction de l'Interface
 
 **Support multilingue :**
-- Langues disponibles : Anglais et Français
+- Langues disponibles : Anglais, Français, Allemand et Chinois simplifié
 - Sélecteur de langue dans les paramètres de l'application
 - Traduction complète de l'interface
 - Changement de langue sans interruption
@@ -599,9 +601,9 @@ Avec ce système, vous avez :
 
 - **Export** : Vos fichiers Markdown sont déjà exportés !
 - **Thème** : Interface moderne et épurée
-- **Responsive** : Fonctionne sur différentes tailles d'écran
+- **Responsive** : Optimisé pour mobile — glisser-déposer tactile, formulaires empilés, bouton « + » par colonne
+- **Mode sombre** : Basculement clair/sombre avec détection automatique du système
 - **Raccourcis clavier** : Navigation rapide (à venir)
-- **Mode sombre** : Basculement clair/sombre (à venir)
 
 ---
 
@@ -1123,9 +1125,10 @@ Contributions bienvenues ! Voici comment aider :
 
 ## 📝 Roadmap
 
-### Version actuelle : 1.0
+### Version actuelle : 1.3.1
 
-- ✅ Kanban interactif
+**Socle (depuis la 1.0)**
+- ✅ Kanban interactif avec glisser-déposer
 - ✅ Gestion complète des tâches
 - ✅ Filtres avancés
 - ✅ Système d'archives
@@ -1133,25 +1136,25 @@ Contributions bienvenues ! Voici comment aider :
 - ✅ Auto-sauvegarde
 - ✅ Intégration IA
 
+**Ajouté en 1.1 → 1.3.1**
+- ✅ Système de priorités étendu (50+ icônes emoji) — *1.1*
+- ✅ Mode sombre (bascule + détection automatique du système) — *1.2*
+- ✅ Traductions allemande et chinois simplifié — *1.2*
+- ✅ Vue détaillée des tâches archivées — *1.2*
+- ✅ Support mobile : glisser-déposer tactile, mise en page responsive, bouton « + » par colonne — *1.3 (issue #12)*
+- ✅ Durcissement XSS : rendu échappé + validation du schéma des liens Markdown — *1.3.1*
+
 ### Prochaines versions
 
-**v1.1 (Court terme)**
-- [ ] Mode sombre
+**v2.0 — Statut « économe en tokens » (en cours)**
+- [ ] Découpler le statut d'une tâche de sa position dans le fichier (statut en champ) pour qu'un changement de colonne devienne une modification d'une seule ligne — réduisant drastiquement les tokens nécessaires à une IA pour mettre à jour le tableau
+- [ ] Parser rétro-compatible (champ statut prioritaire, repli sur la section)
+
+**Plus tard**
 - [ ] Raccourcis clavier
-- [ ] Export PDF/HTML
-- [ ] Statistiques visuelles (graphiques)
-
-**v1.2 (Moyen terme)**
-- [ ] Glisser-déposer de fichiers (attachements)
-- [ ] Mentions dans les commentaires (@user)
-- [ ] Notifications de rappel (échéances)
-- [ ] Templates de tâches
-
-**v2.0 (Long terme)**
-- [ ] Mode hors-ligne complet (Service Worker)
-- [ ] Synchronisation entre appareils (via Git automatique)
-- [ ] Plugin système (intégration IDE)
-- [ ] API REST optionnelle (serveur local)
+- [ ] Export PDF/HTML & statistiques visuelles (graphiques)
+- [ ] Pièces jointes, mentions @user, rappels d'échéance, templates de tâches
+- [ ] Mode hors-ligne complet (Service Worker), synchronisation multi-appareils, plugin IDE, API REST locale optionnelle
 
 ---
 
