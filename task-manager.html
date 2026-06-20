@@ -1907,7 +1907,7 @@
             // Re-render the interface
             renderKanban();
             updateProjectSelector();
-            updateArchivesModal();
+            renderArchivesModal();
 
             console.log(`Language changed to: ${lang}`);
         }
@@ -3152,6 +3152,11 @@ ${t('markdown.archiveSection')}
             board.innerHTML = '';
 
             console.log('Rendering kanban with', tasks.length, 'tasks');
+
+            // Nothing loaded yet (e.g. language switched on the welcome screen): skip rendering
+            if (!config.columns || config.columns.length === 0) {
+                return;
+            }
 
             // Debug info
             const debugInfo = document.getElementById('debugInfo');
