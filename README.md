@@ -1162,7 +1162,7 @@ Contributions welcome! Here's how to help:
 
 ## 📝 Roadmap
 
-### Current version: 1.3.1
+### Current version: 2.0
 
 **Core (since 1.0)**
 - ✅ Interactive Kanban with drag & drop
@@ -1173,19 +1173,17 @@ Contributions welcome! Here's how to help:
 - ✅ Auto-save
 - ✅ AI integration
 
-**Added in 1.1 → 1.3.1**
+**Added in 1.1 → 2.0**
 - ✅ Extended priority system (50+ emoji icons) — *1.1*
 - ✅ Dark mode (toggle + system auto-detection) — *1.2*
 - ✅ German and Simplified Chinese translations — *1.2*
 - ✅ Archived task detail view — *1.2*
 - ✅ Mobile support: touch drag & drop, responsive layout, per-column "+" button — *1.3 (issue #12)*
 - ✅ XSS hardening: escaped rendering + Markdown link scheme validation — *1.3.1*
+- ✅ **Token-efficient status (status as a field)** — a task's column is a `**Status**:` field in a single `## Tasks` section, so moving a task between columns is a one-line edit; AIs read/update the board via cheap `grep` (no stored index). Backward-compatible parser + **automatic, safe V1→V2 migration on load** (creates a `.v1-backup.md`, no data loss); the archive is migrated too. — *2.0*
+- ✅ Source split into `src/` and compiled to the single `task-manager.html` by a dependency-free Node build (`npm run build`) — *2.0*
 
 ### Next versions
-
-**v2.0 — Token-efficient status (in progress)**
-- [ ] Decouple a task's status from its position in the file (status as a field) so moving a task between columns becomes a one-line edit — drastically cutting the tokens an AI needs to update the board
-- [ ] Backward-compatible parser (status field first, section fallback)
 
 **Later**
 - [ ] Keyboard shortcuts

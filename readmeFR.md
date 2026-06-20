@@ -1125,7 +1125,7 @@ Contributions bienvenues ! Voici comment aider :
 
 ## 📝 Roadmap
 
-### Version actuelle : 1.3.1
+### Version actuelle : 2.0
 
 **Socle (depuis la 1.0)**
 - ✅ Kanban interactif avec glisser-déposer
@@ -1136,19 +1136,17 @@ Contributions bienvenues ! Voici comment aider :
 - ✅ Auto-sauvegarde
 - ✅ Intégration IA
 
-**Ajouté en 1.1 → 1.3.1**
+**Ajouté en 1.1 → 2.0**
 - ✅ Système de priorités étendu (50+ icônes emoji) — *1.1*
 - ✅ Mode sombre (bascule + détection automatique du système) — *1.2*
 - ✅ Traductions allemande et chinois simplifié — *1.2*
 - ✅ Vue détaillée des tâches archivées — *1.2*
 - ✅ Support mobile : glisser-déposer tactile, mise en page responsive, bouton « + » par colonne — *1.3 (issue #12)*
 - ✅ Durcissement XSS : rendu échappé + validation du schéma des liens Markdown — *1.3.1*
+- ✅ **Statut « économe en tokens » (statut en champ)** — la colonne d'une tâche est un champ `**Status**:` dans une seule section `## Tasks` ; déplacer une tâche entre colonnes devient une modification d'une seule ligne, et une IA lit/met à jour le tableau via un simple `grep` (aucun index stocké). Parser rétro-compatible + **migration automatique et sûre V1→V2 au chargement** (crée un `.v1-backup.md`, sans perte de données) ; l'archive est migrée aussi. — *2.0*
+- ✅ Sources découpées dans `src/` et compilées vers l'unique `task-manager.html` par un build Node sans dépendance (`npm run build`) — *2.0*
 
 ### Prochaines versions
-
-**v2.0 — Statut « économe en tokens » (en cours)**
-- [ ] Découpler le statut d'une tâche de sa position dans le fichier (statut en champ) pour qu'un changement de colonne devienne une modification d'une seule ligne — réduisant drastiquement les tokens nécessaires à une IA pour mettre à jour le tableau
-- [ ] Parser rétro-compatible (champ statut prioritaire, repli sur la section)
 
 **Plus tard**
 - [ ] Raccourcis clavier
