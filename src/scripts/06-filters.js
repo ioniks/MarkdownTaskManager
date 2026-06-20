@@ -24,9 +24,11 @@
 
         // Helper function to get full user format from user ID
         function getUserFullFormat(userId) {
-            // Check if there's a defined user in config with this ID
-            const configUser = (config.users || []).find(u => normalizeUserId(u) === userId);
-            return configUser || userId;
+            // Resolve "@user (Name)" from the runtime union (config + active + archived tasks),
+            // not just config.users: a user that lives only on a task must still show its full
+            // name in filter badges now that config no longer absorbs task-derived users.
+            const match = extractUniqueValues().users.find(u => normalizeUserId(u) === userId);
+            return match || userId;
         }
 
         // Extract unique values for autocomplete (including historical archived data)

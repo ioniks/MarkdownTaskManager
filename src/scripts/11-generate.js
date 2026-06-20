@@ -1,22 +1,17 @@
         function generateMarkdown() {
             // The Format marker makes V2 detection unambiguous (vs a legacy column named "Tasks").
-            let md = `# Kanban Board\n\n<!-- Config: Last Task ID: ${config.lastTaskId} -->\n<!-- Format: v2 -->\n\n`;
+            // Preserve the user's H1 title (default "Kanban Board") instead of hardcoding it.
+            const boardTitle = (config.boardTitle && config.boardTitle.trim()) || 'Kanban Board';
+            let md = `# ${boardTitle}\n\n<!-- Config: Last Task ID: ${config.lastTaskId} -->\n<!-- Format: v2 -->\n\n`;
 
-            // Update config with values from tasks (merge with existing)
-            const allCategories = new Set(config.categories || []);
-            const allUsers = new Set(config.users || []);
-            const allTags = new Set(config.tags || []);
-
-            tasks.forEach(task => {
-                if (task.category) allCategories.add(task.category);
-                task.assignees.forEach(u => allUsers.add(u));
-                task.tags.forEach(t => allTags.add(t.replace('#', '')));
-            });
-
-            // Update config with merged values
-            config.categories = [...allCategories];
-            config.users = [...allUsers];
-            config.tags = [...allTags];
+            // The config lists (Categories / Users / Tags) keep ONLY the user-configured values.
+            // Values that appear only on tasks are NOT folded back in here — doing so made these
+            // lines grow without bound on every save (every tag/category/user ever used stuck
+            // forever). Autocomplete still surfaces task-derived values: extractUniqueValues()
+            // unions config + active + archived tasks at runtime.
+            config.categories = [...new Set(config.categories || [])];
+            config.users = [...new Set(config.users || [])];
+            config.tags = [...new Set(config.tags || [])];
 
             // Ensure defaults exist
             if (config.categories.length === 0) {

@@ -144,10 +144,20 @@ ${t('markdown.archiveSection')}
                 categories: [],
                 users: [],
                 priorities: [],
-                tags: []
+                tags: [],
+                boardTitle: 'Kanban Board'
             };
 
             console.log('=== Starting parseMarkdown ===');
+
+            // Preserve the board's H1 title so a custom title survives a save/migration instead of
+            // being reset to the default. Only the FIRST line is considered (the title is always
+            // line 1 in both V1 and generated V2 files); this avoids ever mistaking a "# heading"
+            // inside a task description for the board title. A non-matching first line keeps the
+            // default — never injects wrong content. "##"/"###" can't match (single "#" + space).
+            const firstLine = content.split('\n', 1)[0].replace(/\r$/, ''); // tolerate CRLF files
+            const titleMatch = firstLine.match(/^#[ \t]+(.+?)[ \t]*$/);
+            if (titleMatch) config.boardTitle = titleMatch[1].trim();
 
             // Parse config comment
             const configMatch = content.match(/<!-- Config: Last Task ID: (\d+) -->/);
