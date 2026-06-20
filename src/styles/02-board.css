@@ -161,6 +161,28 @@
             font-size: 0.7rem;
         }
 
+        /* Deadline visibility: the due date is always shown on the card; it turns orange when
+           due within 2 days and red once overdue, with a matching left-border accent. Fixed
+           red/orange read well in both light and dark themes. */
+        .badge-due {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+        .badge-due--soon {
+            background: #f59e0b;
+            color: #fff;
+        }
+        .badge-due--overdue {
+            background: #ef4444;
+            color: #fff;
+        }
+        .task-card--soon {
+            border-left: 4px solid #f59e0b;
+        }
+        .task-card--overdue {
+            border-left: 4px solid #ef4444;
+        }
+
         .task-description {
             font-size: 0.85rem;
             color: var(--text-secondary);

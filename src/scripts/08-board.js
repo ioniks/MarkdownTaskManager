@@ -54,12 +54,37 @@
             });
         }
 
+        // Deadline visibility: classify a task by its **Due** date so the card can surface it.
+        // Returns 'overdue' (due date is before today), 'soon' (due within the next 2 days,
+        // today included), or null. A task with a Finished date (task.completed) is never flagged
+        // — it's done. Dates are compared at LOCAL midnight (parsed field-by-field, not via
+        // new Date("YYYY-MM-DD") which is UTC) to avoid a timezone off-by-one near midnight.
+        function dueStatus(task) {
+            if (!task.due || task.completed) return null;
+            const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(task.due.trim());
+            if (!m) return null;
+            const due = new Date(+m[1], +m[2] - 1, +m[3]);
+            // Reject impossible calendar dates: JS rolls "2026-02-31" over to 2026-03-03, which
+            // isNaN never catches — verify the constructed date matches the parsed fields.
+            if (due.getFullYear() !== +m[1] || due.getMonth() !== +m[2] - 1 || due.getDate() !== +m[3]) return null;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const days = Math.round((due - today) / 86400000);
+            if (days < 0) return 'overdue';
+            if (days <= 2) return 'soon';
+            return null;
+        }
+
         // Create task element
         function createTaskElement(task) {
             const taskEl = document.createElement('div');
             taskEl.className = 'task-card';
             taskEl.draggable = true;
             taskEl.dataset.taskId = task.id;
+
+            // Deadline accent on the card border (red overdue / orange due-soon).
+            const due = dueStatus(task);
+            if (due) taskEl.classList.add(`task-card--${due}`);
 
             var priorityBadgeClass = "Default";
             if (config.priorities) {
@@ -90,6 +115,7 @@
                 <div class="task-title">${escapeHtml(task.title)}</div>
                 ${task.description ? `<div class="task-description">${markdownToHtml(task.description)}</div>` : ''}
                 <div class="task-meta">
+                    ${task.due ? `<span class="badge badge-due${due ? ` badge-due--${due}` : ''}" title="${escapeHtml(t(due === 'overdue' ? 'tooltip.overdue' : (due === 'soon' ? 'tooltip.dueSoon' : 'meta.due')))}">${due === 'overdue' ? '⚠️' : '📅'} ${escapeHtml(task.due)}</span>` : ''}
                     ${task.priority ? `<span class="badge badge-priority ${priorityBadgeClass}" data-filter="priority" data-filter-value="${escapeHtml(task.priority)}" style="cursor: pointer;" title="${t('tooltip.filterByPriority')}">${escapeHtml(displayPriority(task.priority))}</span>` : ''}
                     ${task.category ? `<span class="badge badge-category" data-filter="category" data-filter-value="${escapeHtml(task.category)}" style="cursor: pointer;" title="${t('tooltip.filterByCategory')}">${escapeHtml(task.category)}</span>` : ''}
                     ${task.assignees.map(a => {

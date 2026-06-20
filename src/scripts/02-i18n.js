@@ -121,6 +121,8 @@
                 'tooltip.filterByPriority': 'Filter by this priority',
                 'tooltip.doubleClickEdit': 'Double-click to edit',
                 'tooltip.delete': 'Delete',
+                'tooltip.overdue': 'Overdue',
+                'tooltip.dueSoon': 'Due soon',
 
                 // Notifications
                 'notif.folderLoaded': 'Folder loaded successfully!',
@@ -298,6 +300,8 @@
                 'tooltip.filterByPriority': 'Filtrer par cette priorité',
                 'tooltip.doubleClickEdit': 'Double-cliquez pour éditer',
                 'tooltip.delete': 'Supprimer',
+                'tooltip.overdue': 'En retard',
+                'tooltip.dueSoon': 'Bientôt dû',
 
                 // Notifications
                 'notif.folderLoaded': 'Dossier chargé avec succès !',
@@ -475,6 +479,8 @@
                 'tooltip.filterByPriority': 'Nach dieser Priorität filtern',
                 'tooltip.doubleClickEdit': 'Doppelklick zum Bearbeiten',
                 'tooltip.delete': 'Löschen',
+                'tooltip.overdue': 'Überfällig',
+                'tooltip.dueSoon': 'Bald fällig',
 
                 // Notifications
                 'notif.folderLoaded': 'Ordner erfolgreich geladen!',
@@ -651,6 +657,8 @@
                 'tooltip.filterByPriority': '按此优先级筛选',
                 'tooltip.doubleClickEdit': '双击编辑',
                 'tooltip.delete': '删除',
+                'tooltip.overdue': '已逾期',
+                'tooltip.dueSoon': '即将到期',
 
                 // Notifications
                 'notif.folderLoaded': '文件夹加载成功!',
