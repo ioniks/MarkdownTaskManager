@@ -386,4 +386,43 @@
             }
         });
 
+        function logActivity(type, message) {
+            const entry = {
+                time: new Date(),
+                type: type,
+                message: message
+            };
+            activityLogs.unshift(entry);
+            if (activityLogs.length > 50) {
+                activityLogs.pop();
+            }
+            renderActivityLog();
+        }
+
+        function renderActivityLog() {
+            const listEl = document.getElementById('activityLogList');
+            if (!listEl) return;
+            
+            listEl.innerHTML = activityLogs.map(log => {
+                const timeStr = log.time.toLocaleTimeString();
+                let borderClass = '';
+                if (log.type === 'reload') borderClass = 'reload';
+                else if (log.type === 'create') borderClass = 'create';
+                else if (log.type === 'delete' || log.type === 'archive') borderClass = 'delete';
+                else if (log.type === 'edit' || log.type === 'move') borderClass = 'edit';
+                
+                return `
+                    <div class="activity-log-item ${borderClass}">
+                        <span class="activity-log-time">[${timeStr}]</span>
+                        <span class="activity-log-msg">${escapeHtml(log.message)}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function clearActivityLog() {
+            activityLogs = [];
+            renderActivityLog();
+        }
+
         // Load kanban.md file

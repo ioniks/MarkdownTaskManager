@@ -104,6 +104,7 @@
                     renderKanban();
                     closeModal();
                     showNotification(t('notif.taskArchived'), 'success');
+                    logActivity('archive', t('activity.localArchived', {id: task.id, title: task.title}));
                 }
             }
         }
@@ -144,6 +145,9 @@
                     }
 
                     showNotification(t('notif.taskDeleted'), 'success');
+                    if (!fromArchive) {
+                        logActivity('delete', t('activity.localDeleted', {id: taskId}));
+                    }
                 }
             }
         }
@@ -228,6 +232,7 @@
                 renderKanban();
                 renderArchiveList(document.getElementById('archiveSearch').value);
                 showNotification(t('notif.taskRestored'), 'success');
+                logActivity('create', t('activity.localRestored', {id: task.id, title: task.title}));
             }
         }
 

@@ -462,6 +462,77 @@
             animation: highlightMoved 5s ease-out forwards;
         }
 
+        /* Activity Log / History Section */
+        .activity-log-section {
+            margin: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .activity-log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .activity-log-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .activity-log-list {
+            max-height: 200px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .activity-log-item {
+            display: flex;
+            gap: 1rem;
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            background: var(--bg-primary);
+            border-left: 4px solid var(--accent);
+        }
+
+        .activity-log-item.reload {
+            border-left-color: var(--priority-green);
+        }
+
+        .activity-log-item.create {
+            border-left-color: var(--priority-blue);
+        }
+
+        .activity-log-item.edit {
+            border-left-color: var(--priority-yellow);
+        }
+
+        .activity-log-item.delete {
+            border-left-color: var(--priority-red);
+        }
+
+        .activity-log-time {
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .activity-log-msg {
+            color: var(--text-primary);
+            word-break: break-all;
+        }
+
 /* ===== 03-modals.css ===== */
 .modal {
             display: none;
@@ -808,6 +879,17 @@
     <div id="kanbanView" style="display: none;">
         <div id="debugInfo" class="debug-info" style="display: none;"></div>
         <div class="kanban-board" id="kanbanBoard"></div>
+        
+        <!-- Activity Log / History Section -->
+        <div id="activityLogSection" class="activity-log-section">
+            <div class="activity-log-header">
+                <h3 id="activityLogTitle">Recent Activity</h3>
+                <button id="clearActivityLogBtn" class="btn btn-secondary btn-sm" onclick="clearActivityLog()" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Clear</button>
+            </div>
+            <div id="activityLogList" class="activity-log-list">
+                <!-- Log entries will be inserted here dynamically -->
+            </div>
+        </div>
     </div>
 
     <!-- Modal Task Detail -->
@@ -988,6 +1070,7 @@
         let wasArchiveModalActive = false;
         let loadedFormatV2 = false; // true once the loaded kanban.md is V2 (status carried by a **Status** field)
         let loadedArchiveV2 = false; // true once the loaded archive.md carries the v2 format marker
+        let activityLogs = []; // Array of {time: Date, type: string, message: string}
 
 /* ===== 02-i18n.js ===== */
 // ===== TRANSLATION SYSTEM =====
@@ -1137,6 +1220,21 @@
                 'notif.taskArchived': 'Task archived!',
                 'notif.taskDeleted': 'Task permanently deleted',
                 'notif.taskRestored': 'Task restored to its original column!',
+
+                // Activity logs
+                'activity.title': 'Recent Activity',
+                'activity.clear': 'Clear',
+                'activity.externalReload': 'Board reloaded automatically from disk.',
+                'activity.externalCreated': 'Task {id} ("{title}") was created externally.',
+                'activity.externalMoved': 'Task {id} ("{title}") was moved from "{from}" to "{to}" externally.',
+                'activity.externalEdited': 'Task {id} ("{title}") was modified externally.',
+                'activity.externalDeleted': 'Task {id} was deleted externally.',
+                'activity.localCreated': 'Task {id} ("{title}") created.',
+                'activity.localMoved': 'Task {id} ("{title}") moved from "{from}" to "{to}".',
+                'activity.localEdited': 'Task {id} ("{title}") updated.',
+                'activity.localArchived': 'Task {id} ("{title}") archived.',
+                'activity.localDeleted': 'Task {id} permanently deleted.',
+                'activity.localRestored': 'Task {id} ("{title}") restored from archive.',
 
                 // Prompts and confirmations
                 'prompt.projectName': 'Project name (leave empty to use "{name}"):',
@@ -1319,6 +1417,21 @@
                 'notif.taskDeleted': 'Tâche supprimée définitivement',
                 'notif.taskRestored': 'Tâche restaurée dans sa colonne d\'origine !',
 
+                // Activity logs
+                'activity.title': 'Activité Récente',
+                'activity.clear': 'Effacer',
+                'activity.externalReload': 'Tableau rechargé automatiquement depuis le disque.',
+                'activity.externalCreated': 'La tâche {id} ("{title}") a été créée de l\'extérieur.',
+                'activity.externalMoved': 'La tâche {id} ("{title}") a été déplacée de "{from}" à "{to}" de l\'extérieur.',
+                'activity.externalEdited': 'La tâche {id} ("{title}") a été modifiée de l\'extérieur.',
+                'activity.externalDeleted': 'La tâche {id} a été supprimée de l\'extérieur.',
+                'activity.localCreated': 'Tâche {id} ("{title}") créée.',
+                'activity.localMoved': 'Tâche {id} ("{title}") déplacée de "{from}" à "{to}".',
+                'activity.localEdited': 'Tâche {id} ("{title}") mise à jour.',
+                'activity.localArchived': 'Tâche {id} ("{title}") archivée.',
+                'activity.localDeleted': 'Tâche {id} supprimée définitivement.',
+                'activity.localRestored': 'Tâche {id} ("{title}") restaurée depuis l\'archive.',
+
                 // Prompts and confirmations
                 'prompt.projectName': 'Nom du projet (laisser vide pour utiliser "{name}") :',
                 'prompt.renameProject': 'Nouveau nom du projet :',
@@ -1500,6 +1613,21 @@
                 'notif.taskDeleted': 'Aufgabe endgültig gelöscht',
                 'notif.taskRestored': 'Aufgabe in ursprünglicher Spalte zurückgesetzt!',
 
+                // Activity logs
+                'activity.title': 'Letzte Aktivitäten',
+                'activity.clear': 'Leeren',
+                'activity.externalReload': 'Board automatisch vom Datenträger neu geladen.',
+                'activity.externalCreated': 'Aufgabe {id} ("{title}") wurde extern erstellt.',
+                'activity.externalMoved': 'Aufgabe {id} ("{title}") wurde extern von "{from}" nach "{to}" verschoben.',
+                'activity.externalEdited': 'Aufgabe {id} ("{title}") wurde extern geändert.',
+                'activity.externalDeleted': 'Aufgabe {id} wurde extern gelöscht.',
+                'activity.localCreated': 'Aufgabe {id} ("{title}") erstellt.',
+                'activity.localMoved': 'Aufgabe {id} ("{title}") von "{from}" nach "{to}" verschoben.',
+                'activity.localEdited': 'Aufgabe {id} ("{title}") aktualisiert.',
+                'activity.localArchived': 'Aufgabe {id} ("{title}") archiviert.',
+                'activity.localDeleted': 'Aufgabe {id} endgültig gelöscht.',
+                'activity.localRestored': 'Aufgabe {id} ("{title}") aus dem Archiv wiederhergestellt.',
+
                 // Prompts and confirmations
                 'prompt.projectName': 'Projektname (leer lassen, um "{name}" zu verwenden):',
                 'prompt.renameProject': 'Neuer Projektname:',
@@ -1680,6 +1808,21 @@
                 'notif.taskDeleted': '任务已永久删除',
                 'notif.taskRestored': '任务已恢复至原列!',
 
+                // Activity logs
+                'activity.title': '最近动态',
+                'activity.clear': '清空',
+                'activity.externalReload': '看板已自动从磁盘重新加载。',
+                'activity.externalCreated': '任务 {id} ("{title}") 已在外部创建。',
+                'activity.externalMoved': '任务 {id} ("{title}") 已在外部从 "{from}" 移动到 "{to}"。',
+                'activity.externalEdited': '任务 {id} ("{title}") 已在外部修改。',
+                'activity.externalDeleted': '任务 {id} 已在外部删除。',
+                'activity.localCreated': '任务 {id} ("{title}") 已创建。',
+                'activity.localMoved': '任务 {id} ("{title}") 已从 "{from}" 移动到 "{to}"。',
+                'activity.localEdited': '任务 {id} ("{title}") 已更新。',
+                'activity.localArchived': '任务 {id} ("{title}") 已归档。',
+                'activity.localDeleted': '任务 {id} 已永久删除。',
+                'activity.localRestored': '任务 {id} ("{title}") 已从归档中恢复。',
+
                 // Prompts and confirmations
                 'prompt.projectName': '项目名称 (留空则使用 "{name}"):',
                 'prompt.renameProject': '新项目名称:',
@@ -1841,6 +1984,12 @@
             document.getElementById('archiveBtn').innerHTML = t('header.archives');
             document.getElementById('manageColsBtn').innerHTML = t('header.columns');
             document.getElementById('autoReloadLabel').textContent = t('header.autoReload');
+
+            // Update activity log static texts
+            const activityLogTitle = document.getElementById('activityLogTitle');
+            if (activityLogTitle) activityLogTitle.textContent = t('activity.title');
+            const clearActivityLogBtn = document.getElementById('clearActivityLogBtn');
+            if (clearActivityLogBtn) clearActivityLogBtn.textContent = t('activity.clear');
 
             // Update language selector to match current language
             document.getElementById('languageSelector').value = currentLanguage;
@@ -2481,6 +2630,45 @@ async function openDB() {
             }
         });
 
+        function logActivity(type, message) {
+            const entry = {
+                time: new Date(),
+                type: type,
+                message: message
+            };
+            activityLogs.unshift(entry);
+            if (activityLogs.length > 50) {
+                activityLogs.pop();
+            }
+            renderActivityLog();
+        }
+
+        function renderActivityLog() {
+            const listEl = document.getElementById('activityLogList');
+            if (!listEl) return;
+            
+            listEl.innerHTML = activityLogs.map(log => {
+                const timeStr = log.time.toLocaleTimeString();
+                let borderClass = '';
+                if (log.type === 'reload') borderClass = 'reload';
+                else if (log.type === 'create') borderClass = 'create';
+                else if (log.type === 'delete' || log.type === 'archive') borderClass = 'delete';
+                else if (log.type === 'edit' || log.type === 'move') borderClass = 'edit';
+                
+                return `
+                    <div class="activity-log-item ${borderClass}">
+                        <span class="activity-log-time">[${timeStr}]</span>
+                        <span class="activity-log-msg">${escapeHtml(log.message)}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function clearActivityLog() {
+            activityLogs = [];
+            renderActivityLog();
+        }
+
         // Load kanban.md file
 
 /* ===== 04-io.js ===== */
@@ -2495,9 +2683,13 @@ async function loadKanbanFile() {
 
                 // Capture previous task list mapping task IDs to statuses to identify new/moved tasks
                 const oldTaskStatusMap = new Map();
+                const oldTaskTitleMap = new Map();
                 const wasLoadedBefore = tasks && tasks.length > 0;
                 if (wasLoadedBefore) {
-                    tasks.forEach(t => oldTaskStatusMap.set(t.id, t.status));
+                    tasks.forEach(t => {
+                        oldTaskStatusMap.set(t.id, t.status);
+                        oldTaskTitleMap.set(t.id, t.title);
+                    });
                 }
 
                 parseMarkdown(currentKanbanContent);
@@ -2506,13 +2698,43 @@ async function loadKanbanFile() {
 
                 // Compare tasks to identify new or moved items, only if there were tasks loaded before
                 if (wasLoadedBefore) {
+                    let externalChangesCount = 0;
+                    const newTaskIds = new Set(tasks.map(t => t.id));
+
                     tasks.forEach(task => {
                         if (!oldTaskStatusMap.has(task.id)) {
                             task.isNew = true;
-                        } else if (oldTaskStatusMap.get(task.id) !== task.status) {
-                            task.isMoved = true;
+                            logActivity('reload', t('activity.externalCreated', {id: task.id, title: task.title}));
+                            externalChangesCount++;
+                        } else {
+                            if (oldTaskStatusMap.get(task.id) !== task.status) {
+                                task.isMoved = true;
+                                const oldStatus = oldTaskStatusMap.get(task.id);
+                                const oldCol = config.columns.find(c => c.id === oldStatus);
+                                const newCol = config.columns.find(c => c.id === task.status);
+                                const oldColName = oldCol ? oldCol.name : oldStatus;
+                                const newColName = newCol ? newCol.name : task.status;
+                                logActivity('reload', t('activity.externalMoved', {id: task.id, title: task.title, from: oldColName, to: newColName}));
+                                externalChangesCount++;
+                            }
+                            if (oldTaskTitleMap.get(task.id) !== task.title) {
+                                logActivity('reload', t('activity.externalEdited', {id: task.id, title: task.title}));
+                                externalChangesCount++;
+                            }
                         }
                     });
+
+                    // Track deleted tasks
+                    oldTaskStatusMap.forEach((status, id) => {
+                        if (!newTaskIds.has(id)) {
+                            logActivity('reload', t('activity.externalDeleted', {id: id}));
+                            externalChangesCount++;
+                        }
+                    });
+
+                    if (externalChangesCount > 0) {
+                        logActivity('reload', t('activity.externalReload'));
+                    }
                 }
 
                 renderKanban();
@@ -3680,6 +3902,7 @@ function renderKanban() {
             const oldIdx = tasks.findIndex(t => t.id === taskId);
             if (oldIdx < 0) return false;
             const task = tasks[oldIdx];
+            const oldStatus = task.status;
             const statusChanged = newStatus && task.status !== newStatus;
             const targetStatus = newStatus || task.status;
             tasks.splice(oldIdx, 1);
@@ -3698,6 +3921,15 @@ function renderKanban() {
             tasks.splice(insertIdx, 0, task);
             const posChanged = tasks.indexOf(task) !== oldIdx;
             if (newStatus) task.status = newStatus;
+
+            if (statusChanged) {
+                const oldCol = config.columns.find(c => c.id === oldStatus);
+                const newCol = config.columns.find(c => c.id === newStatus);
+                const oldColName = oldCol ? oldCol.name : oldStatus;
+                const newColName = newCol ? newCol.name : newStatus;
+                logActivity('move', t('activity.localMoved', {id: task.id, title: task.title, from: oldColName, to: newColName}));
+            }
+
             return statusChanged || posChanged;
         }
 
@@ -4068,6 +4300,7 @@ function showTaskDetail(task) {
                     task.subtasks = formSubtasks;
                     task.notes = notes;
                     showNotification(t('notif.taskEdited', {id: taskId}), 'success');
+                    logActivity('edit', t('activity.localEdited', {id: taskId, title: title}));
                 }
             } else {
                 // Create new task
@@ -4090,6 +4323,7 @@ function showTaskDetail(task) {
                     notes
                 });
                 showNotification(t('notif.taskCreated', {id: newTaskId}), 'success');
+                logActivity('create', t('activity.localCreated', {id: newTaskId, title: title}));
             }
 
             closeTaskModal();
@@ -4206,6 +4440,7 @@ async function loadArchive() {
                     renderKanban();
                     closeModal();
                     showNotification(t('notif.taskArchived'), 'success');
+                    logActivity('archive', t('activity.localArchived', {id: task.id, title: task.title}));
                 }
             }
         }
@@ -4246,6 +4481,9 @@ async function loadArchive() {
                     }
 
                     showNotification(t('notif.taskDeleted'), 'success');
+                    if (!fromArchive) {
+                        logActivity('delete', t('activity.localDeleted', {id: taskId}));
+                    }
                 }
             }
         }
@@ -4330,6 +4568,7 @@ async function loadArchive() {
                 renderKanban();
                 renderArchiveList(document.getElementById('archiveSearch').value);
                 showNotification(t('notif.taskRestored'), 'success');
+                logActivity('create', t('activity.localRestored', {id: task.id, title: task.title}));
             }
         }
 

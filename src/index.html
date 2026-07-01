@@ -116,6 +116,17 @@
     <div id="kanbanView" style="display: none;">
         <div id="debugInfo" class="debug-info" style="display: none;"></div>
         <div class="kanban-board" id="kanbanBoard"></div>
+        
+        <!-- Activity Log / History Section -->
+        <div id="activityLogSection" class="activity-log-section">
+            <div class="activity-log-header">
+                <h3 id="activityLogTitle">Recent Activity</h3>
+                <button id="clearActivityLogBtn" class="btn btn-secondary btn-sm" onclick="clearActivityLog()" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Clear</button>
+            </div>
+            <div id="activityLogList" class="activity-log-list">
+                <!-- Log entries will be inserted here dynamically -->
+            </div>
+        </div>
     </div>
 
     <!-- Modal Task Detail -->

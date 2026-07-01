@@ -9,9 +9,13 @@
 
                 // Capture previous task list mapping task IDs to statuses to identify new/moved tasks
                 const oldTaskStatusMap = new Map();
+                const oldTaskTitleMap = new Map();
                 const wasLoadedBefore = tasks && tasks.length > 0;
                 if (wasLoadedBefore) {
-                    tasks.forEach(t => oldTaskStatusMap.set(t.id, t.status));
+                    tasks.forEach(t => {
+                        oldTaskStatusMap.set(t.id, t.status);
+                        oldTaskTitleMap.set(t.id, t.title);
+                    });
                 }
 
                 parseMarkdown(currentKanbanContent);
@@ -20,13 +24,43 @@
 
                 // Compare tasks to identify new or moved items, only if there were tasks loaded before
                 if (wasLoadedBefore) {
+                    let externalChangesCount = 0;
+                    const newTaskIds = new Set(tasks.map(t => t.id));
+
                     tasks.forEach(task => {
                         if (!oldTaskStatusMap.has(task.id)) {
                             task.isNew = true;
-                        } else if (oldTaskStatusMap.get(task.id) !== task.status) {
-                            task.isMoved = true;
+                            logActivity('reload', t('activity.externalCreated', {id: task.id, title: task.title}));
+                            externalChangesCount++;
+                        } else {
+                            if (oldTaskStatusMap.get(task.id) !== task.status) {
+                                task.isMoved = true;
+                                const oldStatus = oldTaskStatusMap.get(task.id);
+                                const oldCol = config.columns.find(c => c.id === oldStatus);
+                                const newCol = config.columns.find(c => c.id === task.status);
+                                const oldColName = oldCol ? oldCol.name : oldStatus;
+                                const newColName = newCol ? newCol.name : task.status;
+                                logActivity('reload', t('activity.externalMoved', {id: task.id, title: task.title, from: oldColName, to: newColName}));
+                                externalChangesCount++;
+                            }
+                            if (oldTaskTitleMap.get(task.id) !== task.title) {
+                                logActivity('reload', t('activity.externalEdited', {id: task.id, title: task.title}));
+                                externalChangesCount++;
+                            }
                         }
                     });
+
+                    // Track deleted tasks
+                    oldTaskStatusMap.forEach((status, id) => {
+                        if (!newTaskIds.has(id)) {
+                            logActivity('reload', t('activity.externalDeleted', {id: id}));
+                            externalChangesCount++;
+                        }
+                    });
+
+                    if (externalChangesCount > 0) {
+                        logActivity('reload', t('activity.externalReload'));
+                    }
                 }
 
                 renderKanban();
