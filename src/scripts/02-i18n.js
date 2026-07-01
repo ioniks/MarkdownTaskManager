@@ -14,6 +14,7 @@
                 'header.newTask': '➕ Task',
                 'header.archives': '📦 Archives',
                 'header.columns': '⚙️ Columns',
+                'header.autoReload': 'Auto-Reload',
 
                 // Filters
                 'filters.tags': 'Tags:',
@@ -137,6 +138,7 @@
                 'notif.projectDeleted': 'Project removed from list',
                 'notif.renameError': 'Error renaming',
                 'notif.projectRestored': 'Project restored automatically',
+                'notif.fileChangedReloaded': 'kanban.md changed on disk. Board reloaded.',
                 'notif.taskMoved': 'Task moved!',
                 'notif.taskEdited': 'Task {id} updated!',
                 'notif.taskCreated': 'Task {id} created!',
@@ -193,6 +195,7 @@
                 'header.newTask': '➕ Tâche',
                 'header.archives': '📦 Archives',
                 'header.columns': '⚙️ Colonnes',
+                'header.autoReload': 'Rechargement auto',
 
                 // Filters
                 'filters.tags': 'Tags:',
@@ -316,6 +319,7 @@
                 'notif.projectDeleted': 'Projet retiré de la liste',
                 'notif.renameError': 'Erreur lors du renommage',
                 'notif.projectRestored': 'Projet restauré automatiquement',
+                'notif.fileChangedReloaded': 'kanban.md a été modifié sur le disque. Tableau rechargé.',
                 'notif.taskMoved': 'Tâche déplacée !',
                 'notif.taskEdited': 'Tâche {id} modifiée !',
                 'notif.taskCreated': 'Tâche {id} créée !',
@@ -372,6 +376,7 @@
                 'header.newTask': '➕ Aufgabe',
                 'header.archives': '📦 Archiv',
                 'header.columns': '⚙️ Spalten',
+                'header.autoReload': 'Auto-Reload',
 
                 // Filters
                 'filters.tags': 'Tags:',
@@ -495,6 +500,7 @@
                 'notif.projectDeleted': 'Projekt aus Liste gelöscht',
                 'notif.renameError': 'Problem beim Umbenennen',
                 'notif.projectRestored': 'Projekt erfolgreich wiederhergestellt',
+                'notif.fileChangedReloaded': 'kanban.md auf dem Datenträger geändert. Board neu geladen.',
                 'notif.taskMoved': 'Aufgabe verschoben!',
                 'notif.taskEdited': 'Aufgabe {id} aktualisiert!',
                 'notif.taskCreated': 'Aufgabe {id} erstellt!',
@@ -550,6 +556,7 @@
                 'header.newTask': '➕ 任务',
                 'header.archives': '📦 归档',
                 'header.columns': '⚙️ 列设置',
+                'header.autoReload': '自动重新加载',
 
                 // Filters
                 'filters.tags': '标签:',
@@ -673,6 +680,7 @@
                 'notif.projectDeleted': '项目已从列表中移除',
                 'notif.renameError': '重命名时出错',
                 'notif.projectRestored': '项目已自动恢复',
+                'notif.fileChangedReloaded': 'kanban.md 已在磁盘上更改。看板已重新加载。',
                 'notif.taskMoved': '任务已移动!',
                 'notif.taskEdited': '任务 {id} 已更新!',
                 'notif.taskCreated': '任务 {id} 已创建!',
@@ -840,6 +848,7 @@
             document.getElementById('newTaskBtn').innerHTML = t('header.newTask');
             document.getElementById('archiveBtn').innerHTML = t('header.archives');
             document.getElementById('manageColsBtn').innerHTML = t('header.columns');
+            document.getElementById('autoReloadLabel').textContent = t('header.autoReload');
 
             // Update language selector to match current language
             document.getElementById('languageSelector').value = currentLanguage;

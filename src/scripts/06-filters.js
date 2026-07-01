@@ -6,6 +6,11 @@
                 await writable.write(newContent);
                 await writable.close();
                 currentKanbanContent = newContent;
+                
+                // Get the updated file metadata to avoid reloading what we just saved
+                const file = await kanbanFileHandle.getFile();
+                lastKanbanModified = file.lastModified;
+
                 console.log('Auto-saved');
                 return true;
             } catch (error) {

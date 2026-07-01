@@ -3,11 +3,32 @@
                 kanbanFileHandle = await directoryHandle.getFileHandle('kanban.md');
                 const file = await kanbanFileHandle.getFile();
                 currentKanbanContent = await file.text();
+                lastKanbanModified = file.lastModified;
 
                 console.log('File loaded, size:', currentKanbanContent.length);
+
+                // Capture previous task list mapping task IDs to statuses to identify new/moved tasks
+                const oldTaskStatusMap = new Map();
+                const wasLoadedBefore = tasks && tasks.length > 0;
+                if (wasLoadedBefore) {
+                    tasks.forEach(t => oldTaskStatusMap.set(t.id, t.status));
+                }
+
                 parseMarkdown(currentKanbanContent);
                 await loadArchive(); // Load archive for historical autocomplete data
                 updateAutocomplete();
+
+                // Compare tasks to identify new or moved items, only if there were tasks loaded before
+                if (wasLoadedBefore) {
+                    tasks.forEach(task => {
+                        if (!oldTaskStatusMap.has(task.id)) {
+                            task.isNew = true;
+                        } else if (oldTaskStatusMap.get(task.id) !== task.status) {
+                            task.isMoved = true;
+                        }
+                    });
+                }
+
                 renderKanban();
                 // Auto-migrate a legacy (V1) kanban.md to V2 on disk: nothing is lost and future
                 // AI reads/edits stay cheap. One-time — V2 files carry the format marker.

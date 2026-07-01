@@ -2,6 +2,7 @@
         let directoryHandle = null;
         let kanbanFileHandle = null;
         let currentKanbanContent = '';
+        let lastKanbanModified = 0;
         let tasks = [];
         let config = {};
         let activeFilters = []; // Array of {type: 'tag'|'category'|'user', value: string}

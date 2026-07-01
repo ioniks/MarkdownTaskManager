@@ -86,6 +86,13 @@
             const due = dueStatus(task);
             if (due) taskEl.classList.add(`task-card--${due}`);
 
+            // Visual highlight for new or moved tasks from external changes
+            if (task.isNew) {
+                taskEl.classList.add('task-card--new');
+            } else if (task.isMoved) {
+                taskEl.classList.add('task-card--moved');
+            }
+
             var priorityBadgeClass = "Default";
             if (config.priorities) {
                 const priority = config.priorities.find(p => clean(p) === task.priority);

@@ -251,3 +251,34 @@
             background: none;
             padding: 0;
         }
+
+        /* Flash highlights for new/moved tasks */
+        @keyframes highlightNew {
+            0% {
+                box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.6); /* green outline */
+                background-color: rgba(34, 197, 94, 0.15); /* light green bg */
+            }
+            100% {
+                box-shadow: none;
+                background-color: var(--bg-secondary);
+            }
+        }
+
+        @keyframes highlightMoved {
+            0% {
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.6); /* blue outline */
+                background-color: rgba(59, 130, 246, 0.15); /* light blue bg */
+            }
+            100% {
+                box-shadow: none;
+                background-color: var(--bg-secondary);
+            }
+        }
+
+        .task-card--new {
+            animation: highlightNew 5s ease-out forwards;
+        }
+
+        .task-card--moved {
+            animation: highlightMoved 5s ease-out forwards;
+        }

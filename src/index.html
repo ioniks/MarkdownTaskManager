@@ -19,6 +19,10 @@
                     <option value="de">Deutsch</option>
                     <option value="zh_cn">简体中文</option>
                 </select>
+                <label id="autoReloadContainer" style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.9rem; cursor: pointer; user-select: none; color: var(--text-primary); margin-left: 0.25rem;">
+                    <input type="checkbox" id="autoReloadCheckbox" checked style="cursor: pointer; width: 16px; height: 16px;">
+                    <span id="autoReloadLabel">Auto-Reload</span>
+                </label>
                 <select id="projectSelector" style="display: none; padding: 0.6rem 1rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9rem; background: white; cursor: pointer; min-width: 180px;">
                 </select>
                 <button id="renameProjectBtn" class="btn btn-secondary" style="display: none; padding: 0.6rem;" title="Renommer le projet" onclick="renameCurrentProject()">✏️</button>
