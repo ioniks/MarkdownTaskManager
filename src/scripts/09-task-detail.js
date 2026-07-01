@@ -269,6 +269,7 @@
                     task.subtasks = formSubtasks;
                     task.notes = notes;
                     showNotification(t('notif.taskEdited', {id: taskId}), 'success');
+                    logActivity('edit', t('activity.localEdited', {id: taskId, title: title}));
                 }
             } else {
                 // Create new task
@@ -291,6 +292,7 @@
                     notes
                 });
                 showNotification(t('notif.taskCreated', {id: newTaskId}), 'success');
+                logActivity('create', t('activity.localCreated', {id: newTaskId, title: title}));
             }
 
             closeTaskModal();

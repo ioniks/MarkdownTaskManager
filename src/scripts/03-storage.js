@@ -313,6 +313,45 @@
                     await switchProject(projectIndex);
                 }
             });
+
+            // Start background poller to auto-reload kanban.md when it changes externally
+            setInterval(async () => {
+                if (!kanbanFileHandle) return;
+                
+                // Only poll if auto-reload is enabled
+                const autoReloadCheckbox = document.getElementById('autoReloadCheckbox');
+                if (autoReloadCheckbox && !autoReloadCheckbox.checked) return;
+
+                try {
+                    const file = await kanbanFileHandle.getFile();
+                    if (file.lastModified > lastKanbanModified) {
+                        const newText = await file.text();
+                        if (newText !== currentKanbanContent) {
+                            console.log('kanban.md changed on disk. Reloading...');
+                            await loadKanbanFile();
+
+                            // If the details modal is open, refresh it with the updated task data
+                            const modal = document.getElementById('taskModal');
+                            if (modal && modal.classList.contains('active') && currentDetailTask) {
+                                const updatedTask = tasks.find(t => t.id === currentDetailTask.id);
+                                if (updatedTask) {
+                                    showTaskDetail(updatedTask);
+                                } else {
+                                    closeModal();
+                                }
+                            }
+
+                            showNotification(t('notif.fileChangedReloaded'), 'info');
+                        } else {
+                            // Only lastModified changed (e.g. metadata touched), content is same.
+                            lastKanbanModified = file.lastModified;
+                        }
+                    }
+                } catch (error) {
+                    // Suppress check errors since they might be temporary lock/permission prompts
+                    console.debug('Error checking kanban.md changes:', error);
+                }
+            }, 1000);
         });
 
         // Select folder
@@ -346,5 +385,44 @@
                 }
             }
         });
+
+        function logActivity(type, message) {
+            const entry = {
+                time: new Date(),
+                type: type,
+                message: message
+            };
+            activityLogs.unshift(entry);
+            if (activityLogs.length > 50) {
+                activityLogs.pop();
+            }
+            renderActivityLog();
+        }
+
+        function renderActivityLog() {
+            const listEl = document.getElementById('activityLogList');
+            if (!listEl) return;
+            
+            listEl.innerHTML = activityLogs.map(log => {
+                const timeStr = log.time.toLocaleTimeString();
+                let borderClass = '';
+                if (log.type === 'reload') borderClass = 'reload';
+                else if (log.type === 'create') borderClass = 'create';
+                else if (log.type === 'delete' || log.type === 'archive') borderClass = 'delete';
+                else if (log.type === 'edit' || log.type === 'move') borderClass = 'edit';
+                
+                return `
+                    <div class="activity-log-item ${borderClass}">
+                        <span class="activity-log-time">[${timeStr}]</span>
+                        <span class="activity-log-msg">${escapeHtml(log.message)}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function clearActivityLog() {
+            activityLogs = [];
+            renderActivityLog();
+        }
 
         // Load kanban.md file

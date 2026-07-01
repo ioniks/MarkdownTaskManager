@@ -251,3 +251,105 @@
             background: none;
             padding: 0;
         }
+
+        /* Flash highlights for new/moved tasks */
+        @keyframes highlightNew {
+            0% {
+                box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.6); /* green outline */
+                background-color: rgba(34, 197, 94, 0.15); /* light green bg */
+            }
+            100% {
+                box-shadow: none;
+                background-color: var(--bg-secondary);
+            }
+        }
+
+        @keyframes highlightMoved {
+            0% {
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.6); /* blue outline */
+                background-color: rgba(59, 130, 246, 0.15); /* light blue bg */
+            }
+            100% {
+                box-shadow: none;
+                background-color: var(--bg-secondary);
+            }
+        }
+
+        .task-card--new {
+            animation: highlightNew 5s ease-out forwards;
+        }
+
+        .task-card--moved {
+            animation: highlightMoved 5s ease-out forwards;
+        }
+
+        /* Activity Log / History Section */
+        .activity-log-section {
+            margin: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .activity-log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .activity-log-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .activity-log-list {
+            max-height: 200px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .activity-log-item {
+            display: flex;
+            gap: 1rem;
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            background: var(--bg-primary);
+            border-left: 4px solid var(--accent);
+        }
+
+        .activity-log-item.reload {
+            border-left-color: var(--priority-green);
+        }
+
+        .activity-log-item.create {
+            border-left-color: var(--priority-blue);
+        }
+
+        .activity-log-item.edit {
+            border-left-color: var(--priority-yellow);
+        }
+
+        .activity-log-item.delete {
+            border-left-color: var(--priority-red);
+        }
+
+        .activity-log-time {
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .activity-log-msg {
+            color: var(--text-primary);
+            word-break: break-all;
+        }

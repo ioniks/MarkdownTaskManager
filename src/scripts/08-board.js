@@ -86,6 +86,13 @@
             const due = dueStatus(task);
             if (due) taskEl.classList.add(`task-card--${due}`);
 
+            // Visual highlight for new or moved tasks from external changes
+            if (task.isNew) {
+                taskEl.classList.add('task-card--new');
+            } else if (task.isMoved) {
+                taskEl.classList.add('task-card--moved');
+            }
+
             var priorityBadgeClass = "Default";
             if (config.priorities) {
                 const priority = config.priorities.find(p => clean(p) === task.priority);
@@ -170,6 +177,7 @@
             const oldIdx = tasks.findIndex(t => t.id === taskId);
             if (oldIdx < 0) return false;
             const task = tasks[oldIdx];
+            const oldStatus = task.status;
             const statusChanged = newStatus && task.status !== newStatus;
             const targetStatus = newStatus || task.status;
             tasks.splice(oldIdx, 1);
@@ -188,6 +196,15 @@
             tasks.splice(insertIdx, 0, task);
             const posChanged = tasks.indexOf(task) !== oldIdx;
             if (newStatus) task.status = newStatus;
+
+            if (statusChanged) {
+                const oldCol = config.columns.find(c => c.id === oldStatus);
+                const newCol = config.columns.find(c => c.id === newStatus);
+                const oldColName = oldCol ? oldCol.name : oldStatus;
+                const newColName = newCol ? newCol.name : newStatus;
+                logActivity('move', t('activity.localMoved', {id: task.id, title: task.title, from: oldColName, to: newColName}));
+            }
+
             return statusChanged || posChanged;
         }
 

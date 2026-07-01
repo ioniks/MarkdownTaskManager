@@ -14,6 +14,7 @@
                 'header.newTask': '➕ Task',
                 'header.archives': '📦 Archives',
                 'header.columns': '⚙️ Columns',
+                'header.autoReload': 'Auto-Reload',
 
                 // Filters
                 'filters.tags': 'Tags:',
@@ -137,12 +138,28 @@
                 'notif.projectDeleted': 'Project removed from list',
                 'notif.renameError': 'Error renaming',
                 'notif.projectRestored': 'Project restored automatically',
+                'notif.fileChangedReloaded': 'kanban.md changed on disk. Board reloaded.',
                 'notif.taskMoved': 'Task moved!',
                 'notif.taskEdited': 'Task {id} updated!',
                 'notif.taskCreated': 'Task {id} created!',
                 'notif.taskArchived': 'Task archived!',
                 'notif.taskDeleted': 'Task permanently deleted',
                 'notif.taskRestored': 'Task restored to its original column!',
+
+                // Activity logs
+                'activity.title': 'Recent Activity',
+                'activity.clear': 'Clear',
+                'activity.externalReload': 'Board reloaded automatically from disk.',
+                'activity.externalCreated': 'Task {id} ("{title}") was created externally.',
+                'activity.externalMoved': 'Task {id} ("{title}") was moved from "{from}" to "{to}" externally.',
+                'activity.externalEdited': 'Task {id} ("{title}") was modified externally.',
+                'activity.externalDeleted': 'Task {id} was deleted externally.',
+                'activity.localCreated': 'Task {id} ("{title}") created.',
+                'activity.localMoved': 'Task {id} ("{title}") moved from "{from}" to "{to}".',
+                'activity.localEdited': 'Task {id} ("{title}") updated.',
+                'activity.localArchived': 'Task {id} ("{title}") archived.',
+                'activity.localDeleted': 'Task {id} permanently deleted.',
+                'activity.localRestored': 'Task {id} ("{title}") restored from archive.',
 
                 // Prompts and confirmations
                 'prompt.projectName': 'Project name (leave empty to use "{name}"):',
@@ -193,6 +210,7 @@
                 'header.newTask': '➕ Tâche',
                 'header.archives': '📦 Archives',
                 'header.columns': '⚙️ Colonnes',
+                'header.autoReload': 'Rechargement auto',
 
                 // Filters
                 'filters.tags': 'Tags:',
@@ -316,12 +334,28 @@
                 'notif.projectDeleted': 'Projet retiré de la liste',
                 'notif.renameError': 'Erreur lors du renommage',
                 'notif.projectRestored': 'Projet restauré automatiquement',
+                'notif.fileChangedReloaded': 'kanban.md a été modifié sur le disque. Tableau rechargé.',
                 'notif.taskMoved': 'Tâche déplacée !',
                 'notif.taskEdited': 'Tâche {id} modifiée !',
                 'notif.taskCreated': 'Tâche {id} créée !',
                 'notif.taskArchived': 'Tâche archivée !',
                 'notif.taskDeleted': 'Tâche supprimée définitivement',
                 'notif.taskRestored': 'Tâche restaurée dans sa colonne d\'origine !',
+
+                // Activity logs
+                'activity.title': 'Activité Récente',
+                'activity.clear': 'Effacer',
+                'activity.externalReload': 'Tableau rechargé automatiquement depuis le disque.',
+                'activity.externalCreated': 'La tâche {id} ("{title}") a été créée de l\'extérieur.',
+                'activity.externalMoved': 'La tâche {id} ("{title}") a été déplacée de "{from}" à "{to}" de l\'extérieur.',
+                'activity.externalEdited': 'La tâche {id} ("{title}") a été modifiée de l\'extérieur.',
+                'activity.externalDeleted': 'La tâche {id} a été supprimée de l\'extérieur.',
+                'activity.localCreated': 'Tâche {id} ("{title}") créée.',
+                'activity.localMoved': 'Tâche {id} ("{title}") déplacée de "{from}" à "{to}".',
+                'activity.localEdited': 'Tâche {id} ("{title}") mise à jour.',
+                'activity.localArchived': 'Tâche {id} ("{title}") archivée.',
+                'activity.localDeleted': 'Tâche {id} supprimée définitivement.',
+                'activity.localRestored': 'Tâche {id} ("{title}") restaurée depuis l\'archive.',
 
                 // Prompts and confirmations
                 'prompt.projectName': 'Nom du projet (laisser vide pour utiliser "{name}") :',
@@ -372,6 +406,7 @@
                 'header.newTask': '➕ Aufgabe',
                 'header.archives': '📦 Archiv',
                 'header.columns': '⚙️ Spalten',
+                'header.autoReload': 'Auto-Reload',
 
                 // Filters
                 'filters.tags': 'Tags:',
@@ -495,12 +530,28 @@
                 'notif.projectDeleted': 'Projekt aus Liste gelöscht',
                 'notif.renameError': 'Problem beim Umbenennen',
                 'notif.projectRestored': 'Projekt erfolgreich wiederhergestellt',
+                'notif.fileChangedReloaded': 'kanban.md auf dem Datenträger geändert. Board neu geladen.',
                 'notif.taskMoved': 'Aufgabe verschoben!',
                 'notif.taskEdited': 'Aufgabe {id} aktualisiert!',
                 'notif.taskCreated': 'Aufgabe {id} erstellt!',
                 'notif.taskArchived': 'Aufgabe archiviert!',
                 'notif.taskDeleted': 'Aufgabe endgültig gelöscht',
                 'notif.taskRestored': 'Aufgabe in ursprünglicher Spalte zurückgesetzt!',
+
+                // Activity logs
+                'activity.title': 'Letzte Aktivitäten',
+                'activity.clear': 'Leeren',
+                'activity.externalReload': 'Board automatisch vom Datenträger neu geladen.',
+                'activity.externalCreated': 'Aufgabe {id} ("{title}") wurde extern erstellt.',
+                'activity.externalMoved': 'Aufgabe {id} ("{title}") wurde extern von "{from}" nach "{to}" verschoben.',
+                'activity.externalEdited': 'Aufgabe {id} ("{title}") wurde extern geändert.',
+                'activity.externalDeleted': 'Aufgabe {id} wurde extern gelöscht.',
+                'activity.localCreated': 'Aufgabe {id} ("{title}") erstellt.',
+                'activity.localMoved': 'Aufgabe {id} ("{title}") von "{from}" nach "{to}" verschoben.',
+                'activity.localEdited': 'Aufgabe {id} ("{title}") aktualisiert.',
+                'activity.localArchived': 'Aufgabe {id} ("{title}") archiviert.',
+                'activity.localDeleted': 'Aufgabe {id} endgültig gelöscht.',
+                'activity.localRestored': 'Aufgabe {id} ("{title}") aus dem Archiv wiederhergestellt.',
 
                 // Prompts and confirmations
                 'prompt.projectName': 'Projektname (leer lassen, um "{name}" zu verwenden):',
@@ -550,6 +601,7 @@
                 'header.newTask': '➕ 任务',
                 'header.archives': '📦 归档',
                 'header.columns': '⚙️ 列设置',
+                'header.autoReload': '自动重新加载',
 
                 // Filters
                 'filters.tags': '标签:',
@@ -673,12 +725,28 @@
                 'notif.projectDeleted': '项目已从列表中移除',
                 'notif.renameError': '重命名时出错',
                 'notif.projectRestored': '项目已自动恢复',
+                'notif.fileChangedReloaded': 'kanban.md 已在磁盘上更改。看板已重新加载。',
                 'notif.taskMoved': '任务已移动!',
                 'notif.taskEdited': '任务 {id} 已更新!',
                 'notif.taskCreated': '任务 {id} 已创建!',
                 'notif.taskArchived': '任务已归档!',
                 'notif.taskDeleted': '任务已永久删除',
                 'notif.taskRestored': '任务已恢复至原列!',
+
+                // Activity logs
+                'activity.title': '最近动态',
+                'activity.clear': '清空',
+                'activity.externalReload': '看板已自动从磁盘重新加载。',
+                'activity.externalCreated': '任务 {id} ("{title}") 已在外部创建。',
+                'activity.externalMoved': '任务 {id} ("{title}") 已在外部从 "{from}" 移动到 "{to}"。',
+                'activity.externalEdited': '任务 {id} ("{title}") 已在外部修改。',
+                'activity.externalDeleted': '任务 {id} 已在外部删除。',
+                'activity.localCreated': '任务 {id} ("{title}") 已创建。',
+                'activity.localMoved': '任务 {id} ("{title}") 已从 "{from}" 移动到 "{to}"。',
+                'activity.localEdited': '任务 {id} ("{title}") 已更新。',
+                'activity.localArchived': '任务 {id} ("{title}") 已归档。',
+                'activity.localDeleted': '任务 {id} 已永久删除。',
+                'activity.localRestored': '任务 {id} ("{title}") 已从归档中恢复。',
 
                 // Prompts and confirmations
                 'prompt.projectName': '项目名称 (留空则使用 "{name}"):',
@@ -840,6 +908,13 @@
             document.getElementById('newTaskBtn').innerHTML = t('header.newTask');
             document.getElementById('archiveBtn').innerHTML = t('header.archives');
             document.getElementById('manageColsBtn').innerHTML = t('header.columns');
+            document.getElementById('autoReloadLabel').textContent = t('header.autoReload');
+
+            // Update activity log static texts
+            const activityLogTitle = document.getElementById('activityLogTitle');
+            if (activityLogTitle) activityLogTitle.textContent = t('activity.title');
+            const clearActivityLogBtn = document.getElementById('clearActivityLogBtn');
+            if (clearActivityLogBtn) clearActivityLogBtn.textContent = t('activity.clear');
 
             // Update language selector to match current language
             document.getElementById('languageSelector').value = currentLanguage;

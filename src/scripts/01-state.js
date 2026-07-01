@@ -2,6 +2,7 @@
         let directoryHandle = null;
         let kanbanFileHandle = null;
         let currentKanbanContent = '';
+        let lastKanbanModified = 0;
         let tasks = [];
         let config = {};
         let activeFilters = []; // Array of {type: 'tag'|'category'|'user', value: string}
@@ -14,3 +15,4 @@
         let wasArchiveModalActive = false;
         let loadedFormatV2 = false; // true once the loaded kanban.md is V2 (status carried by a **Status** field)
         let loadedArchiveV2 = false; // true once the loaded archive.md carries the v2 format marker
+        let activityLogs = []; // Array of {time: Date, type: string, message: string}
