@@ -178,6 +178,7 @@
                 'language.label': 'Language:',
                 'language.en': 'English',
                 'language.fr': 'Français',
+                'language.it': 'Italian',
                 'language.de': 'Deutsch',
                 'language.zh_cn': '简体中文'
             },
@@ -357,6 +358,187 @@
                 'language.label': 'Langue :',
                 'language.en': 'English',
                 'language.fr': 'Français',
+                'language.it': 'Italian',
+                'language.de': 'Deutsch',
+                'language.zh_cn': '简体中文'
+            },
+            it: {
+                // Page title
+                'page.title': 'Markdown Task Manager',
+
+                // Header
+                'header.title': '📋 Task Manager',
+                'header.renameProject': 'Rinomina progetto',
+                'header.deleteProject': 'Rimuovi progetto dalla lista',
+                'header.folder': '📁 Cartella',
+                'header.newTask': '➕ Task',
+                'header.archives': '📦 Archivio',
+                'header.columns': '⚙️ Colonne',
+
+                // Filters
+                'filters.tags': 'Tags:',
+                'filters.category': 'Categoria:',
+                'filters.user': 'Utente:',
+                'filters.priority': 'Priorità:',
+                'filters.select': 'Seleziona...',
+                'filters.add': '+',
+                'filters.clearAll': '✕ Pulisci tutto',
+                'filters.search': 'Cerca fra i task...',
+                'filters.searchClear': '✕',
+
+                // Welcome screen
+                'welcome.title': 'Benvenuto/a! 👋',
+                'welcome.description': 'Seleziona la cartella contenente i tuoi files Markdown (kanban.md and archive.md)',
+                'welcome.start': '📁 Inizia',
+                'welcome.howItWorks': '💡 Come funziona?',
+                'welcome.step1': 'Seleziona "Inizia"',
+                'welcome.step2': 'Seleziona la cartella contenente i tuoi files Markdown',
+                'welcome.step3': 'L\'app carica automaticamente kanban.md',
+                'welcome.step4': 'Gestisci i tuoi task con Kanban',
+                'welcome.step5': 'I cambiamenti sono salvati sui files Markdown',
+                'welcome.browserWarning': '⚠️ Browsers supportati: Chrome 86+, Edge 86+, Opera 72+',
+
+                // Task detail modal
+                'taskDetail.title': 'Dettagli Task',
+                'taskDetail.close': 'Chiudi',
+                'taskDetail.delete': '🗑️ Elimina',
+                'taskDetail.archive': '📦 Archivia',
+                'taskDetail.edit': '✏️ Modifica',
+
+                // Task form modal
+                'taskForm.newTask': 'Nuovo Task',
+                'taskForm.editTask': 'Modifica Task',
+                'taskForm.titleLabel': 'Titolo *',
+                'taskForm.columnLabel': 'Colonna *',
+                'taskForm.priorityLabel': 'Priorità',
+                'taskForm.priorityNone': 'Nessuna',
+                'taskForm.priorityCritical': 'Critica',
+                'taskForm.priorityHigh': 'Alta',
+                'taskForm.priorityMedium': 'Media',
+                'taskForm.priorityLow': 'Bassa',
+                'taskForm.categoryLabel': 'Categoria',
+                'taskForm.categoryPlaceholder': 'Frontend, Backend...',
+                'taskForm.assignedLabel': 'Assegnato a',
+                'taskForm.assignedPlaceholder': '@alice',
+                'taskForm.createdLabel': 'Creazione',
+                'taskForm.startedLabel': 'Inizio',
+                'taskForm.dueLabel': 'Scadenza',
+                'taskForm.completedLabel': 'Completato',
+                'taskForm.tagsLabel': 'Tags',
+                'taskForm.tagsPlaceholder': '#bug #feature',
+                'taskForm.tagsHelp': 'Separa ogni tag con uno spazio',
+                'taskForm.descriptionLabel': 'Descrizione',
+                'taskForm.subtasksLabel': 'Subtask',
+                'taskForm.subtaskPlaceholder': 'Aggiungi a subtask...',
+                'taskForm.subtaskAdd': '+ Aggiungi',
+                'taskForm.notesLabel': 'Note',
+                'taskForm.notesPlaceholder': 'Note tecniche, risultati, decisioni, etc...',
+                'taskForm.notesHelp': 'Markdown supportato: **bold**, *italic*, `code`, lists, links, **Subsections**:',
+                'taskForm.cancel': 'Annulla',
+                'taskForm.create': 'Crea',
+                'taskForm.save': 'Salva',
+
+                // Columns modal
+                'columns.title': 'Gestisci Colonne',
+                'columns.add': '+ Aggiungi Colonna',
+
+                // Archives modal
+                'archives.title': '📦 Archivio',
+                'archives.search': 'Cerca nell\'archivio...',
+                'archives.empty': 'Nessun task archiviato',
+
+                // Project selector
+                'projects.select': 'Seleziona un progetto...',
+
+                // Task metadata in detail modal
+                'meta.priority': 'Priorità',
+                'meta.status': 'Stato',
+                'meta.category': 'Categoria',
+                'meta.assigned': 'Assegnato a',
+                'meta.created': 'Data di creazione',
+                'meta.started': 'Data di inizio',
+                'meta.due': 'Data di scadenza',
+                'meta.completed': 'Data di completamento',
+                'meta.tags': 'Tags',
+                'meta.description': 'Descrizione',
+                'meta.subtasks': 'Subtask ({completed}/{total})',
+                'meta.notes': 'Note',
+
+                // Empty states
+                'empty.noTasks': 'Nessun task',
+
+                // Buttons and actions
+                'action.restore': '↩️ Ripristina',
+                'action.delete': '🗑️',
+                'action.edit': '✏️',
+                'action.moveUp': 'Muovi su',
+                'action.moveDown': 'Muovi giù',
+
+                // Tooltips
+                'tooltip.filterByCategory': 'Filtra per categoria',
+                'tooltip.filterByUser': 'Filtra per utente',
+                'tooltip.filterByTag': 'Filtra per tag',
+                'tooltip.filterByPriority': 'Filtra per priorità',
+                'tooltip.doubleClickEdit': 'Double-click per modificare',
+                'tooltip.delete': 'Elimina',
+                'tooltip.overdue': 'Scaduto',
+                'tooltip.dueSoon': 'In scadenza',
+
+                // Notifications
+                'notif.folderLoaded': 'Cartella caricata con successo!',
+                'notif.folderError': 'Errore nel caricamento della cartella',
+                'notif.initializingFolder': 'Inizializzazione cartella...',
+                'notif.filesInitialized': 'File inizializzati con successo! (kanban.md and archive.md)',
+                'notif.filesError': 'Errore nella creazione dei file',
+                'notif.projectLoaded': 'Progetto "{name}" caricato',
+                'notif.permissionDenied': 'Permesso negato per questo progetto',
+                'notif.projectError': 'Errore nel cambio progetto',
+                'notif.projectRenamed': 'Progetto rinominato con successo',
+                'notif.projectDeleted': 'Progetto rimosso dalla lista',
+                'notif.renameError': 'Errore nella rinomina',
+                'notif.projectRestored': 'Progetto recuperato automaticamente',
+                'notif.taskMoved': 'Task spostato!',
+                'notif.taskEdited': 'Task {id} modificato!',
+                'notif.taskCreated': 'Task {id} creato!',
+                'notif.taskArchived': 'Task archiviato!',
+                'notif.taskDeleted': 'Task eliminato permanentemente',
+                'notif.taskRestored': 'Task ripristinato nella colonna iniziale!',
+
+                // Prompts and confirmations
+                'prompt.projectName': 'Nome progetto (Lasciare vuoto per usare "{name}"):',
+                'prompt.renameProject': 'Nuovo nome progetto:',
+                'prompt.columnName': 'Nome colonna:',
+                'prompt.columnId': 'ID colonna (e.g., todo, done):',
+                'prompt.editSubtask': 'Modifica subtask:',
+                'confirm.deleteColumn': 'Eliminare la colonna?',
+                'confirm.deleteSubtask': 'Cancellare questo subtask?',
+                'confirm.deleteProject': 'Rimuovi progetto "{name}" dalla lista dei recenti?\n\nIl progetto verrà rimosso solo dal menu - i tuoi file non saranno rimossi.',
+                'confirm.archiveTask': 'Archivia task "{title}"?',
+                'confirm.deleteTask': '⚠️ WARNING: Eliminare permanentemente il task "{title}"?\n\nQuesta azione non può essere annullata.',
+                'confirm.deleteTaskFromArchive': '⚠️ WARNING: Eliminare permanentemente il task "{title}"?\n\nQuesta azione non può essere annullata.\n\nSe vuoi mantenere il task nello storico, usa "Archivia".',
+
+                // Alerts
+                'alert.browserNotSupported': 'Il tuo browser non support File System Access API.\n\nUsa Chrome 86+, Edge 86+ or Opera 72+.',
+
+                // Subtasks in detail modal
+                'subtask.newPlaceholder': 'Nuovo subtask...',
+
+                // Markdown generation
+                'markdown.archiveTitle': '# Archivio Task',
+                'markdown.archiveDesc': '> Task archiviati',
+                'markdown.archiveSection': '## ✅ Archivio',
+                'markdown.configSection': '## ⚙️ Configurazione',
+                'markdown.configColumns': '**Colonne**:',
+                'markdown.configCategories': '**Categorie**:',
+                'markdown.configUsers': '**Utenti**:',
+                'markdown.configPriorities': '**Priorità**:',
+                'markdown.configTags': '**Tag**:',
+
+                // Language selector
+                'language.label': 'Lingua:',
+                'language.en': 'English',
+                'language.fr': 'Français',
+                'language.it': 'Italiano',
                 'language.de': 'Deutsch',
                 'language.zh_cn': '简体中文'
             },
@@ -536,6 +718,7 @@
                 'language.label': 'Sprache:',
                 'language.en': 'English',
                 'language.fr': 'Français',
+                'language.it': 'Italian',
                 'language.de': 'Deutsch'
             },
             zh_cn: {
@@ -714,6 +897,7 @@
                 'language.label': '语言:',
                 'language.en': 'English',
                 'language.fr': 'Français',
+                'language.it': 'Italian',
                 'language.zh_cn': '简体中文'
             }
         };
