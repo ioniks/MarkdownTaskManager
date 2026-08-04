@@ -209,6 +209,7 @@
                             ${task.tags.map(t => `<span style="background: #3b82f6; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">${escapeHtml(t)}</span>`).join('')}
                         </div>
                     </div>
+                </div>
             `).join('');
         }
 
