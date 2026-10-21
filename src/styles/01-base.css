@@ -22,6 +22,38 @@
             color: var(--text-primary);
         }
 
+        /* Title + version badge (issue #22) */
+        .header-brand {
+            display: flex;
+            align-items: baseline;
+            gap: 0.6rem;
+        }
+
+        .version-badge {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.75rem;
+            padding: 0.1rem 0.5rem;
+            white-space: nowrap;
+        }
+
+        .version-badge:hover {
+            background: var(--btn-secondary-hover);
+        }
+
+        .version-badge.update-available {
+            background: #f59e0b;
+            border-color: #f59e0b;
+            color: #fff;
+        }
+
+        #aboutBody a {
+            color: var(--accent);
+        }
+
         .btn {
             padding: 0.6rem 1.2rem;
             border: none;

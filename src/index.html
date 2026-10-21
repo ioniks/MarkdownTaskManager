@@ -11,7 +11,10 @@
 <body>
     <header class="header">
         <div class="header-content">
-            <h1 id="headerTitle">📋 Task Manager</h1>
+            <div class="header-brand">
+                <h1 id="headerTitle">📋 Task Manager</h1>
+                <button id="versionBtn" class="version-badge" onclick="openAboutModal()"></button>
+            </div>
             <div style="display: flex; gap: 0.75rem; align-items: center;">
                 <select id="languageSelector" onchange="setLanguage(this.value)" style="padding: 0.6rem 1rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9rem; background: white; cursor: pointer;">
                     <option value="en">English</option>
@@ -243,6 +246,17 @@
                 </div>
                 <div id="archiveList" style="max-height: 500px; overflow-y: auto;"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal About / Updates (issue #22) -->
+    <div id="aboutModal" class="modal">
+        <div class="modal-content" style="max-width: 480px;">
+            <div class="modal-header">
+                <h2 id="aboutModalTitle">About</h2>
+                <button class="close-btn" onclick="closeAboutModal()">&times;</button>
+            </div>
+            <div id="aboutBody"></div>
         </div>
     </div>
 

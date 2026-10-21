@@ -163,6 +163,22 @@
                 // Subtasks in detail modal
                 'subtask.newPlaceholder': 'New subtask...',
 
+                // About / update check (issue #22)
+                'header.about': 'About / check for updates',
+                'about.title': 'ℹ️ About',
+                'about.version': 'Version:',
+                'about.checkNow': '🔄 Check for updates',
+                'about.checking': 'Checking for updates...',
+                'about.upToDate': 'You are using the latest version.',
+                'about.updateAvailable': 'Version {version} is available',
+                'about.viewRelease': 'view release',
+                'about.checkFailed': 'Could not check for updates (offline?).',
+                'about.neverChecked': 'Not checked for updates yet.',
+                'about.lastChecked': 'Last checked: {date}',
+                'about.autoCheck': 'Check for updates automatically (once a day)',
+                'about.privacy': 'The check sends a single request to api.github.com. No board data is sent.',
+                'about.allReleases': 'All releases on GitHub',
+
                 // Markdown generation
                 'markdown.archiveTitle': '# Task Archive',
                 'markdown.archiveDesc': '> Archived tasks',
@@ -341,6 +357,22 @@
 
                 // Subtasks in detail modal
                 'subtask.newPlaceholder': 'Nouvelle sous-tâche...',
+
+                // About / update check (issue #22)
+                'header.about': 'À propos / rechercher des mises à jour',
+                'about.title': 'ℹ️ À propos',
+                'about.version': 'Version :',
+                'about.checkNow': '🔄 Rechercher des mises à jour',
+                'about.checking': 'Recherche de mises à jour...',
+                'about.upToDate': 'Vous utilisez la dernière version.',
+                'about.updateAvailable': 'La version {version} est disponible',
+                'about.viewRelease': 'voir la version',
+                'about.checkFailed': 'Impossible de rechercher des mises à jour (hors ligne ?).',
+                'about.neverChecked': 'Aucune recherche de mise à jour effectuée.',
+                'about.lastChecked': 'Dernière vérification : {date}',
+                'about.autoCheck': 'Rechercher automatiquement les mises à jour (une fois par jour)',
+                'about.privacy': 'La vérification envoie une seule requête à api.github.com. Aucune donnée du tableau n\'est envoyée.',
+                'about.allReleases': 'Toutes les versions sur GitHub',
 
                 // Markdown generation
                 'markdown.archiveTitle': '# Archive des Tâches',
@@ -521,6 +553,22 @@
                 // Subtasks in detail modal
                 'subtask.newPlaceholder': 'Neue Unteraufgabe...',
 
+                // About / update check (issue #22)
+                'header.about': 'Über / nach Updates suchen',
+                'about.title': 'ℹ️ Über',
+                'about.version': 'Version:',
+                'about.checkNow': '🔄 Nach Updates suchen',
+                'about.checking': 'Suche nach Updates...',
+                'about.upToDate': 'Sie verwenden die neueste Version.',
+                'about.updateAvailable': 'Version {version} ist verfügbar',
+                'about.viewRelease': 'Release ansehen',
+                'about.checkFailed': 'Updates konnten nicht geprüft werden (offline?).',
+                'about.neverChecked': 'Noch nicht nach Updates gesucht.',
+                'about.lastChecked': 'Zuletzt geprüft: {date}',
+                'about.autoCheck': 'Automatisch nach Updates suchen (einmal täglich)',
+                'about.privacy': 'Die Prüfung sendet eine einzige Anfrage an api.github.com. Es werden keine Board-Daten gesendet.',
+                'about.allReleases': 'Alle Releases auf GitHub',
+
                 // Markdown generation
                 'markdown.archiveTitle': '# Aufgaben-Archiv',
                 'markdown.archiveDesc': '> Archivierte Aufgaben',
@@ -698,6 +746,22 @@
 
                 // Subtasks in detail modal
                 'subtask.newPlaceholder': '新的子任务...',
+
+                // About / update check (issue #22)
+                'header.about': '关于 / 检查更新',
+                'about.title': 'ℹ️ 关于',
+                'about.version': '版本:',
+                'about.checkNow': '🔄 检查更新',
+                'about.checking': '正在检查更新...',
+                'about.upToDate': '您使用的是最新版本。',
+                'about.updateAvailable': '新版本 {version} 可用',
+                'about.viewRelease': '查看发布',
+                'about.checkFailed': '无法检查更新(是否离线?)。',
+                'about.neverChecked': '尚未检查更新。',
+                'about.lastChecked': '上次检查:{date}',
+                'about.autoCheck': '自动检查更新(每天一次)',
+                'about.privacy': '检查只会向 api.github.com 发送一个请求,不会发送任何看板数据。',
+                'about.allReleases': 'GitHub 上的所有版本',
 
                 // Markdown generation
                 'markdown.archiveTitle': '# 任务归档',

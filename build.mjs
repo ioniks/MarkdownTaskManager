@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import { minify } from 'html-minifier-terser';
 
 const dev = process.argv.includes('--dev');
+const { version } = JSON.parse(readFileSync('package.json', 'utf8'));
 
 // Concatenate every file of a given extension in a directory, sorted by name
 // (file names are numbered, e.g. 00-...,01-..., to control order).
@@ -24,7 +25,9 @@ const js = concatDir('src/scripts', '.js');
 // Function replacers so $ / ${...} inside css/js are inserted literally.
 let html = readFileSync('src/index.html', 'utf8')
   .replace('/* build:css */', () => css)
-  .replace('/* build:js */', () => js);
+  .replace('/* build:js */', () => js)
+  // Embed the package version so the app can show it and check for updates (issue #22)
+  .replaceAll('__APP_VERSION__', version);
 
 if (!dev) {
   html = await minify(html, {
@@ -43,4 +46,4 @@ if (!dev) {
 }
 
 writeFileSync('task-manager.html', html);
-console.log(`Built task-manager.html (${dev ? 'dev/readable' : 'minified'}) — ${(html.length / 1024).toFixed(1)} KB`);
+console.log(`Built task-manager.html v${version} (${dev ? 'dev/readable' : 'minified'}) — ${(html.length / 1024).toFixed(1)} KB`);
