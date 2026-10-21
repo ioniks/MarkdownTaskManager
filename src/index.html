@@ -27,6 +27,7 @@
                 <button id="newTaskBtn" class="btn btn-secondary" style="display: none;">➕ Tâche</button>
                 <button id="archiveBtn" class="btn btn-secondary" style="display: none;">📦 Archives</button>
                 <button id="manageColsBtn" class="btn btn-secondary" style="display: none;">⚙️ Colonnes</button>
+                <button class="theme-toggle" onclick="openShortcutsModal()" title="Keyboard shortcuts (?)" id="shortcutsBtn">⌨️</button>
                 <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode" id="themeToggleBtn">🌙</button>
             </div>
         </div>
@@ -227,6 +228,17 @@
                 <div id="columnsList"></div>
                 <button id="addColumnBtn" onclick="addColumn()" class="btn btn-primary" style="margin-top: 1rem; width: 100%;">+ Ajouter une colonne</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal Keyboard shortcuts (issue #24) -->
+    <div id="shortcutsModal" class="modal">
+        <div class="modal-content" style="max-width: 560px;">
+            <div class="modal-header">
+                <h2 id="shortcutsModalTitle">Keyboard shortcuts</h2>
+                <button class="close-btn" onclick="closeShortcutsModal()">&times;</button>
+            </div>
+            <table class="shortcuts-table"><tbody id="shortcutsList"></tbody></table>
         </div>
     </div>
 

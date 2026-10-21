@@ -83,3 +83,29 @@
             gap: 1rem;
             margin-top: 1.5rem;
         }
+
+        /* Keyboard shortcuts cheat sheet (issue #24) */
+        .shortcuts-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .shortcuts-table td {
+            padding: 0.4rem 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+        }
+
+        .shortcuts-table td:first-child {
+            white-space: nowrap;
+            width: 1%;
+        }
+
+        kbd {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85em;
+            padding: 0.1rem 0.4rem;
+        }

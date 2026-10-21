@@ -45,8 +45,8 @@
                 addBtn.title = t('taskForm.newTask');
                 addBtn.addEventListener('click', () => openTaskModal(null, column.id));
 
-                columnTasks.forEach(task => {
-                    const taskEl = createTaskElement(task);
+                columnTasks.forEach((task, idx) => {
+                    const taskEl = createTaskElement(task, idx === 0, idx === columnTasks.length - 1);
                     taskList.appendChild(taskEl);
                 });
 
@@ -75,12 +75,16 @@
             return null;
         }
 
-        // Create task element
-        function createTaskElement(task) {
+        // Create task element. isFirst/isLast (position among the column's visible cards) disable
+        // the matching ↑/↓ reorder button.
+        function createTaskElement(task, isFirst = false, isLast = false) {
             const taskEl = document.createElement('div');
             taskEl.className = 'task-card';
             taskEl.draggable = true;
             taskEl.dataset.taskId = task.id;
+            // Reachable with Tab / arrow keys (issue #24)
+            taskEl.tabIndex = 0;
+            taskEl.setAttribute('aria-label', `${task.id}: ${task.title}`);
 
             // Deadline accent on the card border (red overdue / orange due-soon).
             const due = dueStatus(task);
@@ -110,7 +114,11 @@
             taskEl.innerHTML = `
                 <div class="task-header">
                     <span class="task-id">${escapeHtml(task.id)}</span>
-                    <button class="task-edit-btn" data-edit-task="1" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 0.25rem;">✏️</button>
+                    <div class="task-header-actions">
+                        <button class="task-order-btn" data-move="up" aria-disabled="${isFirst}" title="${escapeHtml(t('action.moveUp'))}" aria-label="${escapeHtml(t('action.moveUp'))}">↑</button>
+                        <button class="task-order-btn" data-move="down" aria-disabled="${isLast}" title="${escapeHtml(t('action.moveDown'))}" aria-label="${escapeHtml(t('action.moveDown'))}">↓</button>
+                        <button class="task-edit-btn" data-edit-task="1" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 0.25rem;">✏️</button>
+                    </div>
                 </div>
                 <div class="task-title">${escapeHtml(task.title)}</div>
                 ${task.description ? `<div class="task-description">${markdownToHtml(task.description)}</div>` : ''}
@@ -130,11 +138,23 @@
             // Bind handlers in JS (values passed via closure / dataset, never concatenated into HTML → no XSS)
             const editBtn = taskEl.querySelector('[data-edit-task]');
             if (editBtn) editBtn.addEventListener('click', (e) => { e.stopPropagation(); openTaskModal(task); });
+            // aria-disabled rather than disabled: a disabled button swallows the click without
+            // stopPropagation, which would fall through to the card and open the task.
+            taskEl.querySelectorAll('[data-move]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (btn.getAttribute('aria-disabled') !== 'true') moveTaskInColumn(task.id, btn.dataset.move);
+                });
+            });
             taskEl.querySelectorAll('[data-filter]').forEach(el => {
                 el.addEventListener('click', (e) => { e.stopPropagation(); clickToFilter(el.dataset.filter, el.dataset.filterValue); });
             });
 
             taskEl.addEventListener('dragstart', drag);
+            taskEl.addEventListener('dragend', () => {
+                taskEl.classList.remove('dragging');
+                stopAutoScroll();
+            });
             taskEl.addEventListener('click', () => showTaskDetail(task));
             attachTouchDrag(taskEl);
 
@@ -149,6 +169,7 @@
         function drag(event) {
             event.dataTransfer.setData('taskId', event.target.dataset.taskId);
             event.target.classList.add('dragging');
+            startAutoScroll();
         }
 
         // Id of the card the dragged task should be inserted BEFORE, given a vertical
@@ -190,6 +211,107 @@
             if (newStatus) task.status = newStatus;
             return statusChanged || posChanged;
         }
+
+        // Reorder a task within its column without dragging (issue #21). where is 'up' / 'down'
+        // (swap with the neighbouring VISIBLE card, so it behaves as seen while filters are
+        // active) or 'top' / 'bottom' (first / last of the whole column). Returns true if moved.
+        function reorderTask(taskId, where) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return false;
+            const column = tasks.filter(t => t.status === task.status);
+            const visible = column.filter(t => matchesFilters(t));
+            const pos = visible.indexOf(task);
+            let anchor = null, after = false;
+            if (where === 'top') anchor = column[0];
+            else if (where === 'bottom') { anchor = column[column.length - 1]; after = true; }
+            else if (where === 'up' && pos > 0) anchor = visible[pos - 1];
+            else if (where === 'down' && pos >= 0) { anchor = visible[pos + 1]; after = true; }
+            if (!anchor || anchor === task) return false;
+            tasks.splice(tasks.indexOf(task), 1);
+            tasks.splice(tasks.indexOf(anchor) + (after ? 1 : 0), 0, task);
+            return true;
+        }
+
+        // Which reorder moves are possible for a task (to disable buttons at the column edges)
+        function reorderOptions(task) {
+            const column = tasks.filter(t => t.status === task.status);
+            const visible = column.filter(t => matchesFilters(t));
+            const pos = visible.indexOf(task);
+            return {
+                top: column[0] !== task,
+                up: pos > 0,
+                down: pos >= 0 && pos < visible.length - 1,
+                bottom: column[column.length - 1] !== task
+            };
+        }
+
+        function moveTaskInColumn(taskId, where) {
+            if (!reorderTask(taskId, where)) return false;
+            renderKanban();
+            autoSave();
+            // Refresh the open detail dialog so its position buttons reflect the new rank
+            if (currentDetailTask && currentDetailTask.id === taskId &&
+                    document.getElementById('taskModal').classList.contains('active')) {
+                showTaskDetail(currentDetailTask);
+            }
+            showNotification(t('notif.taskMoved'), 'success');
+            return true;
+        }
+
+        // ===== Auto-scroll while dragging (issue #21) =====
+        // The page (not the column) scrolls, and the board scrolls horizontally, so while a card
+        // is dragged near an edge we scroll that way on every animation frame. Speed grows the
+        // closer the pointer is to the edge.
+        const AUTO_SCROLL_EDGE = 70;      // px from the edge where scrolling starts
+        const AUTO_SCROLL_MAX_SPEED = 22; // px per frame at the very edge
+        let autoScroll = null;            // { x, y, frame } while a drag is in progress
+
+        function startAutoScroll() {
+            if (autoScroll) return;
+            autoScroll = { x: null, y: null, frame: requestAnimationFrame(autoScrollStep) };
+        }
+
+        function updateAutoScroll(x, y) {
+            if (autoScroll) { autoScroll.x = x; autoScroll.y = y; }
+        }
+
+        function stopAutoScroll() {
+            if (autoScroll) cancelAnimationFrame(autoScroll.frame);
+            autoScroll = null;
+        }
+
+        // Signed scroll speed for a pointer position within [min, max]: negative near min,
+        // positive near max, 0 in between.
+        function autoScrollSpeed(pos, min, max) {
+            const ratio = (dist) => Math.min(1, Math.max(0, 1 - dist / AUTO_SCROLL_EDGE));
+            if (pos < min + AUTO_SCROLL_EDGE) return -Math.ceil(AUTO_SCROLL_MAX_SPEED * ratio(pos - min));
+            if (pos > max - AUTO_SCROLL_EDGE) return Math.ceil(AUTO_SCROLL_MAX_SPEED * ratio(max - pos));
+            return 0;
+        }
+
+        function autoScrollStep() {
+            if (!autoScroll) return;
+            const { x, y } = autoScroll;
+            if (x !== null && y !== null) {
+                // The sticky header covers the top of the viewport: the top zone starts below it
+                const header = document.querySelector('.header');
+                const top = header ? header.getBoundingClientRect().bottom : 0;
+                const dy = autoScrollSpeed(y, top, window.innerHeight);
+                if (dy) window.scrollBy(0, dy);
+                const board = document.getElementById('kanbanBoard');
+                const rect = board.getBoundingClientRect();
+                if (board.scrollWidth > board.clientWidth && y >= rect.top && y <= rect.bottom) {
+                    const dx = autoScrollSpeed(x, rect.left, rect.right);
+                    if (dx) board.scrollLeft += dx;
+                }
+            }
+            autoScroll.frame = requestAnimationFrame(autoScrollStep);
+        }
+
+        // dragover fires on whatever is under the pointer and bubbles here; the dragged card
+        // is re-rendered on drop, so its own dragend may never bubble — stop on drop too.
+        document.addEventListener('dragover', (e) => updateAutoScroll(e.clientX, e.clientY));
+        document.addEventListener('drop', stopAutoScroll);
 
         function drop(event) {
             event.preventDefault();
@@ -252,6 +374,8 @@
                     return;
                 }
                 e.preventDefault(); // block page scroll while dragging
+                startAutoScroll();
+                updateAutoScroll(tch.clientX, tch.clientY);
                 const under = document.elementFromPoint(tch.clientX, tch.clientY);
                 const col = under && under.closest('.kanban-column');
                 document.querySelectorAll('.kanban-column').forEach(c => c.classList.toggle('drop-target', c === col));
@@ -260,6 +384,7 @@
             const endHandler = (e) => {
                 if (!touchDrag) return;
                 clearTimeout(touchDrag.timer);
+                stopAutoScroll();
                 if (touchDrag.active) {
                     e.preventDefault(); // suppress the synthetic click that follows a drag
                     touchDrag.el.classList.remove('dragging');

@@ -113,6 +113,9 @@
                 'action.edit': '✏️',
                 'action.moveUp': 'Move up',
                 'action.moveDown': 'Move down',
+                'action.moveTop': 'Move to top',
+                'action.moveBottom': 'Move to bottom',
+                'taskDetail.position': 'Position in column',
 
                 // Tooltips
                 'tooltip.filterByCategory': 'Filter by this category',
@@ -152,6 +155,7 @@
                 'prompt.editSubtask': 'Edit subtask:',
                 'confirm.deleteColumn': 'Delete this column?',
                 'confirm.deleteSubtask': 'Delete this subtask?',
+                'confirm.discardChanges': 'Discard your unsaved changes?',
                 'confirm.deleteProject': 'Remove project "{name}" from the recent list?\n\nThis only removes it from the dropdown - your files will not be deleted.',
                 'confirm.archiveTask': 'Archive task "{title}"?',
                 'confirm.deleteTask': '⚠️ WARNING: Permanently delete task "{title}"?\n\nThis action cannot be undone.',
@@ -159,6 +163,21 @@
 
                 // Alerts
                 'alert.browserNotSupported': 'Your browser does not support the File System Access API.\n\nPlease use Chrome 86+, Edge 86+ or Opera 72+.',
+
+                // Keyboard shortcuts (issue #24)
+                'shortcuts.title': 'Keyboard shortcuts',
+                'shortcuts.navigate': 'Move the focus between cards and columns',
+                'shortcuts.firstLast': 'Focus the first / last card of the column',
+                'shortcuts.open': 'Open the focused task',
+                'shortcuts.edit': 'Edit the focused or open task',
+                'shortcuts.new': 'New task (in the focused column)',
+                'shortcuts.moveColumn': 'Move the task to the previous / next column',
+                'shortcuts.moveUpDown': 'Move the task up / down',
+                'shortcuts.moveTopBottom': 'Move the task to the top / bottom of the column',
+                'shortcuts.search': 'Focus the search field',
+                'shortcuts.close': 'Close the dialog on top / leave the search field',
+                'shortcuts.save': 'Save the task form',
+                'shortcuts.help': 'Show this help',
 
                 // Subtasks in detail modal
                 'subtask.newPlaceholder': 'New subtask...',
@@ -292,6 +311,9 @@
                 'action.edit': '✏️',
                 'action.moveUp': 'Déplacer vers le haut',
                 'action.moveDown': 'Déplacer vers le bas',
+                'action.moveTop': 'Déplacer tout en haut',
+                'action.moveBottom': 'Déplacer tout en bas',
+                'taskDetail.position': 'Position dans la colonne',
 
                 // Tooltips
                 'tooltip.filterByCategory': 'Filtrer par cette catégorie',
@@ -331,6 +353,7 @@
                 'prompt.editSubtask': 'Modifier la sous-tâche:',
                 'confirm.deleteColumn': 'Supprimer cette colonne ?',
                 'confirm.deleteSubtask': 'Supprimer cette sous-tâche ?',
+                'confirm.discardChanges': 'Abandonner les modifications non enregistrées ?',
                 'confirm.deleteProject': 'Retirer le projet "{name}" de la liste récente ?\n\nCeci retire seulement le projet du menu déroulant - vos fichiers ne seront pas supprimés.',
                 'confirm.archiveTask': 'Archiver la tâche "{title}" ?',
                 'confirm.deleteTask': '⚠️ ATTENTION : Supprimer définitivement la tâche "{title}" ?\n\nCette action est irréversible.',
@@ -338,6 +361,21 @@
 
                 // Alerts
                 'alert.browserNotSupported': 'Votre navigateur ne supporte pas la File System Access API.\n\nVeuillez utiliser Chrome 86+, Edge 86+ ou Opera 72+.',
+
+                // Keyboard shortcuts (issue #24)
+                'shortcuts.title': 'Raccourcis clavier',
+                'shortcuts.navigate': 'Déplacer le focus entre les cartes et les colonnes',
+                'shortcuts.firstLast': 'Aller à la première / dernière carte de la colonne',
+                'shortcuts.open': 'Ouvrir la tâche sélectionnée',
+                'shortcuts.edit': 'Modifier la tâche sélectionnée ou ouverte',
+                'shortcuts.new': 'Nouvelle tâche (dans la colonne sélectionnée)',
+                'shortcuts.moveColumn': 'Déplacer la tâche vers la colonne précédente / suivante',
+                'shortcuts.moveUpDown': 'Monter / descendre la tâche',
+                'shortcuts.moveTopBottom': 'Déplacer la tâche tout en haut / en bas de la colonne',
+                'shortcuts.search': 'Aller au champ de recherche',
+                'shortcuts.close': 'Fermer la fenêtre du dessus / quitter la recherche',
+                'shortcuts.save': 'Enregistrer le formulaire de tâche',
+                'shortcuts.help': 'Afficher cette aide',
 
                 // Subtasks in detail modal
                 'subtask.newPlaceholder': 'Nouvelle sous-tâche...',
@@ -471,6 +509,9 @@
                 'action.edit': '✏️',
                 'action.moveUp': 'Nach oben',
                 'action.moveDown': 'Nach unten',
+                'action.moveTop': 'Ganz nach oben',
+                'action.moveBottom': 'Ganz nach unten',
+                'taskDetail.position': 'Position in der Spalte',
 
                 // Tooltips
                 'tooltip.filterByCategory': 'Nach dieser Kategorie filtern',
@@ -510,6 +551,7 @@
                 'prompt.editSubtask': 'Unteraufgabe bearbeiten:',
                 'confirm.deleteColumn': 'Diese Spalte löschen?',
                 'confirm.deleteSubtask': 'Diese Unteraufgabe löschen?',
+                'confirm.discardChanges': 'Ungespeicherte Änderungen verwerfen?',
                 'confirm.deleteProject': 'Projekt "{name}" aus Liste löschen?\n\nDas Projekt wird nur aus der Liste gelöscht. Die Dateien bleiben bestehen.',
                 'confirm.archiveTask': 'Aufgabe "{title}" archivieren?',
                 'confirm.deleteTask': '⚠️ WARNUNG: Aufgabe "{title}" endgültig löschen?\n\nDies kann nicht rückgängig gemacht werden.',
@@ -517,6 +559,21 @@
 
                 // Alerts
                 'alert.browserNotSupported': 'Ihr Browser unterstützt die File System Access API nicht.\n\Bitte Chrome 86+, Edge 86+ oder Opera 72+ nutzen.',
+
+                // Keyboard shortcuts (issue #24)
+                'shortcuts.title': 'Tastenkürzel',
+                'shortcuts.navigate': 'Fokus zwischen Karten und Spalten bewegen',
+                'shortcuts.firstLast': 'Erste / letzte Karte der Spalte fokussieren',
+                'shortcuts.open': 'Fokussierte Aufgabe öffnen',
+                'shortcuts.edit': 'Fokussierte oder geöffnete Aufgabe bearbeiten',
+                'shortcuts.new': 'Neue Aufgabe (in der fokussierten Spalte)',
+                'shortcuts.moveColumn': 'Aufgabe in die vorherige / nächste Spalte verschieben',
+                'shortcuts.moveUpDown': 'Aufgabe nach oben / unten verschieben',
+                'shortcuts.moveTopBottom': 'Aufgabe ganz nach oben / unten in der Spalte verschieben',
+                'shortcuts.search': 'Suchfeld fokussieren',
+                'shortcuts.close': 'Obersten Dialog schließen / Suchfeld verlassen',
+                'shortcuts.save': 'Aufgabenformular speichern',
+                'shortcuts.help': 'Diese Hilfe anzeigen',
 
                 // Subtasks in detail modal
                 'subtask.newPlaceholder': 'Neue Unteraufgabe...',
@@ -649,6 +706,9 @@
                 'action.edit': '✏️',
                 'action.moveUp': '上移',
                 'action.moveDown': '下移',
+                'action.moveTop': '移到顶部',
+                'action.moveBottom': '移到底部',
+                'taskDetail.position': '在列中的位置',
 
                 // Tooltips
                 'tooltip.filterByCategory': '按此类别筛选',
@@ -688,6 +748,7 @@
                 'prompt.editSubtask': '编辑子任务:',
                 'confirm.deleteColumn': '删除此列?',
                 'confirm.deleteSubtask': '删除此子任务?',
+                'confirm.discardChanges': '放弃未保存的更改?',
                 'confirm.deleteProject': '从近期列表中移除项目 "{name}" ?\n\n此操作仅会将其从下拉列表中移除, 您的文件不会被删除.',
                 'confirm.archiveTask': '归档任务 "{title}"?',
                 'confirm.deleteTask': '⚠️ 警告: 永久删除任务 "{title}"?\n\n此操作无法撤销.',
@@ -695,6 +756,21 @@
 
                 // Alerts
                 'alert.browserNotSupported': '您的浏览器不支持文件系统访问 API.\n\n请使用 Chrome 86+、 Edge 86+ 或 Opera 72+.',
+
+                // Keyboard shortcuts (issue #24)
+                'shortcuts.title': '键盘快捷键',
+                'shortcuts.navigate': '在卡片和列之间移动焦点',
+                'shortcuts.firstLast': '聚焦本列的第一张 / 最后一张卡片',
+                'shortcuts.open': '打开聚焦的任务',
+                'shortcuts.edit': '编辑聚焦或已打开的任务',
+                'shortcuts.new': '新建任务(在聚焦的列中)',
+                'shortcuts.moveColumn': '将任务移到上一列 / 下一列',
+                'shortcuts.moveUpDown': '上移 / 下移任务',
+                'shortcuts.moveTopBottom': '将任务移到本列顶部 / 底部',
+                'shortcuts.search': '聚焦搜索框',
+                'shortcuts.close': '关闭最上层对话框 / 离开搜索框',
+                'shortcuts.save': '保存任务表单',
+                'shortcuts.help': '显示此帮助',
 
                 // Subtasks in detail modal
                 'subtask.newPlaceholder': '新的子任务...',
