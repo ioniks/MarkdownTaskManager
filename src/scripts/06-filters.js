@@ -212,10 +212,11 @@
                 if (!matchesActiveFilters) return false;
             }
 
-            // Check global search term (searches in title, description, and notes)
+            // Check global search term (searches in task ID, title, description, and notes)
             if (globalSearchTerm) {
                 const searchLower = globalSearchTerm.toLowerCase();
                 const matchesSearch =
+                    matchesTaskId(task, globalSearchTerm) ||
                     (task.title && task.title.toLowerCase().includes(searchLower)) ||
                     (task.description && task.description.toLowerCase().includes(searchLower)) ||
                     (task.notes && task.notes.toLowerCase().includes(searchLower));
@@ -223,6 +224,20 @@
             }
 
             return true;
+        }
+
+        // Does a search term refer to this task's ID? A plain substring match covers "TASK-035",
+        // "task-03" or "035"; a term that is just a number (optionally prefixed with "TASK",
+        // "TASK-" or "#") also matches the zero-padded ID by value, so "35", "#35", "TASK-35"
+        // and "0035" all find TASK-035.
+        function matchesTaskId(task, term) {
+            if (!task.id || !term) return false;
+            const id = task.id.toLowerCase();
+            const termLower = term.trim().toLowerCase();
+            if (id.includes(termLower)) return true;
+            const termNum = /^(?:#|task-?\s*)?0*(\d+)$/.exec(termLower);
+            const idNum = /^task-0*(\d+)$/.exec(id);
+            return !!(termNum && idNum && termNum[1] === idNum[1]);
         }
 
         // Click to add filter

@@ -173,6 +173,7 @@
 
             const filtered = searchTerm ?
                 archivedTasks.filter(t =>
+                    matchesTaskId(t, searchTerm) ||
                     t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     t.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())) ||
