@@ -113,6 +113,9 @@
                 'action.edit': '✏️',
                 'action.moveUp': 'Move up',
                 'action.moveDown': 'Move down',
+                'action.moveTop': 'Move to top',
+                'action.moveBottom': 'Move to bottom',
+                'taskDetail.position': 'Position in column',
 
                 // Tooltips
                 'tooltip.filterByCategory': 'Filter by this category',
@@ -292,6 +295,9 @@
                 'action.edit': '✏️',
                 'action.moveUp': 'Déplacer vers le haut',
                 'action.moveDown': 'Déplacer vers le bas',
+                'action.moveTop': 'Déplacer tout en haut',
+                'action.moveBottom': 'Déplacer tout en bas',
+                'taskDetail.position': 'Position dans la colonne',
 
                 // Tooltips
                 'tooltip.filterByCategory': 'Filtrer par cette catégorie',
@@ -471,6 +477,9 @@
                 'action.edit': '✏️',
                 'action.moveUp': 'Nach oben',
                 'action.moveDown': 'Nach unten',
+                'action.moveTop': 'Ganz nach oben',
+                'action.moveBottom': 'Ganz nach unten',
+                'taskDetail.position': 'Position in der Spalte',
 
                 // Tooltips
                 'tooltip.filterByCategory': 'Nach dieser Kategorie filtern',
@@ -649,6 +658,9 @@
                 'action.edit': '✏️',
                 'action.moveUp': '上移',
                 'action.moveDown': '下移',
+                'action.moveTop': '移到顶部',
+                'action.moveBottom': '移到底部',
+                'taskDetail.position': '在列中的位置',
 
                 // Tooltips
                 'tooltip.filterByCategory': '按此类别筛选',

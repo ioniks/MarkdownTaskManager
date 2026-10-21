@@ -29,6 +29,24 @@
                 }
             }
 
+            // Reorder buttons (issue #21) — only for active tasks, not archived ones
+            let positionHtml = '';
+            if (!wasArchiveModalActive) {
+                const can = reorderOptions(task);
+                const btn = (where, icon, key) =>
+                    `<button class="btn btn-secondary position-btn" data-move="${where}" ${can[where] ? '' : 'disabled'} title="${escapeHtml(t(key))}">${icon} ${escapeHtml(t(key))}</button>`;
+                positionHtml = `
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; font-weight: 600;">${t('taskDetail.position')}</div>
+                        <div class="position-controls">
+                            ${btn('top', '⤒', 'action.moveTop')}
+                            ${btn('up', '↑', 'action.moveUp')}
+                            ${btn('down', '↓', 'action.moveDown')}
+                            ${btn('bottom', '⤓', 'action.moveBottom')}
+                        </div>
+                    </div>`;
+            }
+
             // Get status name
             const statusColumn = config.columns.find(col => col.id === task.status);
             const statusName = statusColumn ? statusColumn.name : task.status;
@@ -100,6 +118,8 @@
                         ` : ''}
                     </div>
 
+                    ${positionHtml}
+
                     <!-- Tags -->
                     ${task.tags.length > 0 ? `
                         <div style="margin-bottom: 1.5rem;">
@@ -156,6 +176,10 @@
                     ` : ''}
                 </div>
             `;
+
+            modalBody.querySelectorAll('[data-move]').forEach(btn => {
+                btn.addEventListener('click', () => moveTaskInColumn(task.id, btn.dataset.move));
+            });
 
             modal.classList.add('active');
         }

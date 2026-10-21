@@ -101,6 +101,66 @@
             margin-bottom: 0.5rem;
         }
 
+        /* Reorder buttons on the card (issue #21): revealed on hover/focus, always shown on
+           touch screens (no hover). Disabled at the column edges via aria-disabled. */
+        .task-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.1rem;
+        }
+
+        .task-order-btn {
+            background: none;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.9rem;
+            line-height: 1;
+            padding: 0.2rem 0.35rem;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+
+        .task-card:hover .task-order-btn,
+        .task-card:focus-within .task-order-btn {
+            opacity: 1;
+        }
+
+        .task-order-btn:hover:not([aria-disabled="true"]) {
+            background: var(--bg-primary);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .task-card:hover .task-order-btn[aria-disabled="true"],
+        .task-card:focus-within .task-order-btn[aria-disabled="true"] {
+            opacity: 0.3;
+            cursor: default;
+        }
+
+        @media (hover: none) {
+            .task-order-btn { opacity: 1; }
+            .task-order-btn[aria-disabled="true"] { opacity: 0.3; }
+        }
+
+        /* Position buttons in the task detail dialog (issue #21) */
+        .position-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .position-btn {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .position-btn:disabled {
+            opacity: 0.45;
+            cursor: default;
+        }
+
         .task-id {
             font-size: 0.75rem;
             color: var(--text-secondary);
