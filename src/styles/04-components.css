@@ -72,3 +72,36 @@
             white-space: pre-wrap;
             word-wrap: break-word;
         }
+
+        /* "Files changed on disk" banner (issue #25): above dialogs, so it shows while editing */
+        .reload-banner {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1500;
+            display: none;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: calc(100% - 2rem);
+            background: var(--notification-bg);
+            color: var(--text-primary);
+            border-left: 4px solid #f59e0b;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            padding: 0.75rem 1rem;
+        }
+
+        .reload-banner.show {
+            display: flex;
+        }
+
+        .reload-banner .btn {
+            padding: 0.4rem 0.9rem;
+        }
+
+        #autoReloadBtn.is-off {
+            opacity: 0.45;
+        }

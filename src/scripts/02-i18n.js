@@ -144,6 +144,18 @@
                 'notif.taskDeleted': 'Task permanently deleted',
                 'notif.taskRestored': 'Task restored to its original column!',
 
+                // Auto-reload (issue #25)
+                'notif.reloadedFromDisk': 'Board reloaded: the files changed on disk',
+                'notif.reloadFailed': 'Could not reload: kanban.md is missing',
+                'notif.autoReloadOn': 'Auto-reload enabled',
+                'notif.autoReloadOff': 'Auto-reload disabled',
+                'header.autoReloadOn': 'Auto-reload when files change on disk: on (click to turn off)',
+                'header.autoReloadOff': 'Auto-reload when files change on disk: off (click to turn on)',
+                'banner.fileChanged': 'kanban.md or archive.md changed on disk.',
+                'banner.reload': 'Reload',
+                'banner.dismiss': 'Not now',
+                'confirm.fileChangedOnDisk': '{file} was changed on disk since it was loaded (by another program, an AI assistant or git).\n\nOK: overwrite it with your version.\nCancel: discard your last change and reload the file from disk.',
+
                 // Prompts and confirmations
                 'prompt.projectName': 'Project name (leave empty to use "{name}"):',
                 'prompt.renameProject': 'New project name:',
@@ -322,6 +334,18 @@
                 'notif.taskArchived': 'Tâche archivée !',
                 'notif.taskDeleted': 'Tâche supprimée définitivement',
                 'notif.taskRestored': 'Tâche restaurée dans sa colonne d\'origine !',
+
+                // Auto-reload (issue #25)
+                'notif.reloadedFromDisk': 'Tableau rechargé : les fichiers ont changé sur le disque',
+                'notif.reloadFailed': 'Rechargement impossible : kanban.md est introuvable',
+                'notif.autoReloadOn': 'Rechargement automatique activé',
+                'notif.autoReloadOff': 'Rechargement automatique désactivé',
+                'header.autoReloadOn': 'Recharger quand les fichiers changent sur le disque : activé (cliquer pour désactiver)',
+                'header.autoReloadOff': 'Recharger quand les fichiers changent sur le disque : désactivé (cliquer pour activer)',
+                'banner.fileChanged': 'kanban.md ou archive.md a changé sur le disque.',
+                'banner.reload': 'Recharger',
+                'banner.dismiss': 'Plus tard',
+                'confirm.fileChangedOnDisk': '{file} a été modifié sur le disque depuis son chargement (par un autre programme, un assistant IA ou git).\n\nOK : l\'écraser avec votre version.\nAnnuler : abandonner votre dernière modification et recharger le fichier depuis le disque.',
 
                 // Prompts and confirmations
                 'prompt.projectName': 'Nom du projet (laisser vide pour utiliser "{name}") :',
@@ -502,6 +526,18 @@
                 'notif.taskDeleted': 'Aufgabe endgültig gelöscht',
                 'notif.taskRestored': 'Aufgabe in ursprünglicher Spalte zurückgesetzt!',
 
+                // Auto-reload (issue #25)
+                'notif.reloadedFromDisk': 'Board neu geladen: die Dateien wurden auf der Festplatte geändert',
+                'notif.reloadFailed': 'Neu laden nicht möglich: kanban.md fehlt',
+                'notif.autoReloadOn': 'Automatisches Neuladen aktiviert',
+                'notif.autoReloadOff': 'Automatisches Neuladen deaktiviert',
+                'header.autoReloadOn': 'Neu laden, wenn sich Dateien ändern: an (klicken zum Ausschalten)',
+                'header.autoReloadOff': 'Neu laden, wenn sich Dateien ändern: aus (klicken zum Einschalten)',
+                'banner.fileChanged': 'kanban.md oder archive.md wurde auf der Festplatte geändert.',
+                'banner.reload': 'Neu laden',
+                'banner.dismiss': 'Später',
+                'confirm.fileChangedOnDisk': '{file} wurde seit dem Laden auf der Festplatte geändert (von einem anderen Programm, einem KI-Assistenten oder git).\n\nOK: mit Ihrer Version überschreiben.\nAbbrechen: Ihre letzte Änderung verwerfen und die Datei neu laden.',
+
                 // Prompts and confirmations
                 'prompt.projectName': 'Projektname (leer lassen, um "{name}" zu verwenden):',
                 'prompt.renameProject': 'Neuer Projektname:',
@@ -679,6 +715,18 @@
                 'notif.taskArchived': '任务已归档!',
                 'notif.taskDeleted': '任务已永久删除',
                 'notif.taskRestored': '任务已恢复至原列!',
+
+                // Auto-reload (issue #25)
+                'notif.reloadedFromDisk': '看板已重新加载:磁盘上的文件已更改',
+                'notif.reloadFailed': '无法重新加载:找不到 kanban.md',
+                'notif.autoReloadOn': '已启用自动重新加载',
+                'notif.autoReloadOff': '已禁用自动重新加载',
+                'header.autoReloadOn': '文件在磁盘上更改时自动重新加载:开启(点击关闭)',
+                'header.autoReloadOff': '文件在磁盘上更改时自动重新加载:关闭(点击开启)',
+                'banner.fileChanged': '磁盘上的 kanban.md 或 archive.md 已更改。',
+                'banner.reload': '重新加载',
+                'banner.dismiss': '稍后',
+                'confirm.fileChangedOnDisk': '{file} 自加载以来已在磁盘上被更改(由其他程序、AI 助手或 git)。\n\n确定:用您的版本覆盖。\n取消:放弃您的最后一次更改并从磁盘重新加载文件。',
 
                 // Prompts and confirmations
                 'prompt.projectName': '项目名称 (留空则使用 "{name}"):',

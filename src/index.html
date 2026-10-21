@@ -27,6 +27,7 @@
                 <button id="newTaskBtn" class="btn btn-secondary" style="display: none;">➕ Tâche</button>
                 <button id="archiveBtn" class="btn btn-secondary" style="display: none;">📦 Archives</button>
                 <button id="manageColsBtn" class="btn btn-secondary" style="display: none;">⚙️ Colonnes</button>
+                <button class="theme-toggle" onclick="toggleAutoReload()" title="Auto-reload" id="autoReloadBtn">🔄</button>
                 <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode" id="themeToggleBtn">🌙</button>
             </div>
         </div>
@@ -244,6 +245,13 @@
                 <div id="archiveList" style="max-height: 500px; overflow-y: auto;"></div>
             </div>
         </div>
+    </div>
+
+    <!-- Files changed on disk while a dialog is open (issue #25) -->
+    <div id="reloadBanner" class="reload-banner" role="alert">
+        <span id="reloadBannerText"></span>
+        <button id="reloadBannerBtn" class="btn btn-primary"></button>
+        <button id="reloadBannerDismiss" class="btn btn-secondary"></button>
     </div>
 
     <!-- Notification -->

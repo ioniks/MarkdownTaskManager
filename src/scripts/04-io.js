@@ -2,6 +2,7 @@
             try {
                 kanbanFileHandle = await directoryHandle.getFileHandle('kanban.md');
                 const file = await kanbanFileHandle.getFile();
+                fileStamps.kanban = fileStamp(file);
                 currentKanbanContent = await file.text();
 
                 console.log('File loaded, size:', currentKanbanContent.length);
@@ -45,13 +46,18 @@
                         const writable = await kanbanFileHandle.createWritable();
                         await writable.write(currentKanbanContent);
                         await writable.close();
+                        await rememberFileStamp('kanban');
 
-                        // Create archive.md
+                        // Create archive.md. Assign the global handle (it used to be a shadowing
+                        // local), so archiving in this new folder never writes to the previous
+                        // project's archive.md.
                         const archiveContent = createDefaultArchiveContent();
-                        const archiveFileHandle = await directoryHandle.getFileHandle('archive.md', { create: true });
+                        archiveFileHandle = await directoryHandle.getFileHandle('archive.md', { create: true });
                         const archiveWritable = await archiveFileHandle.createWritable();
                         await archiveWritable.write(archiveContent);
                         await archiveWritable.close();
+                        await rememberFileStamp('archive');
+                        archivedTasks = [];
 
                         showNotification(t('notif.filesInitialized'), 'success');
 

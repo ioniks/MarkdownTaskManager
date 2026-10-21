@@ -1,9 +1,14 @@
         async function loadArchive() {
             console.log('🗃️ === LOADING ARCHIVE ===');
+            // Drop the previous project's handle first: if this folder has no archive.md, a stale
+            // handle would make saveArchive() write into the OTHER project's archive.
+            archiveFileHandle = null;
+            fileStamps.archive = null;
             try {
                 archiveFileHandle = await directoryHandle.getFileHandle('archive.md');
                 console.log('✓ Archive file handle obtained');
                 const file = await archiveFileHandle.getFile();
+                fileStamps.archive = fileStamp(file);
                 console.log('✓ Archive file loaded, size:', file.size, 'bytes');
                 const content = await file.text();
                 console.log('✓ Archive content read, length:', content.length, 'characters');
@@ -49,9 +54,15 @@
         }
 
         async function saveArchive() {
+            // Serialized with other writes; refuses to silently overwrite external edits (issue #25)
+            return withFileLock(() => writeArchive());
+        }
+
+        async function writeArchive() {
             if (!archiveFileHandle) {
                 archiveFileHandle = await directoryHandle.getFileHandle('archive.md', { create: true });
             }
+            if (!(await confirmOverwriteIfChanged('archive'))) return false;
 
             let md = `${t('markdown.archiveTitle')}\n<!-- Format: v2 -->\n\n${t('markdown.archiveDesc')}\n\n${t('markdown.archiveSection')}\n\n`;
             archivedTasks.forEach(task => {
@@ -88,6 +99,8 @@
             const writable = await archiveFileHandle.createWritable();
             await writable.write(md);
             await writable.close();
+            await rememberFileStamp('archive');
+            return true;
         }
 
         function archiveCurrentTask() {

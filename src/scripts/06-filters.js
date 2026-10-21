@@ -1,17 +1,23 @@
         async function autoSave() {
             if (!kanbanFileHandle) return false;
-            try {
-                const newContent = generateMarkdown();
-                const writable = await kanbanFileHandle.createWritable();
-                await writable.write(newContent);
-                await writable.close();
-                currentKanbanContent = newContent;
-                console.log('Auto-saved');
-                return true;
-            } catch (error) {
-                console.error('Auto-save failed:', error);
-                return false;
-            }
+            // Serialized with other writes; refuses to silently overwrite a file that changed on
+            // disk since it was read (issue #25)
+            return withFileLock(async () => {
+                try {
+                    if (!(await confirmOverwriteIfChanged('kanban'))) return false;
+                    const newContent = generateMarkdown();
+                    const writable = await kanbanFileHandle.createWritable();
+                    await writable.write(newContent);
+                    await writable.close();
+                    currentKanbanContent = newContent;
+                    await rememberFileStamp('kanban');
+                    console.log('Auto-saved');
+                    return true;
+                } catch (error) {
+                    console.error('Auto-save failed:', error);
+                    return false;
+                }
+            });
         }
 
         // Helper function to normalize user identifier (extract @username from @username (Display Name))
