@@ -9,7 +9,7 @@
             display: none;
             align-items: center;
             gap: 0.75rem;
-            z-index: 1001;
+            z-index: 2000; /* above dialogs, which are raised to 1000 + n when stacked */
         }
 
         .notification.show {

@@ -107,6 +107,22 @@
 
             renderFormSubtasks();
             modal.classList.add('active');
+            taskFormSnapshot = taskFormState();
+        }
+
+        // Serialized form contents, to tell whether the user changed anything since opening
+        // (Esc asks before discarding unsaved edits — issue #23).
+        let taskFormSnapshot = null;
+        const TASK_FORM_FIELDS = ['taskTitle', 'taskStatus', 'taskPriority', 'taskCategory', 'taskAssignee',
+            'taskCreated', 'taskStarted', 'taskDue', 'taskCompleted', 'taskTags', 'taskDescription',
+            'taskNotes', 'formSubtaskInput'];
+
+        function taskFormState() {
+            return JSON.stringify([TASK_FORM_FIELDS.map(id => document.getElementById(id).value), formSubtasks]);
+        }
+
+        function isTaskFormDirty() {
+            return taskFormSnapshot !== null && taskFormState() !== taskFormSnapshot;
         }
 
         function closeTaskModal() {
@@ -114,6 +130,7 @@
             document.getElementById('newTaskForm').reset();
             formSubtasks = [];
             isEditMode = false;
+            taskFormSnapshot = null;
         }
 
         // Form subtasks management
