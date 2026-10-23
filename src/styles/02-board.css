@@ -193,6 +193,10 @@
             overflow: hidden;
         }
 
+        .task-ref--solved {
+            color: var(--text-secondary);
+        }
+
         .task-subtasks {
             margin-top: 0.75rem;
             font-size: 0.8rem;

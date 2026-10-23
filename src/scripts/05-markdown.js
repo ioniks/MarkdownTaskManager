@@ -2,6 +2,30 @@
             return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
         }
 
+        // A task counts as solved when it is archived, has a Finished date, or sits in the
+        // last board column (the "Done" column, whatever it is called).
+        function findSolvedTask(id) {
+            const archived = archivedTasks.find(t => t.id === id);
+            if (archived) return archived;
+            const task = tasks.find(t => t.id === id);
+            if (!task) return null;
+            const lastColumn = config.columns && config.columns[config.columns.length - 1];
+            return task.completed || (lastColumn && task.status === lastColumn.id) ? task : null;
+        }
+
+        // Strike through references like "TASK-12" / "TASK-012" to solved tasks. Runs on
+        // already-escaped HTML and skips inline code and tag markup, so IDs in code and in
+        // link URLs stay untouched. Code blocks are still placeholders at this point.
+        function markSolvedTaskRefs(html) {
+            return html.split(/(<code[^>]*>[\s\S]*?<\/code>|<[^>]+>)/).map((part, i) => {
+                if (i % 2) return part;
+                return part.replace(/\bTASK-(\d+)\b/g, (ref, num) => {
+                    const task = findSolvedTask('TASK-' + String(Number(num)).padStart(3, '0'));
+                    return task ? `<del class="task-ref--solved" title="${escapeHtml(task.title)}">${ref}</del>` : ref;
+                });
+            }).join('');
+        }
+
         function markdownToHtml(markdown) {
             if (!markdown) return '';
 
@@ -50,6 +74,8 @@
                 const safe = /^(https?:|mailto:|#|\/)/i.test(u) ? u : '#';
                 return `<a href="${escapeHtml(safe)}" target="_blank" style="color: var(--primary); text-decoration: underline;">${text}</a>`;
             });
+
+            html = markSolvedTaskRefs(html);
 
             // Convert bullet lists and paragraphs
             const lines = html.split('\n');
