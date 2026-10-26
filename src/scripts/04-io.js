@@ -384,14 +384,14 @@ ${t('markdown.archiveSection')}
             };
 
             // Parse metadata line
-            const metaMatch = content.match(/\*\*Priority\*\*:\s*(\w+)\s*\|\s*\*\*Category\*\*:\s*([^|]+?)(?:\s*\|\s*\*\*Assigned\*\*:\s*(.+?))?$/m);
-            if (metaMatch) {
-                task.priority = metaMatch[1].trim();
-                task.category = metaMatch[2].trim();
-                if (metaMatch[3]) {
-                    task.assignees = metaMatch[3].split(',').map(a => a.trim());
-                }
-            }
+            const priorityMatch = content.match(/\*\*Priority\*\*:[ \t]*([^|\n]+)/);
+            if (priorityMatch) task.priority = clean(priorityMatch[1]);
+
+            const categoryMatch = content.match(/\*\*Category\*\*:[ \t]*([^|\n]+)/);
+            if (categoryMatch) task.category = categoryMatch[1].trim();
+
+            const assignedMatch = content.match(/\*\*Assigned\*\*:[ \t]*([^|\n]+)/);
+            if (assignedMatch) task.assignees = assignedMatch[1].split(',').map(a => a.trim());
 
             // Parse dates - support all date fields
             const createdMatch = content.match(/\*\*Created\*\*:\s*([\d-]+)/);
