@@ -872,6 +872,18 @@ Priorities support a wide range of emojis that automatically map to colors. You 
 
 **Note:** The emoji determines the badge color in the UI. For example, 🔴 displays as red, 🟢 as green, etc.
 
+### Defaults and labels (optional)
+
+```markdown
+**Default Priority**: 🟡 Medium
+**Default Category**: Backend
+**Priority Label**: Urgency
+**Category Label**: Importance
+```
+
+- `Default Priority` / `Default Category`: pre-filled when creating a new task (priority accepts `🟡 Medium` or `Medium`).
+- `Priority Label` / `Category Label`: rename Priority/Category in the UI only; task blocks still use `**Priority**:` / `**Category**:`.
+
 ### Tags
 
 Create an adapted tag system:

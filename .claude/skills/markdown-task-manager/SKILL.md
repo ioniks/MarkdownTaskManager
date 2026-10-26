@@ -101,6 +101,11 @@ What was done.
 **Users**: @alice, @bob
 **Priorities**: 🔴 Critical | 🟠 High | 🟡 Medium | 🟢 Low
 **Tags**: #bug, #feature, #docs
+**Default Priority**: Medium
+**Default Category**: Backend
+**Priority Label**: Urgency
+**Category Label**: Importance
+<!-- the 4 lines above are optional; the two labels rename Priority/Category in the UI only -->
 
 ---
 
@@ -117,6 +122,9 @@ What was done.
 
 All tasks share the single `## Tasks` section; the column comes from `**Status**:`
 (which must equal a column `id` from the Config), and file order = order within a column.
+
+When creating a task without an explicit priority/category, use `**Default Priority**` /
+`**Default Category**` if set. Labels are display-only: always write `**Priority**:` / `**Category**:`.
 
 ### ⚡ Token-economical operations (for AI)
 

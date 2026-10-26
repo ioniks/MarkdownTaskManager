@@ -6,6 +6,7 @@
 
                 console.log('File loaded, size:', currentKanbanContent.length);
                 parseMarkdown(currentKanbanContent);
+                updateTaskFormLabels(); updateFilterLabels();
                 await loadArchive(); // Load archive for historical autocomplete data
                 updateAutocomplete();
                 renderKanban();
@@ -56,6 +57,7 @@
                         showNotification(t('notif.filesInitialized'), 'success');
 
                         parseMarkdown(currentKanbanContent);
+                        updateTaskFormLabels(); updateFilterLabels();
                         updateAutocomplete();
                         renderKanban();
                     } catch (createError) {
@@ -145,6 +147,10 @@ ${t('markdown.archiveSection')}
                 users: [],
                 priorities: [],
                 tags: [],
+                defaultPriority: '',
+                defaultCategory: '',
+                priorityLabel: '',
+                categoryLabel: '',
                 boardTitle: 'Kanban Board'
             };
 
@@ -230,6 +236,12 @@ ${t('markdown.archiveSection')}
                     config.tags = tagsMatch[1].split(/\s+/).filter(t => t.startsWith('#')).map(t => t.replace('#', ''));
                     console.log('Parsed tags:', config.tags);
                 }
+
+                const findCfgKey = key => (configText.match(new RegExp(`\\*\\*${key}\\*\\*:[ \\t]*(.+)`)) || [])[1]?.trim() || '';
+                config.defaultPriority = findCfgKey('Default Priority');
+                config.defaultCategory = findCfgKey('Default Category');
+                config.priorityLabel = findCfgKey('Priority Label');
+                config.categoryLabel = findCfgKey('Category Label');
             }
 
             // Default columns if not found

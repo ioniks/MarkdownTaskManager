@@ -102,6 +102,11 @@
                 if (defaultColumnId) {
                     document.getElementById('taskStatus').value = defaultColumnId;
                 }
+                const defPriority = config.defaultPriority && clean(config.defaultPriority);
+                if (defPriority && config.priorities.some(p => clean(p) === defPriority)) {
+                    document.getElementById('taskPriority').value = defPriority;
+                }
+                document.getElementById('taskCategory').value = config.defaultCategory || '';
                 formSubtasks = [];
             }
 

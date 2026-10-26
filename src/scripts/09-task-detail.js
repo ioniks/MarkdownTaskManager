@@ -47,7 +47,7 @@
                     <div class="modal-form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem; padding: 1rem; background: var(--bg); border-radius: 8px;">
                         ${task.priority ? `
                             <div>
-                                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">${t('meta.priority')}</div>
+                                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">${escapeHtml(t('meta.priority'))}</div>
                                 <div style="font-weight: 500;">${displayPriority(priorityWithIcon)}</div>
                             </div>
                         ` : ''}
@@ -59,7 +59,7 @@
 
                         ${task.category ? `
                             <div>
-                                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">${t('meta.category')}</div>
+                                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">${escapeHtml(t('meta.category'))}</div>
                                 <div style="font-weight: 500;">${escapeHtml(task.category)}</div>
                             </div>
                         ` : ''}

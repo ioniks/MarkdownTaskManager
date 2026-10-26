@@ -34,6 +34,10 @@
             md += `**Users**: ${config.users.join(', ')}\n\n`;
             md += `**Priorities**: ${config.priorities.join(' | ')}\n\n`;
             md += `**Tags**: ${config.tags.map(t => '#' + t).join(' ')}\n\n`;
+            if (config.defaultPriority) md += `**Default Priority**: ${config.defaultPriority}\n\n`;
+            if (config.defaultCategory) md += `**Default Category**: ${config.defaultCategory}\n\n`;
+            if (config.priorityLabel) md += `**Priority Label**: ${config.priorityLabel}\n\n`;
+            if (config.categoryLabel) md += `**Category Label**: ${config.categoryLabel}\n\n`;
             md += `---\n\n`;
 
             // V2: a single "## Tasks" section. Each task carries its own **Status**

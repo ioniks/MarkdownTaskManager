@@ -772,8 +772,16 @@
           '❔': 'Blue',
         }
 
+        // UI labels a board can rename via **Priority Label** / **Category Label** in kanban.md
+        const labelOverrides = {
+            'taskForm.priorityLabel': 'priorityLabel', 'meta.priority': 'priorityLabel', 'filters.priority': 'priorityLabel',
+            'taskForm.categoryLabel': 'categoryLabel', 'meta.category': 'categoryLabel', 'filters.category': 'categoryLabel'
+        };
+
         // Translation function
         function t(key, params = {}) {
+            const override = config[labelOverrides[key]];
+            if (override) return key.startsWith('filters.') ? `${override}:` : override;
             let text = translations[currentLanguage]?.[key] || translations['en'][key] || key;
 
             // Replace parameters in text

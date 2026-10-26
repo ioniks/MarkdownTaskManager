@@ -6,6 +6,11 @@
 **Categories**: Frontend, Backend, Database, DevOps, Design, Tests, Documentation, Security
 **Users**: @alice, @bob, @charlie, @diana
 **Tags**: #bug, #feature, #urgent, #refactor, #performance, #security, #api, #ui, #database
+**Priorities**: Critical | High | Medium | Low
+**Default Priority**: Medium
+**Default Category**: Backend
+**Priority Label**: Urgency
+**Category Label**: Importance
 
 ## 📝 Backlog
 
